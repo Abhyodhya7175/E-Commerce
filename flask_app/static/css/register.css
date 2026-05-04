@@ -1,0 +1,54 @@
+ *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1a1a2e; --ink-light: #4a4a6a; --cream: #faf8f3;
+    --gold: #c9a84c; --gold-light: #f0e6c8; --gold-dark: #8b6914;
+    --border: #e8e3d8; --error: #c0392b; --radius: 12px;
+  }
+  body { font-family: var(--sans); background: var(--cream); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 2.4rem 2rem;
+    width: 100%; max-width: 440px;
+  }
+
+  .logo {
+    font-family: var(--serif);
+    font-size: 1.5rem; font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.2rem;
+    text-align: center;
+  }
+  .logo span { color: var(--gold); }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 1.5rem; font-weight: 600;
+    color: var(--ink); margin: 1.4rem 0 0.3rem;
+  }
+  .subtitle { font-size: 0.85rem; color: var(--ink-light); font-weight: 300; margin-bottom: 1.8rem; }
+
+  .field { margin-bottom: 1rem; }
+  .field label { display: block; font-size: 0.78rem; font-weight: 500; color: var(--ink); letter-spacing: 0.3px; margin-bottom: 0.4rem; text-transform: uppercase; }
+  .field input {
+    width: 100%; padding: 0.72rem 1rem;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: var(--sans); font-size: 0.9rem; color: var(--ink);
+    background: var(--cream); outline: none; transition: border-color 0.2s;
+  }
+  .field input:focus { border-color: var(--gold); }
+  .field input.error { border-color: var(--error); }
+  .field-error { font-size: 0.75rem; color: var(--error); margin-top: 0.3rem; display: none; }
+  .field-error.show { display: block; }
+
+  .btn { width: 100%; padding: 0.85rem; background: var(--ink); color: #fff; border: none; border-radius: 10px; font-family: var(--sans); font-size: 0.95rem; font-weight: 500; cursor: pointer; margin-top: 0.4rem; transition: background 0.15s; }
+  .btn:hover { background: #2a2a4e; }
+
+  .form-footer { text-align: center; font-size: 0.82rem; color: var(--ink-light); margin-top: 1.2rem; }
+  .form-footer a { color: var(--gold-dark); text-decoration: none; font-weight: 500; cursor: pointer; }
+
+  .success-msg { background: #e6f4ec; border: 1px solid #a8d5b8; border-radius: 9px; padding: 0.8rem 1rem; font-size: 0.83rem; color: #1d6a3d; margin-bottom: 1rem; display: none; }
+  .success-msg.show { display: block; }
+

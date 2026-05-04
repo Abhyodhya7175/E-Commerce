@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UrbanCart — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body>
+<div class="layout">
+  <!-- Left Brand Panel -->
+  <div class="brand-panel">
+    <div class="brand-logo">Urban<span>Cart</span></div>
+    <div class="brand-tagline">Premium E-Commerce Platform</div>
+
+    <div class="brand-feature">
+      <div class="feature-icon">🛍️</div>
+      <div class="feature-text">
+        <h4>Curated Products</h4>
+        <p>Browse thousands of premium products with detailed descriptions and live stock.</p>
+      </div>
+    </div>
+    <div class="brand-feature">
+      <div class="feature-icon">🔐</div>
+      <div class="feature-text">
+        <h4>Secure Accounts</h4>
+        <p>Role-based access ensures customers and admins get exactly what they need.</p>
+      </div>
+    </div>
+    <div class="brand-feature">
+      <div class="feature-icon">📦</div>
+      <div class="feature-text">
+        <h4>Order Tracking</h4>
+        <p>Real-time order status from placement to delivery, every step of the way.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Form Panel -->
+  <div class="form-panel">
+    <div class="form-card">
+      <h2>Welcome back</h2>
+      <p class="subtitle">Sign in to your account to continue</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div style="background:#fdf0ef;color:#c0392b;padding:0.8rem;border-radius:8px;margin-bottom:1rem;font-size:0.85rem;text-align:center;">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('auth.login') }}">
+        <div class="demo-note">
+          <p><strong>Demo credentials —</strong><br>
+          Customer: <strong>customer@demo.com</strong> / <strong>customer123</strong><br>
+          Admin: <strong>admin@demo.com</strong> / <strong>admin123</strong></p>
+        </div>
+
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" name="email" placeholder="you@example.com" required />
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="••••••••" required />
+        </div>
+
+        <button type="submit" class="btn-primary">Sign In →</button>
+      </form>
+
+      <div class="divider">or</div>
+
+      <div class="form-footer">
+        Don't have an account? <a href="{{ url_for('auth.register') }}">Create one free</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Removed: All client-side validation and redirect logic are now handled by Flask backend -->
+</body>
+</html>

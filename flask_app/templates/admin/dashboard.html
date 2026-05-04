@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UrbanCart — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #4a4a6a;
+    --cream: #faf8f3;
+    --gold: #c9a84c;
+    --gold-light: #f0e6c8;
+    --gold-dark: #8b6914;
+    --border: #e8e3d8;
+    --danger: #c0392b;
+    --danger-bg: #fdf0ef;
+    --success: #1d6a3d;
+    --success-bg: #e6f4ec;
+    --sidebar-w: 220px;
+    --radius: 12px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    z-index: 50;
+  }
+
+  .sidebar-logo {
+    padding: 1.4rem 1.4rem 0.8rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 1rem;
+  }
+  .sidebar-logo span { color: var(--gold); }
+  .sidebar-logo small {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 400;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 0.8rem 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 0.83rem;
+    font-weight: 400;
+    color: rgba(255,255,255,0.55);
+    transition: all 0.15s;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+  .nav-item.active { background: rgba(201,168,76,0.15); color: var(--gold); font-weight: 500; }
+  .nav-item .nav-icon { font-size: 15px; flex-shrink: 0; }
+
+  .sidebar-footer {
+    padding: 0.8rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .admin-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 0.7rem;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    margin-bottom: 0.5rem;
+  }
+  .admin-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(201,168,76,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 600;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+  .admin-info { flex: 1; overflow: hidden; }
+  .admin-info p { font-size: 0.78rem; font-weight: 500; color: rgba(255,255,255,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .admin-info small { font-size: 0.66rem; color: rgba(255,255,255,0.35); }
+
+  .logout-sidebar {
+    width: 100%;
+    padding: 0.5rem;
+    background: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .logout-sidebar:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7); }
+
+  /* MAIN */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+
+  .topbar h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .access-badge {
+    font-size: 0.72rem;
+    font-weight: 500;
+    background: rgba(201,168,76,0.15);
+    color: var(--gold-dark);
+    border: 1px solid rgba(201,168,76,0.3);
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  .content { padding: 1.8rem 2rem; }
+
+  /* SECTION DISPLAY */
+  .page-section { display: none; }
+  .page-section.active { display: block; }
+
+  /* STAT CARDS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem;
+  }
+  .stat-card .label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 0.5rem;
+  }
+  .stat-card .value {
+    font-size: 1.7rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.2rem;
+    font-family: 'Playfair Display', serif;
+  }
+  .stat-card .change {
+    font-size: 0.72rem;
+    color: var(--success);
+    font-weight: 400;
+  }
+
+  /* TABLES */
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .card-header {
+    padding: 1rem 1.4rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .card-header h3 {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .btn-sm {
+    padding: 0.4rem 0.9rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+    border: 1.5px solid var(--border);
+    background: none;
+    color: var(--ink);
+  }
+  .btn-sm:hover { background: var(--cream); }
+  .btn-sm.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn-sm.primary:hover { background: #2a2a4e; }
+  .btn-sm.danger { color: var(--danger); border-color: #f5c6c2; }
+  .btn-sm.danger:hover { background: var(--danger-bg); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th {
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--ink-light);
+    padding: 0.7rem 1.4rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    font-size: 0.83rem;
+    padding: 0.8rem 1.4rem;
+    color: var(--ink);
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--cream); }
+
+  .badge {
+    font-size: 0.68rem;
+    font-weight: 500;
+    padding: 2px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .badge-active   { background: var(--success-bg); color: var(--success); }
+  .badge-inactive { background: #f1ede5; color: #6a6050; }
+  .badge-pending   { background: #fff8e6; color: #855f0a; }
+  .badge-shipped   { background: #e6f0fb; color: #185fa5; }
+  .badge-delivered { background: var(--success-bg); color: var(--success); }
+  .badge-canceled  { background: var(--danger-bg); color: var(--danger); }
+  .badge-admin    { background: rgba(201,168,76,0.15); color: var(--gold-dark); }
+  .badge-customer { background: #e6e8f4; color: #2d3580; }
+
+  .product-cell { display: flex; align-items: center; gap: 0.7rem; }
+  .product-icon-sm {
+    width: 34px; height: 34px;
+    background: var(--cream);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .product-cell .name { font-weight: 500; font-size: 0.83rem; }
+  .product-cell .cat  { font-size: 0.72rem; color: var(--ink-light); margin-top: 1px; }
+
+  .actions { display: flex; gap: 6px; }
+
+  /* FORM MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 300;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: #fff;
+    border-radius: 16px;
+    width: 480px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-header {
+    padding: 1.2rem 1.4rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-header h3 { font-size: 1rem; font-weight: 500; color: var(--ink); }
+
+  .modal-body { padding: 1.4rem; }
+
+  .mfield { margin-bottom: 1rem; }
+  .mfield label { display: block; font-size: 0.75rem; font-weight: 500; color: var(--ink); margin-bottom: 0.35rem; }
+  .mfield input, .mfield select, .mfield textarea {
+    width: 100%;
+    padding: 0.6rem 0.85rem;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--ink);
+    background: var(--cream);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .mfield input:focus, .mfield select:focus, .mfield textarea:focus { border-color: var(--gold); }
+  .mfield textarea { min-height: 80px; resize: vertical; }
+
+  .modal-footer {
+    padding: 1rem 1.4rem;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; gap: 0.6rem;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 2rem; right: 2rem;
+    background: var(--ink);
+    color: #fff;
+    padding: 0.7rem 1.2rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  .search-input {
+    padding: 0.45rem 0.85rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    color: var(--ink);
+    background: var(--cream);
+    outline: none;
+    width: 200px;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--gold); }
+
+  .no-data { text-align: center; padding: 2rem; font-size: 0.83rem; color: var(--ink-light); }
+
+  /* Status select */
+  .status-select {
+    padding: 3px 8px;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    color: var(--ink);
+    background: var(--cream);
+    outline: none;
+    cursor: pointer;
+  }
+
+  @media (max-width: 900px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .sidebar { width: 56px; }
+    .nav-item span.nav-label { display: none; }
+    .sidebar-logo small, .admin-info, .logout-sidebar { display: none; }
+    .main { margin-left: 56px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    Shop<span>Vault</span>
+    <small>Admin Panel</small>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" onclick="showSection('dashboard', this)">
+      <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
+    </div>
+    <div class="nav-item" onclick="showSection('products', this)">
+      <span class="nav-icon">📦</span><span class="nav-label">Products</span>
+    </div>
+    <div class="nav-item" onclick="showSection('orders', this)">
+      <span class="nav-icon">🧾</span><span class="nav-label">Orders</span>
+    </div>
+    <div class="nav-item" onclick="showSection('users', this)">
+      <span class="nav-icon">👥</span><span class="nav-label">Users</span>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-badge">
+      <div class="admin-avatar" id="admin-initials">{{ (current_user.name[:2] if current_user.is_authenticated else 'SA') | upper }}</div>
+      <div class="admin-info">
+        <p id="admin-name">{{ current_user.name if current_user.is_authenticated else 'Sara Admin' }}</p>
+        <small>Administrator</small>
+      </div>
+    </div>
+    <a class="logout-sidebar" href="{{ url_for('auth.logout') }}">Sign out</a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <div class="topbar">
+    <h2 id="topbar-title">Dashboard</h2>
+    <div class="topbar-right">
+      <div class="access-badge">⚙️ Admin Access</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page-section active" id="section-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="label">Total Revenue</div>
+          <div class="value">₹2.4L</div>
+          <div class="change">↑ 12% this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Total Orders</div>
+          <div class="value" id="stat-orders">0</div>
+          <div class="change">↑ 5 new today</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Products</div>
+          <div class="value" id="stat-products">0</div>
+          <div class="change">3 low in stock</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Customers</div>
+          <div class="value" id="stat-users">0</div>
+          <div class="change">↑ 2 new this week</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Recent Orders</h3></div>
+        <table>
+          <thead>
+            <tr><th>Order</th><th>Customer</th><th>Amount</th><th>Status</th><th>Date</th></tr>
+          </thead>
+          <tbody id="recent-orders-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="page-section" id="section-products">
+      <div class="card">
+        <div class="card-header">
+          <h3>All Products</h3>
+          <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;">
+            <input class="search-input" placeholder="Search products..." oninput="filterTable('products', this.value)" />
+            <button class="btn-sm primary" onclick="openProductModal()">+ Add Product</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="products-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="page-section" id="section-orders">
+      <div class="card">
+        <div class="card-header">
+          <h3>All Orders</h3>
+          <input class="search-input" placeholder="Search orders..." oninput="filterTable('orders', this.value)" />
+        </div>
+        <table>
+          <thead>
+            <tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr>
+          </thead>
+          <tbody id="orders-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page-section" id="section-users">
+      <div class="card">
+        <div class="card-header">
+          <h3>All Users</h3>
+          <input class="search-input" placeholder="Search users..." oninput="filterTable('users', this.value)" />
+        </div>
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="users-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Add Product</h3>
+      <button class="close-btn btn-sm" onclick="closeModal('product-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-product-id" />
+      <div class="mfield"><label>Product Name</label><input type="text" id="p-name" placeholder="e.g. Wireless Headphones" /></div>
+      <div class="mfield"><label>Category</label>
+        <select id="p-cat">
+          <option>Electronics</option><option>Fashion</option>
+          <option>Home</option><option>Sports</option><option>Books</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+        <div class="mfield"><label>Price (₹)</label><input type="number" id="p-price" placeholder="999" /></div>
+        <div class="mfield"><label>Stock</label><input type="number" id="p-stock" placeholder="10" /></div>
+      </div>
+      <div class="mfield"><label>Description</label><textarea id="p-desc" placeholder="Short product description..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm" onclick="closeModal('product-modal')">Cancel</button>
+      <button class="btn-sm primary" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // DATA
+  let products = [
+    { id:1, name:'Wireless Noise-Cancelling Headphones', category:'Electronics', price:7999, stock:15, active:true, icon:'🎧' },
+    { id:2, name:'Mechanical Keyboard RGB',              category:'Electronics', price:4299, stock:8,  active:true, icon:'⌨️' },
+    { id:3, name:'Slim Fit Cotton Shirt',                category:'Fashion',     price:1199, stock:0,  active:true, icon:'👔' },
+    { id:4, name:'Running Shoes Pro',                    category:'Sports',      price:3499, stock:3,  active:true, icon:'👟' },
+    { id:5, name:'Ceramic Coffee Mug Set',               category:'Home',        price:899,  stock:22, active:true, icon:'☕' },
+    { id:6, name:'Yoga Mat Premium',                     category:'Sports',      price:1599, stock:12, active:false, icon:'🧘' },
+    { id:7, name:'The Art of Clean Code',                category:'Books',       price:549,  stock:30, active:true, icon:'📚' },
+    { id:8, name:'Smart LED Desk Lamp',                  category:'Electronics', price:2199, stock:7,  active:true, icon:'💡' },
+  ];
+
+  let orders = [
+    { id:'#ORD-1034', customer:'Alex Johnson', email:'customer@demo.com', items:'Headphones × 1', total:7999, status:'delivered', date:'Apr 28, 2025' },
+    { id:'#ORD-1033', customer:'Priya Sharma',  email:'priya@demo.com',    items:'Yoga Mat × 2',  total:3198, status:'shipped',   date:'Apr 27, 2025' },
+    { id:'#ORD-1032', customer:'Raj Mehta',     email:'raj@demo.com',      items:'Keyboard × 1',  total:4299, status:'pending',   date:'Apr 26, 2025' },
+    { id:'#ORD-1031', customer:'Lisa Wang',     email:'lisa@demo.com',     items:'Mug Set × 3',   total:2697, status:'delivered', date:'Apr 24, 2025' },
+    { id:'#ORD-1030', customer:'Alex Johnson',  email:'customer@demo.com', items:'Yoga Mat × 1',  total:1599, status:'canceled',  date:'Mar 15, 2025' },
+  ];
+
+  let users = [
+    { id:1, name:'Sara Admin',   email:'admin@demo.com',    role:'admin',    joined:'Jan 1, 2024' },
+    { id:2, name:'Alex Johnson', email:'customer@demo.com', role:'customer', joined:'Feb 3, 2025' },
+    { id:3, name:'Priya Sharma', email:'priya@demo.com',    role:'customer', joined:'Feb 14, 2025' },
+    { id:4, name:'Raj Mehta',    email:'raj@demo.com',      role:'customer', joined:'Mar 8, 2025' },
+    { id:5, name:'Lisa Wang',    email:'lisa@demo.com',     role:'customer', joined:'Mar 22, 2025' },
+  ];
+
+  let nextId = 9;
+  let currentFilter = { products:'', orders:'', users:'' };
+
+  // RENDER PRODUCTS
+  function renderProducts() {
+    const q = currentFilter.products.toLowerCase();
+    const filtered = products.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+    const tbody = document.getElementById('products-table');
+    tbody.innerHTML = filtered.length === 0 ? `<tr><td colspan="5" class="no-data">No products found</td></tr>` :
+      filtered.map(p => `
+        <tr>
+          <td>
+            <div class="product-cell">
+              <div class="product-icon-sm">${p.icon}</div>
+              <div><div class="name">${p.name}</div><div class="cat">${p.category}</div></div>
+            </div>
+          </td>
+          <td>₹${p.price.toLocaleString()}</td>
+          <td>${p.stock === 0 ? '<span style="color:#c0392b">Out</span>' : p.stock <= 3 ? `<span style="color:#855f0a">${p.stock} low</span>` : p.stock}</td>
+          <td><span class="badge ${p.active ? 'badge-active' : 'badge-inactive'}">${p.active ? 'Active' : 'Inactive'}</span></td>
+          <td>
+            <div class="actions">
+              <button class="btn-sm" onclick="editProduct(${p.id})">Edit</button>
+              <button class="btn-sm" onclick="toggleProduct(${p.id})">${p.active ? 'Disable' : 'Enable'}</button>
+              <button class="btn-sm danger" onclick="deleteProduct(${p.id})">Delete</button>
+            </div>
+          </td>
+        </tr>`).join('');
+    document.getElementById('stat-products').textContent = products.length;
+  }
+
+  // RENDER ORDERS
+  function renderOrders() {
+    const q = currentFilter.orders.toLowerCase();
+    const filtered = orders.filter(o =>
+      o.id.toLowerCase().includes(q) || o.customer.toLowerCase().includes(q) || o.items.toLowerCase().includes(q)
+    );
+    const tbody = document.getElementById('orders-table');
+    tbody.innerHTML = filtered.length === 0 ? `<tr><td colspan="6" class="no-data">No orders found</td></tr>` :
+      filtered.map(o => `
+        <tr>
+          <td style="font-weight:500;font-family:monospace;font-size:0.78rem;">${o.id}</td>
+          <td>
+            <div style="font-weight:500;font-size:0.83rem;">${o.customer}</div>
+            <div style="font-size:0.72rem;color:var(--ink-light);">${o.email}</div>
+          </td>
+          <td style="font-size:0.8rem;">${o.items}</td>
+          <td>₹${o.total.toLocaleString()}</td>
+          <td>
+            <select class="status-select" onchange="updateOrderStatus('${o.id}', this.value)">
+              ${['pending','shipped','delivered','canceled'].map(s =>
+                `<option value="${s}" ${o.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`
+              ).join('')}
+            </select>
+          </td>
+          <td style="font-size:0.78rem;color:var(--ink-light);">${o.date}</td>
+        </tr>`).join('');
+
+    // Recent orders in dashboard
+    document.getElementById('recent-orders-table').innerHTML = orders.slice(0,5).map(o => `
+      <tr>
+        <td style="font-weight:500;font-family:monospace;font-size:0.78rem;">${o.id}</td>
+        <td>${o.customer}</td>
+        <td>₹${o.total.toLocaleString()}</td>
+        <td><span class="badge badge-${o.status}">${o.status.charAt(0).toUpperCase()+o.status.slice(1)}</span></td>
+        <td style="font-size:0.78rem;color:var(--ink-light);">${o.date}</td>
+      </tr>`).join('');
+
+    document.getElementById('stat-orders').textContent = orders.length;
+  }
+
+  // RENDER USERS
+  function renderUsers() {
+    const q = currentFilter.users.toLowerCase();
+    const filtered = users.filter(u =>
+      u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+    );
+    const tbody = document.getElementById('users-table');
+    tbody.innerHTML = filtered.length === 0 ? `<tr><td colspan="5" class="no-data">No users found</td></tr>` :
+      filtered.map(u => `
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:0.7rem;">
+              <div style="width:30px;height:30px;border-radius:50%;background:${u.role==='admin'?'rgba(201,168,76,0.15)':'#e6e8f4'};display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:600;color:${u.role==='admin'?'var(--gold-dark)':'#2d3580'};flex-shrink:0;">
+                ${u.name.split(' ').map(p=>p[0]).join('').toUpperCase()}
+              </div>
+              <span style="font-weight:500;">${u.name}</span>
+            </div>
+          </td>
+          <td style="font-size:0.8rem;">${u.email}</td>
+          <td><span class="badge badge-${u.role}">${u.role.charAt(0).toUpperCase()+u.role.slice(1)}</span></td>
+          <td style="font-size:0.78rem;color:var(--ink-light);">${u.joined}</td>
+          <td>
+            ${u.role !== 'admin' ? `<button class="btn-sm danger" onclick="deleteUser(${u.id})">Delete</button>` : '<span style="font-size:0.75rem;color:var(--ink-light);">Protected</span>'}
+          </td>
+        </tr>`).join('');
+
+    document.getElementById('stat-users').textContent = users.filter(u => u.role === 'customer').length;
+  }
+
+  function filterTable(type, val) {
+    currentFilter[type] = val;
+    if (type === 'products') renderProducts();
+    else if (type === 'orders') renderOrders();
+    else if (type === 'users') renderUsers();
+  }
+
+  // PRODUCT ACTIONS
+  function openProductModal(id) {
+    document.getElementById('modal-title').textContent = id ? 'Edit Product' : 'Add Product';
+    document.getElementById('edit-product-id').value = id || '';
+    if (id) {
+      const p = products.find(x => x.id === id);
+      document.getElementById('p-name').value  = p.name;
+      document.getElementById('p-cat').value   = p.category;
+      document.getElementById('p-price').value = p.price;
+      document.getElementById('p-stock').value = p.stock;
+      document.getElementById('p-desc').value  = p.desc || '';
+    } else {
+      ['p-name','p-price','p-stock','p-desc'].forEach(id => document.getElementById(id).value = '');
+    }
+    document.getElementById('product-modal').classList.add('open');
+  }
+
+  function editProduct(id) { openProductModal(id); }
+
+  function saveProduct() {
+    const name  = document.getElementById('p-name').value.trim();
+    const cat   = document.getElementById('p-cat').value;
+    const price = parseInt(document.getElementById('p-price').value);
+    const stock = parseInt(document.getElementById('p-stock').value);
+    const desc  = document.getElementById('p-desc').value.trim();
+    const editId = parseInt(document.getElementById('edit-product-id').value);
+
+    if (!name || isNaN(price) || isNaN(stock)) { showToast('Please fill all required fields.'); return; }
+
+    const icons = { Electronics:'💡', Fashion:'👗', Home:'🏠', Sports:'⚽', Books:'📚' };
+
+    if (editId) {
+      const p = products.find(x => x.id === editId);
+      if (p) { p.name = name; p.category = cat; p.price = price; p.stock = stock; p.desc = desc; }
+      showToast('Product updated.');
+    } else {
+      products.push({ id: nextId++, name, category: cat, price, stock, active: true, icon: icons[cat] || '📦', desc });
+      showToast('Product added.');
+    }
+    closeModal('product-modal');
+    renderProducts();
+  }
+
+  function toggleProduct(id) {
+    const p = products.find(x => x.id === id);
+    if (p) { p.active = !p.active; renderProducts(); showToast(p.active ? 'Product enabled.' : 'Product disabled.'); }
+  }
+
+  function deleteProduct(id) {
+    if (!confirm('Delete this product?')) return;
+    products = products.filter(p => p.id !== id);
+    renderProducts();
+    showToast('Product deleted.');
+  }
+
+  function updateOrderStatus(orderId, status) {
+    const o = orders.find(x => x.id === orderId);
+    if (o) { o.status = status; renderOrders(); showToast(`Order ${orderId} → ${status}`); }
+  }
+
+  function deleteUser(id) {
+    if (!confirm('Delete this user?')) return;
+    users = users.filter(u => u.id !== id);
+    renderUsers();
+    showToast('User removed.');
+  }
+
+  function showSection(name, el) {
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    el.classList.add('active');
+    const titles = { dashboard:'Dashboard', products:'Products', orders:'Orders', users:'Users' };
+    document.getElementById('topbar-title').textContent = titles[name] || name;
+    if (name === 'products') renderProducts();
+    else if (name === 'orders') renderOrders();
+    else if (name === 'users') renderUsers();
+  }
+
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  // Init
+  renderProducts();
+  renderOrders();
+  renderUsers();
+</script>
+</body>
+</html>

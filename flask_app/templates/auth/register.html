@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UrbanCart — Register</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+</head>
+<body>
+<div class="card">
+  <div class="logo">Urban<span>Cart</span></div>
+  <h2>Create account</h2>
+  <p class="subtitle">Join thousands of happy customers</p>
+
+  <div class="success-msg" id="success-msg">Account created! Redirecting to login...</div>
+
+  <div class="field">
+    <label>Full Name</label>
+    <input type="text" id="reg-name" placeholder="Your full name" />
+    <div class="field-error" id="err-name">Name is required.</div>
+  </div>
+  <div class="field">
+    <label>Email</label>
+    <input type="email" id="reg-email" placeholder="you@email.com" />
+    <div class="field-error" id="err-email">Enter a valid email.</div>
+  </div>
+  <div class="field">
+    <label>Password</label>
+    <input type="password" id="reg-pass" placeholder="Min 6 characters" />
+    <div class="field-error" id="err-pass">Password must be at least 6 characters.</div>
+  </div>
+  <div class="field">
+    <label>Confirm Password</label>
+    <input type="password" id="reg-pass2" placeholder="Repeat password" />
+    <div class="field-error" id="err-pass2">Passwords do not match.</div>
+  </div>
+
+  <button class="btn" onclick="register()">Create Account →</button>
+
+  <div class="form-footer">Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></div>
+</div>
+
+<script>
+  function register() {
+    let valid = true;
+    const clear = (id) => { document.getElementById(id).classList.remove('show'); };
+    const show  = (id, inputId) => {
+      document.getElementById(id).classList.add('show');
+      if (inputId) document.getElementById(inputId).classList.add('error');
+      valid = false;
+    };
+
+    ['err-name','err-email','err-pass','err-pass2'].forEach(clear);
+    ['reg-name','reg-email','reg-pass','reg-pass2'].forEach(id => document.getElementById(id).classList.remove('error'));
+
+    const name  = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const pass  = document.getElementById('reg-pass').value;
+    const pass2 = document.getElementById('reg-pass2').value;
+
+    if (!name) show('err-name', 'reg-name');
+    if (!email || !/\S+@\S+\.\S+/.test(email)) show('err-email', 'reg-email');
+    if (!pass || pass.length < 6) show('err-pass', 'reg-pass');
+    if (pass !== pass2) show('err-pass2', 'reg-pass2');
+
+    if (!valid) return;
+
+    document.getElementById('success-msg').classList.add('show');
+    setTimeout(() => window.location.href = "{{ url_for('auth.login') }}", 1600);
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') register(); });
+</script>
+</body>
+</html>

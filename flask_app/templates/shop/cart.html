@@ -1,0 +1,28 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Your Cart - My Shop{% endblock %}
+
+{% block content %}
+<h2>Your Cart</h2>
+{% if cart_items %}
+<table class="table">
+  <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th></th></tr></thead>
+  <tbody>
+  {% for item in cart_items %}
+    <tr>
+      <td>{{ item.name }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>${{ '%.2f'|format(item.price) }}</td>
+      <td><button class="btn btn-sm btn-danger">Remove</button></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<div class="d-flex justify-content-end">
+  <h4 class="me-3">Total: ${{ '%.2f'|format(total) }}</h4>
+  <a href="{{ url_for('customer.checkout') }}" class="btn btn-success">Checkout</a>
+</div>
+{% else %}
+  <p>Your cart is empty.</p>
+{% endif %}
+{% endblock %}

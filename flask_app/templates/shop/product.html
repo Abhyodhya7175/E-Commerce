@@ -1,0 +1,18 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}{{ product.name }} - My Shop{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-6">
+    <img src="{{ product.image_url }}" class="img-fluid" alt="{{ product.name }}">
+  </div>
+  <div class="col-md-6">
+    <h1>{{ product.name }}</h1>
+    <p class="lead">${{ '%.2f'|format(product.price) }}</p>
+    <p>{{ product.description }}</p>
+    <p>Stock: {{ product.stock }}</p>
+    <button class="btn btn-primary">Add to cart</button>
+  </div>
+</div>
+{% endblock %}

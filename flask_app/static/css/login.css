@@ -1,0 +1,292 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #4a4a6a;
+    --cream: #faf8f3;
+    --card: #ffffff;
+    --gold: #c9a84c;
+    --gold-light: #f0e6c8;
+    --gold-dark: #8b6914;
+    --border: #e8e3d8;
+    --error: #c0392b;
+    --radius: 12px;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--cream);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* --- Decorative Split Layout --- */
+  .layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+  }
+
+  .brand-panel {
+    background: var(--ink);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .brand-panel::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    border: 40px solid rgba(201,168,76,0.12);
+  }
+
+  .brand-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -60px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    border: 30px solid rgba(201,168,76,0.08);
+  }
+
+  .brand-logo {
+    font-family: var(--serif);
+    font-size: 2.4rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.4rem;
+    position: relative; z-index: 1;
+  }
+
+  .brand-logo span { color: var(--gold); }
+
+  .brand-tagline {
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.5px;
+    position: relative; z-index: 1;
+    margin-bottom: 4rem;
+  }
+
+  .brand-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.8rem;
+    position: relative; z-index: 1;
+  }
+
+  .feature-icon {
+    width: 36px; height: 36px;
+    background: rgba(201,168,76,0.15);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+  }
+
+  .feature-text h4 {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 2px;
+  }
+
+  .feature-text p {
+    font-size: 0.8rem;
+    font-weight: 300;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.5;
+  }
+
+  /* --- Form Panel --- */
+  .form-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    background: var(--cream);
+  }
+
+  .form-card {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .form-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+  }
+
+  .form-card p.subtitle {
+    font-size: 0.875rem;
+    color: var(--ink-light);
+    margin-bottom: 2.2rem;
+    font-weight: 300;
+  }
+
+  /* Demo note */
+  .demo-note {
+    background: var(--gold-light);
+    border: 1px solid #e0c97b;
+    border-radius: var(--radius);
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.8rem;
+  }
+
+  .demo-note p {
+    font-size: 0.78rem;
+    color: var(--gold-dark);
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  .demo-note strong { font-weight: 500; }
+
+  /* Role tabs */
+  .role-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 1.8rem;
+  }
+
+  .role-tab {
+    padding: 0.7rem;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-light);
+    background: #fff;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .role-tab.active {
+    border-color: var(--gold);
+    background: var(--gold-light);
+    color: var(--gold-dark);
+  }
+
+  .field { margin-bottom: 1.1rem; }
+
+  .field label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: 0.3px;
+    margin-bottom: 0.45rem;
+    text-transform: uppercase;
+  }
+
+  .field input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .field input:focus { border-color: var(--gold); }
+  .field input.error { border-color: var(--error); }
+
+  .field-error {
+    font-size: 0.75rem;
+    color: var(--error);
+    margin-top: 0.3rem;
+    display: none;
+  }
+  .field-error.show { display: block; }
+
+  .btn-primary {
+    width: 100%;
+    padding: 0.85rem;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.2px;
+  }
+
+  .btn-primary:hover { background: #2a2a4e; }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.4rem 0;
+    color: var(--border);
+    font-size: 0.75rem;
+    color: #b0a898;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .form-footer {
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--ink-light);
+    margin-top: 1.2rem;
+  }
+
+  .form-footer a {
+    color: var(--gold-dark);
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .alert-error {
+    background: #fdf0ef;
+    border: 1px solid #f5c6c2;
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    font-size: 0.82rem;
+    color: var(--error);
+    margin-bottom: 1rem;
+    display: none;
+  }
+  .alert-error.show { display: block; }
+
+  /* --- Responsive --- */
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .brand-panel { display: none; }
+    .form-panel { padding: 2rem 1.2rem; min-height: 100vh; }
+  }

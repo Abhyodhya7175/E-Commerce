@@ -1,0 +1,22 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Checkout - My Shop{% endblock %}
+
+{% block content %}
+<h2>Checkout</h2>
+<form>
+  <div class="mb-3">
+    <label class="form-label">Full name</label>
+    <input class="form-control" />
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Address</label>
+    <input class="form-control" />
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Phone</label>
+    <input class="form-control" />
+  </div>
+  <button class="btn btn-primary">Place order</button>
+</form>
+{% endblock %}
