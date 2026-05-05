@@ -29,8 +29,12 @@ def login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
+        selected_role = request.form.get('role', 'customer')
         user = User.query.filter_by(email=email).first()
         if user and user.check_password(password):
+            if user.role != selected_role:
+                flash('Selected role does not match this account.', 'danger')
+                return redirect(url_for('auth.login'))
             login_user(user)
             # redirect based on role
             if user.role == 'admin':

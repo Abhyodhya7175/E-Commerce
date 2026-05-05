@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "name": "Wireless Noise-Cancelling Headphones",
+    "category": "Electronics",
+    "mrp": 9999.0,
+    "discountPrice": 7999.0,
+    "desc": "Premium audio with 30hr battery life.",
+    "icon": "🎧",
+    "active": true
+  },
+  {
+    "id": 2,
+    "name": "Mechanical Keyboard RGB",
+    "category": "Electronics",
+    "mrp": 5499.0,
+    "discountPrice": 4299.0,
+    "desc": "Tactile switches, full RGB backlight.",
+    "icon": "⌨️",
+    "active": true
+  },
+  {
+    "id": 3,
+    "name": "Slim Fit Cotton Shirt",
+    "category": "Fashion",
+    "mrp": 1699.0,
+    "discountPrice": 1199.0,
+    "desc": "100% cotton, perfect for any occasion.",
+    "icon": "👔",
+    "active": true
+  },
+  {
+    "id": 4,
+    "name": "Running Shoes Pro",
+    "category": "Sports",
+    "mrp": 4499.0,
+    "discountPrice": 3499.0,
+    "desc": "Lightweight sole, breathable mesh upper.",
+    "icon": "👟",
+    "active": true
+  },
+  {
+    "id": 5,
+    "name": "Ceramic Coffee Mug Set",
+    "category": "Home",
+    "mrp": 1199.0,
+    "discountPrice": 899.0,
+    "desc": "Set of 4 hand-crafted ceramic mugs.",
+    "icon": "☕",
+    "active": true
+  },
+  {
+    "id": 6,
+    "name": "Yoga Mat Premium",
+    "category": "Sports",
+    "mrp": 1999.0,
+    "discountPrice": 1599.0,
+    "desc": "Non-slip, 6mm thick, eco-friendly.",
+    "icon": "🧘",
+    "active": true
+  },
+  {
+    "id": 7,
+    "name": "The Art of Clean Code",
+    "category": "Books",
+    "mrp": 799.0,
+    "discountPrice": 549.0,
+    "desc": "A bestselling guide for software craftsmanship.",
+    "icon": "📚",
+    "active": true
+  },
+  {
+    "id": 8,
+    "name": "Smart LED Desk Lamp",
+    "category": "Electronics",
+    "mrp": 2799.0,
+    "discountPrice": 2199.0,
+    "desc": "Touch controls, adjustable color temp.",
+    "icon": "💡",
+    "active": true
+  },
+  {
+    "id": 9,
+    "name": "Linen Throw Blanket",
+    "category": "Home",
+    "mrp": 2399.0,
+    "discountPrice": 1899.0,
+    "desc": "Soft woven linen, 140×180cm.",
+    "icon": "🛋️",
+    "active": true
+  },
+  {
+    "id": 10,
+    "name": "Sunglasses UV400",
+    "category": "Fashion",
+    "mrp": 1099.0,
+    "discountPrice": 799.0,
+    "desc": "Polarized lenses, lightweight frame.",
+    "icon": "🕶️",
+    "active": true
+  },
+  {
+    "id": 11,
+    "name": "Stainless Water Bottle",
+    "category": "Sports",
+    "mrp": 999.0,
+    "discountPrice": 699.0,
+    "desc": "1L, keeps cold 24h, leak-proof cap.",
+    "icon": "🍶",
+    "active": true
+  },
+  {
+    "id": 12,
+    "name": "Design Thinking Handbook",
+    "category": "Books",
+    "mrp": 999.0,
+    "discountPrice": 699.0,
+    "desc": "Innovation methods used by top firms.",
+    "icon": "📖",
+    "active": true
+  }
+]

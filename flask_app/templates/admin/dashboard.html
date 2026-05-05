@@ -308,8 +308,67 @@
     font-size: 1.1rem;
     flex-shrink: 0;
   }
+  .product-icon-sm img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+  }
   .product-cell .name { font-weight: 500; font-size: 0.83rem; }
   .product-cell .cat  { font-size: 0.72rem; color: var(--ink-light); margin-top: 1px; }
+
+  .image-preview-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 0.6rem;
+    min-height: 52px;
+  }
+  .image-preview-item {
+    width: 52px;
+    height: 52px;
+    border-radius: 9px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--cream);
+    position: relative;
+  }
+  .image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .image-remove-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.72);
+    color: #fff;
+    font-size: 11px;
+    line-height: 16px;
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+  }
+  .image-remove-btn:hover {
+    background: rgba(192, 57, 43, 0.95);
+  }
+  .image-preview-count {
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    background: rgba(26,26,46,0.86);
+    color: #fff;
+    font-size: 0.65rem;
+    padding: 1px 5px;
+    border-radius: 999px;
+  }
 
   .actions { display: flex; gap: 6px; }
 
@@ -426,7 +485,7 @@
 <!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sidebar-logo">
-    Shop<span>Vault</span>
+    Urban<span>Cart</span>
     <small>Admin Panel</small>
   </div>
   <nav class="sidebar-nav">
@@ -483,7 +542,7 @@
         <div class="stat-card">
           <div class="label">Products</div>
           <div class="value" id="stat-products">0</div>
-          <div class="change">3 low in stock</div>
+          <div class="change">with active offers</div>
         </div>
         <div class="stat-card">
           <div class="label">Customers</div>
@@ -515,7 +574,7 @@
         </div>
         <table>
           <thead>
-            <tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr>
+            <tr><th>Product</th><th>Price</th><th>Offer</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody id="products-table"></tbody>
         </table>
@@ -543,7 +602,10 @@
       <div class="card">
         <div class="card-header">
           <h3>All Users</h3>
-          <input class="search-input" placeholder="Search users..." oninput="filterTable('users', this.value)" />
+          <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;">
+            <input class="search-input" placeholder="Search users..." oninput="filterTable('users', this.value)" />
+            <button type="button" class="btn-sm primary" onclick="openUserModal()">+ Add User</button>
+          </div>
         </div>
         <table>
           <thead>
@@ -574,8 +636,14 @@
         </select>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
-        <div class="mfield"><label>Price (₹)</label><input type="number" id="p-price" placeholder="999" /></div>
-        <div class="mfield"><label>Stock</label><input type="number" id="p-stock" placeholder="10" /></div>
+        <div class="mfield"><label>MRP (₹)</label><input type="number" id="p-mrp" placeholder="999" /></div>
+        <div class="mfield"><label>Discounted Price (₹)</label><input type="number" id="p-discount" placeholder="799" /></div>
+      </div>
+      <div class="mfield">
+        <label>Product Images (multiple allowed)</label>
+        <input type="file" id="p-images" accept="image/*" multiple />
+        <div id="p-image-preview-list" class="image-preview-list"></div>
+        <span id="p-image-note" style="font-size:0.74rem;color:var(--ink-light);display:block;margin-top:0.4rem;">No image selected</span>
       </div>
       <div class="mfield"><label>Description</label><textarea id="p-desc" placeholder="Short product description..."></textarea></div>
     </div>
@@ -586,21 +654,40 @@
   </div>
 </div>
 
+<!-- USER MODAL -->
+<div class="modal-overlay" id="user-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add New User</h3>
+      <button class="close-btn btn-sm" onclick="closeModal('user-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mfield"><label>Full Name</label><input type="text" id="u-name" placeholder="e.g. John Doe" /></div>
+      <div class="mfield"><label>Email Address</label><input type="email" id="u-email" placeholder="user@example.com" /></div>
+      <div class="mfield"><label>Password</label><input type="password" id="u-password" placeholder="Minimum 6 characters" /></div>
+      <div class="mfield"><label>Role</label>
+        <select id="u-role">
+          <option value="customer">Customer</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm" onclick="closeModal('user-modal')">Cancel</button>
+      <button class="btn-sm primary" onclick="saveUser()">Add User</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
   // DATA
-  let products = [
-    { id:1, name:'Wireless Noise-Cancelling Headphones', category:'Electronics', price:7999, stock:15, active:true, icon:'🎧' },
-    { id:2, name:'Mechanical Keyboard RGB',              category:'Electronics', price:4299, stock:8,  active:true, icon:'⌨️' },
-    { id:3, name:'Slim Fit Cotton Shirt',                category:'Fashion',     price:1199, stock:0,  active:true, icon:'👔' },
-    { id:4, name:'Running Shoes Pro',                    category:'Sports',      price:3499, stock:3,  active:true, icon:'👟' },
-    { id:5, name:'Ceramic Coffee Mug Set',               category:'Home',        price:899,  stock:22, active:true, icon:'☕' },
-    { id:6, name:'Yoga Mat Premium',                     category:'Sports',      price:1599, stock:12, active:false, icon:'🧘' },
-    { id:7, name:'The Art of Clean Code',                category:'Books',       price:549,  stock:30, active:true, icon:'📚' },
-    { id:8, name:'Smart LED Desk Lamp',                  category:'Electronics', price:2199, stock:7,  active:true, icon:'💡' },
-  ];
+  const PRODUCTS_API_URL = '{{ url_for("admin.api_products") }}';
+  const PRODUCT_IMAGE_DELETE_API_URL = '{{ url_for("admin.api_delete_product_image") }}';
+  let products = [];
+  let currentEditImageUrls = [];
 
   let orders = [
     { id:'#ORD-1034', customer:'Alex Johnson', email:'customer@demo.com', items:'Headphones × 1', total:7999, status:'delivered', date:'Apr 28, 2025' },
@@ -621,6 +708,46 @@
   let nextId = 9;
   let currentFilter = { products:'', orders:'', users:'' };
 
+  function calculateOfferPercent(mrp, discountPrice) {
+    if (!mrp || mrp <= 0 || discountPrice < 0 || discountPrice > mrp) return 0;
+    return Math.round(((mrp - discountPrice) / mrp) * 100);
+  }
+
+  function productVisual(product) {
+    const imageUrls = Array.isArray(product.imageUrls) ? product.imageUrls : (product.imageUrl ? [product.imageUrl] : []);
+    const first = imageUrls.length ? imageUrls[0] : null;
+    if (first) {
+      return `<img src="${first}" alt="${product.name}">`;
+    }
+    return product.icon || '📦';
+  }
+
+  function setProductPreview(imageUrls) {
+    const previewList = document.getElementById('p-image-preview-list');
+    const note = document.getElementById('p-image-note');
+    const urls = Array.isArray(imageUrls) ? imageUrls.filter(Boolean) : (imageUrls ? [imageUrls] : []);
+    const canRemove = !!(document.getElementById('edit-product-id').value && currentEditImageUrls.length);
+    if (urls.length) {
+      previewList.innerHTML = urls.map((url, index) => `
+        <div class="image-preview-item">
+          <img src="${url}" alt="Preview ${index + 1}">
+          ${canRemove && currentEditImageUrls.includes(url) ? `<button type="button" class="image-remove-btn" onclick="removeExistingImage('${encodeURIComponent(url)}')">×</button>` : ''}
+        </div>
+      `).join('');
+      note.textContent = `${urls.length} image${urls.length === 1 ? '' : 's'} selected`;
+      return;
+    }
+    previewList.innerHTML = '';
+    note.textContent = 'No image selected';
+  }
+
+  async function loadProducts() {
+    const response = await fetch(PRODUCTS_API_URL);
+    const data = await response.json();
+    products = data.products || [];
+    renderProducts();
+  }
+
   // RENDER PRODUCTS
   function renderProducts() {
     const q = currentFilter.products.toLowerCase();
@@ -631,12 +758,15 @@
         <tr>
           <td>
             <div class="product-cell">
-              <div class="product-icon-sm">${p.icon}</div>
+              <div class="product-icon-sm">${productVisual(p)}</div>
               <div><div class="name">${p.name}</div><div class="cat">${p.category}</div></div>
             </div>
           </td>
-          <td>₹${p.price.toLocaleString()}</td>
-          <td>${p.stock === 0 ? '<span style="color:#c0392b">Out</span>' : p.stock <= 3 ? `<span style="color:#855f0a">${p.stock} low</span>` : p.stock}</td>
+          <td>
+            <div style="font-weight:600;">₹${p.discountPrice.toLocaleString()}</div>
+            <div style="font-size:0.72rem;color:var(--ink-light);text-decoration:line-through;">₹${p.mrp.toLocaleString()}</div>
+          </td>
+          <td><span class="badge badge-active">${calculateOfferPercent(p.mrp, p.discountPrice)}% OFF</span></td>
           <td><span class="badge ${p.active ? 'badge-active' : 'badge-inactive'}">${p.active ? 'Active' : 'Inactive'}</span></td>
           <td>
             <div class="actions">
@@ -729,54 +859,134 @@
   function openProductModal(id) {
     document.getElementById('modal-title').textContent = id ? 'Edit Product' : 'Add Product';
     document.getElementById('edit-product-id').value = id || '';
+    document.getElementById('p-images').value = '';
+    currentEditImageUrls = [];
     if (id) {
       const p = products.find(x => x.id === id);
       document.getElementById('p-name').value  = p.name;
       document.getElementById('p-cat').value   = p.category;
-      document.getElementById('p-price').value = p.price;
-      document.getElementById('p-stock').value = p.stock;
+      document.getElementById('p-mrp').value = p.mrp;
+      document.getElementById('p-discount').value = p.discountPrice;
       document.getElementById('p-desc').value  = p.desc || '';
+      const existingUrls = (p.imageUrls && p.imageUrls.length) ? p.imageUrls : (p.imageUrl ? [p.imageUrl] : []);
+      currentEditImageUrls = Array.from(new Set(existingUrls.filter(Boolean)));
+      setProductPreview(currentEditImageUrls);
     } else {
-      ['p-name','p-price','p-stock','p-desc'].forEach(id => document.getElementById(id).value = '');
+      ['p-name','p-mrp','p-discount','p-desc'].forEach(id => document.getElementById(id).value = '');
+      setProductPreview('');
     }
     document.getElementById('product-modal').classList.add('open');
   }
 
   function editProduct(id) { openProductModal(id); }
 
-  function saveProduct() {
+  async function saveProduct() {
     const name  = document.getElementById('p-name').value.trim();
     const cat   = document.getElementById('p-cat').value;
-    const price = parseInt(document.getElementById('p-price').value);
-    const stock = parseInt(document.getElementById('p-stock').value);
+    const mrp = parseFloat(document.getElementById('p-mrp').value);
+    const discountPrice = parseFloat(document.getElementById('p-discount').value);
     const desc  = document.getElementById('p-desc').value.trim();
     const editId = parseInt(document.getElementById('edit-product-id').value);
 
-    if (!name || isNaN(price) || isNaN(stock)) { showToast('Please fill all required fields.'); return; }
+    if (!name || isNaN(mrp) || isNaN(discountPrice)) { showToast('Please fill all required fields.'); return; }
+    if (mrp <= 0 || discountPrice <= 0) { showToast('MRP and discounted price must be greater than 0.'); return; }
+    if (discountPrice > mrp) { showToast('Discounted price cannot be greater than MRP.'); return; }
 
     const icons = { Electronics:'💡', Fashion:'👗', Home:'🏠', Sports:'⚽', Books:'📚' };
+    const existing = editId ? products.find(x => x.id === editId) : null;
+    const imageInput = document.getElementById('p-images');
+    const imageFiles = imageInput.files || [];
 
-    if (editId) {
-      const p = products.find(x => x.id === editId);
-      if (p) { p.name = name; p.category = cat; p.price = price; p.stock = stock; p.desc = desc; }
-      showToast('Product updated.');
-    } else {
-      products.push({ id: nextId++, name, category: cat, price, stock, active: true, icon: icons[cat] || '📦', desc });
-      showToast('Product added.');
+    const formData = new FormData();
+    if (editId) formData.append('id', editId);
+    formData.append('name', name);
+    formData.append('category', cat);
+    formData.append('mrp', mrp);
+    formData.append('discountPrice', discountPrice);
+    formData.append('desc', desc);
+    formData.append('icon', existing?.icon || icons[cat] || '📦');
+    formData.append('active', (existing?.active ?? true) ? 'true' : 'false');
+    // Append all selected files under the 'images' field
+    for (let i = 0; i < imageFiles.length; i++) {
+      formData.append('images', imageFiles[i]);
     }
+
+    let response;
+    let data = {};
+    try {
+      response = await fetch('/admin/api/products/save', {
+        method: 'POST',
+        body: formData
+      });
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        data = { error: await response.text() };
+      }
+    } catch (error) {
+      showToast('Network error while saving product.');
+      return;
+    }
+    if (!response.ok) { showToast(data.error || 'Error saving product.'); return; }
+
+    showToast(editId ? 'Product updated.' : 'Product added.');
     closeModal('product-modal');
-    renderProducts();
+    await loadProducts();
   }
 
-  function toggleProduct(id) {
-    const p = products.find(x => x.id === id);
-    if (p) { p.active = !p.active; renderProducts(); showToast(p.active ? 'Product enabled.' : 'Product disabled.'); }
+  document.getElementById('p-images').addEventListener('change', function () {
+    const files = this.files || [];
+    if (!files || files.length === 0) {
+      setProductPreview('');
+      return;
+    }
+    const previewUrls = Array.from(files).map(file => URL.createObjectURL(file));
+    setProductPreview(previewUrls);
+  });
+
+  async function removeExistingImage(encodedUrl) {
+    const productId = parseInt(document.getElementById('edit-product-id').value);
+    if (!productId) {
+      showToast('Open an existing product to remove saved images.');
+      return;
+    }
+
+    const imageUrl = decodeURIComponent(encodedUrl || '');
+    if (!imageUrl) return;
+    if (!confirm('Remove this image?')) return;
+
+    const response = await fetch(PRODUCT_IMAGE_DELETE_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId, imageUrl })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      showToast(data.error || 'Could not remove image.');
+      return;
+    }
+
+    currentEditImageUrls = (data.product?.imageUrls || []).filter(Boolean);
+    setProductPreview(currentEditImageUrls);
+    await loadProducts();
+    showToast('Image removed.');
   }
 
-  function deleteProduct(id) {
+  async function toggleProduct(id) {
+    const response = await fetch(`/admin/api/products/toggle/${id}`, { method: 'POST' });
+    const data = await response.json();
+    if (!response.ok) { showToast(data.error || 'Error updating product.'); return; }
+    await loadProducts();
+    showToast(data.product.active ? 'Product enabled.' : 'Product disabled.');
+  }
+
+  async function deleteProduct(id) {
     if (!confirm('Delete this product?')) return;
-    products = products.filter(p => p.id !== id);
-    renderProducts();
+    const response = await fetch(`/admin/api/products/delete/${id}`, { method: 'POST' });
+    const data = await response.json();
+    if (!response.ok) { showToast(data.error || 'Error deleting product.'); return; }
+    await loadProducts();
     showToast('Product deleted.');
   }
 
@@ -790,6 +1000,59 @@
     users = users.filter(u => u.id !== id);
     renderUsers();
     showToast('User removed.');
+  }
+  function openUserModal() {
+    document.getElementById('u-name').value = '';
+    document.getElementById('u-email').value = '';
+    document.getElementById('u-password').value = '';
+    document.getElementById('u-role').value = 'customer';
+    document.getElementById('user-modal').classList.add('open');
+  }
+
+  function saveUser() {
+    const name = document.getElementById('u-name').value.trim();
+    const email = document.getElementById('u-email').value.trim();
+    const password = document.getElementById('u-password').value;
+    const role = document.getElementById('u-role').value;
+
+    if (!name || !email || !password) {
+      showToast('Please fill all fields.');
+      return;
+    }
+    if (password.length < 6) {
+      showToast('Password must be at least 6 characters.');
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      showToast('Please enter a valid email.');
+      return;
+    }
+
+    // Call Flask backend to create user
+    fetch('/admin/add-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password, role })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        showToast(data.error);
+        return;
+      }
+      // Add user to local data
+      users.push({
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role,
+        joined: data.user.joined
+      });
+      renderUsers();
+      closeModal('user-modal');
+      showToast(`${role.charAt(0).toUpperCase() + role.slice(1)} user added successfully.`);
+    })
+    .catch(err => showToast('Error adding user.'));
   }
 
   function showSection(name, el) {
@@ -814,7 +1077,7 @@
   }
 
   // Init
-  renderProducts();
+  loadProducts();
   renderOrders();
   renderUsers();
 </script>

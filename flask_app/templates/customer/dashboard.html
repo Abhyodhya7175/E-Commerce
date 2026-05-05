@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ShopVault — Shop</title>
+<title>UrbanCart — Shop</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -226,16 +226,80 @@
 
   .product-img {
     width: 100%;
-    height: 180px;
+    height: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 3.5rem;
     background: var(--cream);
+    overflow: hidden;
+  }
+  .product-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .product-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .product-gallery-main {
+    width: 100%;
+    flex: 1;
+    background: var(--cream);
+    overflow: hidden;
+  }
+  .product-gallery-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .product-gallery-thumbs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.5);
+  }
+  .product-gallery-thumb {
+    height: 40px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--cream);
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .product-gallery-thumb:hover {
+    opacity: 0.8;
+  }
+  .product-gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .product-gallery-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    border-radius: 6px;
+    background: rgba(26,26,46,0.08);
+    color: var(--ink);
+    font-size: 0.72rem;
+    font-weight: 600;
   }
 
   .product-body {
     padding: 1rem;
+    display: flex;
+    flex-direction: column;
   }
 
   .product-category {
@@ -261,34 +325,47 @@
     font-weight: 300;
     margin-bottom: 0.8rem;
     line-height: 1.5;
+    flex: 1;
   }
 
   .product-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 0.8rem;
   }
 
   .product-price {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .current-price {
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--ink);
+    line-height: 1.1;
   }
 
-  .stock-badge {
+  .mrp-price {
+    font-size: 0.76rem;
+    color: var(--ink-light);
+    text-decoration: line-through;
+    line-height: 1;
+  }
+
+  .offer-badge {
     font-size: 0.7rem;
     padding: 2px 8px;
     border-radius: 20px;
     font-weight: 500;
+    background: var(--success-bg);
+    color: var(--success);
   }
-  .in-stock { background: var(--success-bg); color: var(--success); }
-  .low-stock { background: #fff8e6; color: #855f0a; }
-  .out-stock { background: #fdf0ef; color: #c0392b; }
 
   .add-btn {
-    width: 100%;
-    margin-top: 0.8rem;
-    padding: 0.6rem;
+    padding: 0.6rem 1rem;
     background: var(--ink);
     color: #fff;
     border: none;
@@ -298,6 +375,8 @@
     font-weight: 500;
     cursor: pointer;
     transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   .add-btn:hover { background: #2a2a4e; }
   .add-btn:active { transform: scale(0.98); }
@@ -372,7 +451,24 @@
   }
   .cart-item:last-child { border-bottom: none; }
 
-  .ci-icon { font-size: 2rem; flex-shrink: 0; }
+  .ci-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--cream);
+  }
+  .ci-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
   .ci-info { flex: 1; }
   .ci-name { font-size: 0.85rem; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
   .ci-price { font-size: 0.8rem; color: var(--ink-light); }
@@ -616,46 +712,64 @@
     document.getElementById('acc-initials').textContent = parts.map(p => p[0]).join('').toUpperCase();
   }
 
-  const PRODUCTS = [
-    { id:1, name:'Wireless Noise-Cancelling Headphones', category:'Electronics', price:7999, stock:15, desc:'Premium audio with 30hr battery life.', icon:'🎧' },
-    { id:2, name:'Mechanical Keyboard RGB', category:'Electronics', price:4299, stock:8, desc:'Tactile switches, full RGB backlight.', icon:'⌨️' },
-    { id:3, name:'Slim Fit Cotton Shirt', category:'Fashion', price:1199, stock:0, desc:'100% cotton, perfect for any occasion.', icon:'👔' },
-    { id:4, name:'Running Shoes Pro', category:'Sports', price:3499, stock:3, desc:'Lightweight sole, breathable mesh upper.', icon:'👟' },
-    { id:5, name:'Ceramic Coffee Mug Set', category:'Home', price:899, stock:22, desc:'Set of 4 hand-crafted ceramic mugs.', icon:'☕' },
-    { id:6, name:'Yoga Mat Premium', category:'Sports', price:1599, stock:12, desc:'Non-slip, 6mm thick, eco-friendly.', icon:'🧘' },
-    { id:7, name:'The Art of Clean Code', category:'Books', price:549, stock:30, desc:'A bestselling guide for software craftsmanship.', icon:'📚' },
-    { id:8, name:'Smart LED Desk Lamp', category:'Electronics', price:2199, stock:7, desc:'Touch controls, adjustable color temp.', icon:'💡' },
-    { id:9, name:'Linen Throw Blanket', category:'Home', price:1899, stock:0, desc:'Soft woven linen, 140×180cm.', icon:'🛋️' },
-    { id:10, name:'Sunglasses UV400', category:'Fashion', price:799, stock:18, desc:'Polarized lenses, lightweight frame.', icon:'🕶️' },
-    { id:11, name:'Stainless Water Bottle', category:'Sports', price:699, stock:45, desc:'1L, keeps cold 24h, leak-proof cap.', icon:'🍶' },
-    { id:12, name:'Design Thinking Handbook', category:'Books', price:699, stock:20, desc:'Innovation methods used by top firms.', icon:'📖' },
-  ];
-
+  const PRODUCTS_API_URL = '{{ url_for("customer.api_products") }}';
+  let PRODUCTS = [];
   let cart = [];
-  let filteredProducts = [...PRODUCTS];
+  let filteredProducts = [];
+
+  function calculateOfferPercent(mrp, discountPrice) {
+    if (!mrp || mrp <= 0 || discountPrice < 0 || discountPrice > mrp) return 0;
+    return Math.round(((mrp - discountPrice) / mrp) * 100);
+  }
+
+  async function loadProducts() {
+    const response = await fetch(PRODUCTS_API_URL);
+    const data = await response.json();
+    PRODUCTS = (data.products || []).filter(p => p.active);
+    filteredProducts = [...PRODUCTS];
+    renderProducts();
+  }
 
   function renderProducts() {
     const grid = document.getElementById('product-grid');
     grid.innerHTML = filteredProducts.map(p => {
-      const stockClass = p.stock === 0 ? 'out-stock' : p.stock <= 3 ? 'low-stock' : 'in-stock';
-      const stockText  = p.stock === 0 ? 'Out of stock' : p.stock <= 3 ? `Only ${p.stock} left` : 'In stock';
+      const offerPercent = calculateOfferPercent(p.mrp, p.discountPrice);
       const inCart = cart.find(c => c.id === p.id);
+      const rawImageUrls = Array.isArray(p.imageUrls) ? p.imageUrls : (p.imageUrl ? [p.imageUrl] : []);
+      const imageUrls = Array.from(new Set(rawImageUrls.filter(Boolean)));
+      const primary = imageUrls.length ? imageUrls[0] : null;
+      const imageMarkup = primary
+        ? `
+          <div class="product-gallery">
+            <div class="product-gallery-main"><img src="${primary}" alt="${p.name}"></div>
+            ${imageUrls.length > 1 ? `
+              <div class="product-gallery-thumbs">
+                ${imageUrls.slice(1, 5).map((url, index) => `
+                  <div class="product-gallery-thumb"><img src="${url}" alt="${p.name} ${index + 1}"></div>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>`
+        : (p.icon || '📦');
       return `
         <div class="product-card">
-          <div class="product-img">${p.icon}</div>
+          <div class="product-img">${imageMarkup}</div>
           <div class="product-body">
             <div class="product-category">${p.category}</div>
             <div class="product-name">${p.name}</div>
             <div class="product-desc">${p.desc}</div>
             <div class="product-footer">
-              <div class="product-price">₹${p.price.toLocaleString()}</div>
-              <span class="stock-badge ${stockClass}">${stockText}</span>
+              <div class="product-price">
+                <div class="current-price">₹${p.discountPrice.toLocaleString()}</div>
+                <div class="mrp-price">₹${p.mrp.toLocaleString()}</div>
+              </div>
+              <span class="offer-badge">${offerPercent}% OFF</span>
+              <button class="add-btn ${inCart ? 'added' : ''}"
+                onclick="addToCart(${p.id})"
+                ${!p.active ? 'disabled' : ''}>
+                ${!p.active ? 'Unavailable' : (inCart ? '✓ Added' : '+ Add to Cart')}
+              </button>
             </div>
-            <button class="add-btn ${inCart ? 'added' : ''}"
-              onclick="addToCart(${p.id})"
-              ${p.stock === 0 ? 'disabled' : ''}>
-              ${inCart ? '✓ Added' : '+ Add to Cart'}
-            </button>
           </div>
         </div>`;
     }).join('');
@@ -672,8 +786,8 @@
       (!cat || p.category === cat)
     );
 
-    if (sort === 'price-asc')  filteredProducts.sort((a,b) => a.price - b.price);
-    if (sort === 'price-desc') filteredProducts.sort((a,b) => b.price - a.price);
+    if (sort === 'price-asc')  filteredProducts.sort((a,b) => a.discountPrice - b.discountPrice);
+    if (sort === 'price-desc') filteredProducts.sort((a,b) => b.discountPrice - a.discountPrice);
     if (sort === 'name')       filteredProducts.sort((a,b) => a.name.localeCompare(b.name));
 
     renderProducts();
@@ -681,12 +795,12 @@
 
   function addToCart(id) {
     const product = PRODUCTS.find(p => p.id === id);
-    if (!product || product.stock === 0) return;
+    if (!product || !product.active) return;
     const existing = cart.find(c => c.id === id);
     if (existing) { existing.qty++; }
     else { cart.push({ ...product, qty: 1 }); }
     updateCartUI();
-    showToast(`${product.icon} ${product.name} added to cart`);
+    showToast(`${product.name} added to cart`);
     renderProducts();
   }
 
@@ -700,10 +814,10 @@
     } else {
       list.innerHTML = cart.map(item => `
         <div class="cart-item">
-          <div class="ci-icon">${item.icon}</div>
+          <div class="ci-icon">${item.imageUrls && item.imageUrls.length ? `<img src="${item.imageUrls[0]}" alt="${item.name}">` : (item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.name}">` : (item.icon || '📦'))}</div>
           <div class="ci-info">
             <div class="ci-name">${item.name}</div>
-            <div class="ci-price">₹${item.price.toLocaleString()} each</div>
+            <div class="ci-price">₹${item.discountPrice.toLocaleString()} each</div>
             <div class="ci-controls">
               <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
               <span class="qty-num">${item.qty}</span>
@@ -714,7 +828,7 @@
         </div>`).join('');
     }
 
-    const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
+    const total = cart.reduce((s, c) => s + c.discountPrice * c.qty, 0);
     document.getElementById('cart-total-amt').textContent = `₹${total.toLocaleString()}`;
   }
 
@@ -751,7 +865,7 @@
 
   function placeOrder() {
     if (cart.length === 0) { showToast('Your cart is empty!'); return; }
-    const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
+    const total = cart.reduce((s, c) => s + c.discountPrice * c.qty, 0);
     myOrders.unshift({ id:`#ORD-${orderIdCounter++}`, date:'Today', items: cart.map(c => c.name.split(' ').slice(0,2).join(' ')).join(', '), total:`₹${total.toLocaleString()}`, status:'pending' });
     cart = [];
     updateCartUI();
@@ -795,9 +909,11 @@
     setTimeout(() => t.classList.remove('show'), 2800);
   }
 
+  setInterval(loadProducts, 5000);
+
   // Logout is handled via Flask route link
 
-  renderProducts();
+  loadProducts();
   updateCartUI();
 </script>
 </body>

@@ -4,7 +4,6 @@ from sqlalchemy import text
 
 with app.app_context():
     print("Dropping all tables...")
-    # Get all table names
     tables = db.inspect(db.engine).get_table_names()
     for table in tables:
         print(f"  Dropping {table}...")
