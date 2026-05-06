@@ -221,67 +221,115 @@
     overflow: hidden;
     transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
+    position: relative;
   }
   .product-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+  .product-card.out-of-stock {
+    background: #eeeeee;
+    border-color: #d8d8d8;
+    color: #777;
+    cursor: default;
+  }
+  .product-card.out-of-stock:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  .product-card.out-of-stock .product-img,
+  .product-card.out-of-stock .product-body {
+    filter: grayscale(1);
+    opacity: 0.66;
+  }
+  .product-card.out-of-stock .product-img {
+    background: #dedede;
+  }
+  .product-card.out-of-stock .product-name,
+  .product-card.out-of-stock .current-price,
+  .product-card.out-of-stock .product-category,
+  .product-card.out-of-stock .product-desc,
+  .product-card.out-of-stock .mrp-price {
+    color: #6f6f6f;
+  }
+  .stock-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 3;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: rgba(70,70,70,0.88);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 600;
+  }
 
   .product-img {
     width: 100%;
-    height: 300px;
+    height: 180px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 3.5rem;
     background: var(--cream);
-    overflow: hidden;
   }
   .product-img img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
     display: block;
   }
 
   .product-gallery {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 6px;
     width: 100%;
     height: 100%;
   }
   .product-gallery-main {
+    position: relative;
     width: 100%;
-    flex: 1;
+    min-height: 0;
     background: var(--cream);
     overflow: hidden;
+    isolation: isolate;
   }
   .product-gallery-main img {
+    position: relative;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
     display: block;
   }
   .product-gallery-thumbs {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 4px;
-    padding: 8px;
-    background: rgba(255, 255, 255, 0.5);
   }
   .product-gallery-thumb {
-    height: 40px;
+    height: 34px;
+    padding: 0;
+    border: 2px solid transparent;
     border-radius: 6px;
     overflow: hidden;
     background: var(--cream);
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: border-color 0.15s, transform 0.15s, opacity 0.15s;
   }
   .product-gallery-thumb:hover {
-    opacity: 0.8;
+    opacity: 0.86;
+  }
+  .product-gallery-thumb.active {
+    border-color: var(--gold);
+    transform: translateY(-1px);
   }
   .product-gallery-thumb img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
     display: block;
   }
   .product-gallery-more {
@@ -289,6 +337,7 @@
     align-items: center;
     justify-content: center;
     height: 34px;
+    border: 0;
     border-radius: 6px;
     background: rgba(26,26,46,0.08);
     color: var(--ink);
@@ -298,8 +347,6 @@
 
   .product-body {
     padding: 1rem;
-    display: flex;
-    flex-direction: column;
   }
 
   .product-category {
@@ -325,14 +372,12 @@
     font-weight: 300;
     margin-bottom: 0.8rem;
     line-height: 1.5;
-    flex: 1;
   }
 
   .product-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.8rem;
   }
 
   .product-price {
@@ -365,7 +410,9 @@
   }
 
   .add-btn {
-    padding: 0.6rem 1rem;
+    width: 100%;
+    margin-top: 0.8rem;
+    padding: 0.6rem;
     background: var(--ink);
     color: #fff;
     border: none;
@@ -375,13 +422,30 @@
     font-weight: 500;
     cursor: pointer;
     transition: background 0.15s, transform 0.1s;
-    white-space: nowrap;
-    flex-shrink: 0;
   }
   .add-btn:hover { background: #2a2a4e; }
   .add-btn:active { transform: scale(0.98); }
   .add-btn:disabled { background: #ccc; cursor: not-allowed; }
   .add-btn.added { background: var(--success); }
+  .notify-btn {
+    width: 100%;
+    margin-top: 0.8rem;
+    padding: 0.6rem;
+    background: #f7f7f7;
+    color: #3f3f3f;
+    border: 1px solid #bdbdbd;
+    border-radius: 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  }
+  .notify-btn:hover {
+    background: #fff;
+    border-color: #8f8f8f;
+  }
+  .notify-btn:active { transform: scale(0.98); }
 
   /* CART DRAWER */
   .cart-overlay {
@@ -722,10 +786,37 @@
     return Math.round(((mrp - discountPrice) / mrp) * 100);
   }
 
+  function escapeAttr(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function isOutOfStock(product) {
+    return !product?.active || (Object.prototype.hasOwnProperty.call(product || {}, 'stock') && Number(product.stock) <= 0);
+  }
+
+  function changeProductImage(event, button) {
+    event.stopPropagation();
+    const gallery = button.closest('.product-gallery');
+    const main = gallery?.querySelector('.product-gallery-main');
+    const mainImage = main?.querySelector('img');
+    const imageUrl = button.dataset.imageUrl;
+    if (!gallery || !main || !mainImage || !imageUrl) return;
+
+    mainImage.src = imageUrl;
+    mainImage.alt = button.dataset.imageAlt || mainImage.alt;
+    gallery.querySelectorAll('.product-gallery-thumb').forEach(thumb => {
+      thumb.classList.toggle('active', thumb === button);
+    });
+  }
+
   async function loadProducts() {
     const response = await fetch(PRODUCTS_API_URL);
     const data = await response.json();
-    PRODUCTS = (data.products || []).filter(p => p.active);
+    PRODUCTS = data.products || [];
     filteredProducts = [...PRODUCTS];
     renderProducts();
   }
@@ -735,24 +826,35 @@
     grid.innerHTML = filteredProducts.map(p => {
       const offerPercent = calculateOfferPercent(p.mrp, p.discountPrice);
       const inCart = cart.find(c => c.id === p.id);
+      const outOfStock = isOutOfStock(p);
       const rawImageUrls = Array.isArray(p.imageUrls) ? p.imageUrls : (p.imageUrl ? [p.imageUrl] : []);
       const imageUrls = Array.from(new Set(rawImageUrls.filter(Boolean)));
       const primary = imageUrls.length ? imageUrls[0] : null;
+      const visibleImages = imageUrls.length > 5 ? imageUrls.slice(0, 4) : imageUrls.slice(0, 5);
       const imageMarkup = primary
         ? `
           <div class="product-gallery">
-            <div class="product-gallery-main"><img src="${primary}" alt="${p.name}"></div>
+            <div class="product-gallery-main"><img src="${escapeAttr(primary)}" alt="${escapeAttr(p.name)}"></div>
             ${imageUrls.length > 1 ? `
               <div class="product-gallery-thumbs">
-                ${imageUrls.slice(1, 5).map((url, index) => `
-                  <div class="product-gallery-thumb"><img src="${url}" alt="${p.name} ${index + 1}"></div>
+                ${visibleImages.map((url, index) => `
+                  <button type="button"
+                    class="product-gallery-thumb ${index === 0 ? 'active' : ''}"
+                    data-image-url="${escapeAttr(url)}"
+                    data-image-alt="${escapeAttr(`${p.name} image ${index + 1}`)}"
+                    onclick="changeProductImage(event, this)"
+                    aria-label="Show ${escapeAttr(p.name)} image ${index + 1}">
+                    <img src="${escapeAttr(url)}" alt="${escapeAttr(p.name)} ${index + 1}">
+                  </button>
                 `).join('')}
+                ${imageUrls.length > visibleImages.length ? `<div class="product-gallery-more">+${imageUrls.length - visibleImages.length}</div>` : ''}
               </div>
             ` : ''}
           </div>`
         : (p.icon || '📦');
       return `
-        <div class="product-card">
+        <div class="product-card ${outOfStock ? 'out-of-stock' : ''}">
+          ${outOfStock ? '<div class="stock-badge">Out of Stock</div>' : ''}
           <div class="product-img">${imageMarkup}</div>
           <div class="product-body">
             <div class="product-category">${p.category}</div>
@@ -764,12 +866,14 @@
                 <div class="mrp-price">₹${p.mrp.toLocaleString()}</div>
               </div>
               <span class="offer-badge">${offerPercent}% OFF</span>
-              <button class="add-btn ${inCart ? 'added' : ''}"
-                onclick="addToCart(${p.id})"
-                ${!p.active ? 'disabled' : ''}>
-                ${!p.active ? 'Unavailable' : (inCart ? '✓ Added' : '+ Add to Cart')}
-              </button>
             </div>
+            ${outOfStock ? `
+              <button class="notify-btn" onclick="notifyWhenAvailable(${p.id})">Notify Me</button>
+            ` : `
+              <button class="add-btn ${inCart ? 'added' : ''}" onclick="addToCart(${p.id})">
+                ${inCart ? '✓ Added' : '+ Add to Cart'}
+              </button>
+            `}
           </div>
         </div>`;
     }).join('');
@@ -795,13 +899,20 @@
 
   function addToCart(id) {
     const product = PRODUCTS.find(p => p.id === id);
-    if (!product || !product.active) return;
+    const outOfStock = isOutOfStock(product);
+    if (!product || outOfStock) return;
     const existing = cart.find(c => c.id === id);
     if (existing) { existing.qty++; }
     else { cart.push({ ...product, qty: 1 }); }
     updateCartUI();
     showToast(`${product.name} added to cart`);
     renderProducts();
+  }
+
+  function notifyWhenAvailable(id) {
+    const product = PRODUCTS.find(p => p.id === id);
+    if (!product) return;
+    showToast(`We'll notify you when ${product.name} is back in stock.`);
   }
 
   function updateCartUI() {
@@ -908,8 +1019,6 @@
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2800);
   }
-
-  setInterval(loadProducts, 5000);
 
   // Logout is handled via Flask route link
 

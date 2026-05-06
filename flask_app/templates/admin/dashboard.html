@@ -334,6 +334,9 @@
     background: var(--cream);
     position: relative;
   }
+  .image-preview-item.pending {
+    border-style: dashed;
+  }
   .image-preview-item img {
     width: 100%;
     height: 100%;
@@ -358,6 +361,27 @@
   }
   .image-remove-btn:hover {
     background: rgba(192, 57, 43, 0.95);
+  }
+  .image-upload-actions {
+    display: flex;
+    gap: 0.45rem;
+    align-items: center;
+    margin-top: 0.55rem;
+  }
+  .image-upload-actions .btn-sm {
+    padding: 0.38rem 0.7rem;
+    font-size: 0.74rem;
+  }
+  .image-preview-label {
+    position: absolute;
+    left: 4px;
+    bottom: 4px;
+    background: rgba(26,26,46,0.78);
+    color: #fff;
+    font-size: 0.58rem;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 999px;
   }
   .image-preview-count {
     position: absolute;
@@ -642,6 +666,9 @@
       <div class="mfield">
         <label>Product Images (multiple allowed)</label>
         <input type="file" id="p-images" accept="image/*" multiple />
+        <div class="image-upload-actions">
+          <button type="button" class="btn-sm" id="clear-selected-images" onclick="clearSelectedProductImages()" style="display:none;">Clear selected images</button>
+        </div>
         <div id="p-image-preview-list" class="image-preview-list"></div>
         <span id="p-image-note" style="font-size:0.74rem;color:var(--ink-light);display:block;margin-top:0.4rem;">No image selected</span>
       </div>
@@ -688,6 +715,8 @@
   const PRODUCT_IMAGE_DELETE_API_URL = '{{ url_for("admin.api_delete_product_image") }}';
   let products = [];
   let currentEditImageUrls = [];
+  let selectedProductImageFiles = [];
+  let selectedProductImagePreviews = [];
 
   let orders = [
     { id:'#ORD-1034', customer:'Alex Johnson', email:'customer@demo.com', items:'Headphones × 1', total:7999, status:'delivered', date:'Apr 28, 2025' },
@@ -722,7 +751,7 @@
     return product.icon || '📦';
   }
 
-  function setProductPreview(imageUrls) {
+  function legacySetProductPreview(imageUrls) {
     const previewList = document.getElementById('p-image-preview-list');
     const note = document.getElementById('p-image-note');
     const urls = Array.isArray(imageUrls) ? imageUrls.filter(Boolean) : (imageUrls ? [imageUrls] : []);
@@ -739,6 +768,80 @@
     }
     previewList.innerHTML = '';
     note.textContent = 'No image selected';
+  }
+
+  function escapeAttr(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function releaseSelectedProductImagePreviews() {
+    selectedProductImagePreviews.forEach(item => URL.revokeObjectURL(item.url));
+    selectedProductImagePreviews = [];
+  }
+
+  function resetSelectedProductImages(render = true) {
+    const imageInput = document.getElementById('p-images');
+    if (imageInput) imageInput.value = '';
+    releaseSelectedProductImagePreviews();
+    selectedProductImageFiles = [];
+    if (render) renderProductImagePreview();
+  }
+
+  function setProductPreview(imageUrls) {
+    currentEditImageUrls = Array.isArray(imageUrls) ? Array.from(new Set(imageUrls.filter(Boolean))) : (imageUrls ? [imageUrls] : []);
+    renderProductImagePreview();
+  }
+
+  function renderProductImagePreview() {
+    const previewList = document.getElementById('p-image-preview-list');
+    const note = document.getElementById('p-image-note');
+    const clearButton = document.getElementById('clear-selected-images');
+    const canRemoveSaved = !!document.getElementById('edit-product-id').value;
+    const savedMarkup = currentEditImageUrls.map((url, index) => `
+        <div class="image-preview-item">
+          <img src="${escapeAttr(url)}" alt="Saved product image ${index + 1}">
+          <span class="image-preview-label">Saved</span>
+          ${canRemoveSaved ? `<button type="button" class="image-remove-btn" title="Delete image" onclick="removeExistingImage('${encodeURIComponent(url)}')">x</button>` : ''}
+        </div>
+      `).join('');
+    const pendingMarkup = selectedProductImagePreviews.map((item, index) => `
+        <div class="image-preview-item pending">
+          <img src="${escapeAttr(item.url)}" alt="${escapeAttr(item.name || `Selected image ${index + 1}`)}">
+          <span class="image-preview-label">New</span>
+          <button type="button" class="image-remove-btn" title="Remove selected image" onclick="removeSelectedProductImage(${index})">x</button>
+        </div>
+      `).join('');
+    previewList.innerHTML = savedMarkup + pendingMarkup;
+
+    const savedCount = currentEditImageUrls.length;
+    const pendingCount = selectedProductImageFiles.length;
+    clearButton.style.display = pendingCount ? 'inline-flex' : 'none';
+    if (savedCount || pendingCount) {
+      const parts = [];
+      if (savedCount) parts.push(`${savedCount} saved`);
+      if (pendingCount) parts.push(`${pendingCount} selected`);
+      note.textContent = `${parts.join(' + ')} image${savedCount + pendingCount === 1 ? '' : 's'}`;
+      return;
+    }
+    note.textContent = 'No image selected';
+  }
+
+  function removeSelectedProductImage(index) {
+    const preview = selectedProductImagePreviews[index];
+    if (preview) URL.revokeObjectURL(preview.url);
+    selectedProductImagePreviews.splice(index, 1);
+    selectedProductImageFiles.splice(index, 1);
+    renderProductImagePreview();
+  }
+
+  function clearSelectedProductImages() {
+    if (!selectedProductImageFiles.length) return;
+    resetSelectedProductImages();
+    showToast('Selected images cleared.');
   }
 
   async function loadProducts() {
@@ -772,7 +875,6 @@
             <div class="actions">
               <button class="btn-sm" onclick="editProduct(${p.id})">Edit</button>
               <button class="btn-sm" onclick="toggleProduct(${p.id})">${p.active ? 'Disable' : 'Enable'}</button>
-              <button class="btn-sm danger" onclick="deleteProduct(${p.id})">Delete</button>
             </div>
           </td>
         </tr>`).join('');
@@ -859,7 +961,7 @@
   function openProductModal(id) {
     document.getElementById('modal-title').textContent = id ? 'Edit Product' : 'Add Product';
     document.getElementById('edit-product-id').value = id || '';
-    document.getElementById('p-images').value = '';
+    resetSelectedProductImages(false);
     currentEditImageUrls = [];
     if (id) {
       const p = products.find(x => x.id === id);
@@ -894,8 +996,7 @@
 
     const icons = { Electronics:'💡', Fashion:'👗', Home:'🏠', Sports:'⚽', Books:'📚' };
     const existing = editId ? products.find(x => x.id === editId) : null;
-    const imageInput = document.getElementById('p-images');
-    const imageFiles = imageInput.files || [];
+    const imageFiles = selectedProductImageFiles;
 
     const formData = new FormData();
     if (editId) formData.append('id', editId);
@@ -932,17 +1033,22 @@
 
     showToast(editId ? 'Product updated.' : 'Product added.');
     closeModal('product-modal');
+    resetSelectedProductImages(false);
     await loadProducts();
   }
 
   document.getElementById('p-images').addEventListener('change', function () {
     const files = this.files || [];
     if (!files || files.length === 0) {
-      setProductPreview('');
+      renderProductImagePreview();
       return;
     }
-    const previewUrls = Array.from(files).map(file => URL.createObjectURL(file));
-    setProductPreview(previewUrls);
+    Array.from(files).forEach(file => {
+      selectedProductImageFiles.push(file);
+      selectedProductImagePreviews.push({ url: URL.createObjectURL(file), name: file.name });
+    });
+    this.value = '';
+    renderProductImagePreview();
   });
 
   async function removeExistingImage(encodedUrl) {
@@ -979,15 +1085,6 @@
     if (!response.ok) { showToast(data.error || 'Error updating product.'); return; }
     await loadProducts();
     showToast(data.product.active ? 'Product enabled.' : 'Product disabled.');
-  }
-
-  async function deleteProduct(id) {
-    if (!confirm('Delete this product?')) return;
-    const response = await fetch(`/admin/api/products/delete/${id}`, { method: 'POST' });
-    const data = await response.json();
-    if (!response.ok) { showToast(data.error || 'Error deleting product.'); return; }
-    await loadProducts();
-    showToast('Product deleted.');
   }
 
   function updateOrderStatus(orderId, status) {
@@ -1067,7 +1164,10 @@
     else if (name === 'users') renderUsers();
   }
 
-  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+    if (id === 'product-modal') resetSelectedProductImages(false);
+  }
 
   function showToast(msg) {
     const t = document.getElementById('toast');

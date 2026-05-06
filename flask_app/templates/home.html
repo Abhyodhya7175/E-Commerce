@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UrbanCart - Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #4a4a6a;
+    --cream: #faf8f3;
+    --gold: #c9a84c;
+    --gold-dark: #8b6914;
+    --border: #e8e3d8;
+  }
+
+  body {
+    min-height: 100vh;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    background: var(--cream);
+  }
+
+  nav {
+    height: 64px;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.45rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .logo span { color: var(--gold); }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0.65rem 1rem;
+    border-radius: 9px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.15s, background 0.15s, border-color 0.15s;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.primary { background: var(--ink); color: #fff; }
+  .btn.secondary { background: #fff; color: var(--ink); border: 1px solid var(--border); }
+
+  .hero {
+    min-height: calc(100vh - 64px);
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+    align-items: center;
+    gap: 3rem;
+    padding: 4rem 6vw;
+  }
+
+  .eyebrow {
+    color: var(--gold-dark);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.9rem;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 6vw, 5rem);
+    line-height: 1.02;
+    max-width: 680px;
+    margin-bottom: 1rem;
+  }
+
+  .hero-copy {
+    color: var(--ink-light);
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 540px;
+    margin-bottom: 1.7rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-bottom: 2rem;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9rem;
+    max-width: 520px;
+  }
+
+  .stat {
+    padding: 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+  }
+  .stat strong { display: block; font-size: 1.05rem; margin-bottom: 0.2rem; }
+  .stat span { color: var(--ink-light); font-size: 0.76rem; }
+
+  .visual {
+    min-height: 520px;
+    border-radius: 18px;
+    background:
+      linear-gradient(135deg, rgba(26,26,46,0.92), rgba(26,26,46,0.74)),
+      url("https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=1100&q=80");
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(26,26,46,0.16);
+  }
+
+  .deal-panel {
+    position: absolute;
+    left: 1.2rem;
+    right: 1.2rem;
+    bottom: 1.2rem;
+    padding: 1.1rem;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(255,255,255,0.5);
+  }
+
+  .deal-panel h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    margin-bottom: 0.35rem;
+  }
+  .deal-panel p { color: var(--ink-light); font-size: 0.86rem; line-height: 1.5; }
+
+  .floating-tag {
+    position: absolute;
+    top: 1.2rem;
+    left: 1.2rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(201,168,76,0.95);
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 0.78rem;
+  }
+
+  @media (max-width: 850px) {
+    nav { padding: 0 1rem; }
+    .hero {
+      grid-template-columns: 1fr;
+      padding: 2.2rem 1rem;
+      gap: 2rem;
+    }
+    .visual { min-height: 360px; }
+    .stats { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Urban<span>Cart</span></div>
+  <div class="nav-actions">
+    <a class="btn secondary" href="{{ url_for('auth.login') }}">Login</a>
+    <a class="btn primary" href="{{ url_for('auth.register') }}">Register</a>
+  </div>
+</nav>
+
+<main class="hero">
+  <section>
+    <div class="eyebrow">Premium shopping, made simple</div>
+    <h1>Find everyday favorites and standout deals in one place.</h1>
+    <p class="hero-copy">
+      UrbanCart brings curated products, clear offers, and a smooth shopping dashboard together for customers and admins.
+    </p>
+    <div class="hero-actions">
+      <a class="btn primary" href="{{ url_for('auth.register') }}">Create Account</a>
+      <a class="btn secondary" href="{{ url_for('auth.login') }}">Sign In</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><strong>Fresh Deals</strong><span>Daily offers across categories</span></div>
+      <div class="stat"><strong>Easy Cart</strong><span>Fast shopping and checkout flow</span></div>
+      <div class="stat"><strong>Admin Tools</strong><span>Manage products from one panel</span></div>
+    </div>
+  </section>
+
+  <section class="visual" aria-label="UrbanCart shopping preview">
+    <div class="floating-tag">Up to 30% off</div>
+    <div class="deal-panel">
+      <h2>Shop Electronics, Fashion, Books and more</h2>
+      <p>Login to browse products, save items to cart, and track your orders from your customer dashboard.</p>
+    </div>
+  </section>
+</main>
+</body>
+</html>

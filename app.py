@@ -1,4 +1,4 @@
-from flask import redirect, url_for, jsonify
+from flask import redirect, url_for, jsonify, render_template
 from flask_login import current_user
 
 from flask_app import create_app
@@ -12,7 +12,7 @@ def home():
         if current_user.role == 'admin':
             return redirect(url_for('admin.dashboard'))
         return redirect(url_for('customer.shop_home'))
-    return redirect(url_for('auth.login'))
+    return render_template('home.html')
 
 
 @app.route('/health')

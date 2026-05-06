@@ -32,16 +32,17 @@ class Product(db.Model):
     images = db.relationship('ProductImage', backref='product', cascade='all, delete-orphan', lazy='joined', order_by='ProductImage.order_index')
 
     def to_dict(self):
-        # Collect image URLs from related ProductImage rows, fallback to legacy image_url
+        # Keep the legacy primary image and any gallery images together.
         image_urls = []
         seen_urls = set()
+        if self.image_url:
+            seen_urls.add(self.image_url)
+            image_urls.append(self.image_url)
         for img in (self.images or []):
             if not img.image_url or img.image_url in seen_urls:
                 continue
             seen_urls.add(img.image_url)
             image_urls.append(img.image_url)
-        if not image_urls and self.image_url:
-            image_urls = [self.image_url]
 
         return {
             'id': self.id,
