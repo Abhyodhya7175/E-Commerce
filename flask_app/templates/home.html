@@ -559,14 +559,14 @@
 <nav class="navbar" id="navbar">
   <div class="nav-inner">
 
-    <a href="{{ url_for('customer.shop_home') }}" class="logo">Urban<span>Cart</span></a>
+    <a href="{{ url_for('home') }}" class="logo">Urban<span>Cart</span></a>
 
     <ul class="nav-cats">
       <li><a href="/">Home</a></li>
+      <li><a href="#new-arrivals">New Arrivals</a></li>
       <li><a href="{{ url_for('customer.shop_home') }}" class="shop-now">Shop Now</a></li>
       <li><a href="#">Blogs</a></li>
       <li><a href="#">About</a></li>
-      <li><a href="#">Contact</a></li>
     </ul>
 
     <form class="nav-search" action="{{ url_for('customer.shop_home') }}" method="GET">
@@ -680,6 +680,7 @@
     </div>
 
     <!-- ── Right: Visual ── -->
+     <!----
     <div class="hero-visual">
       <div class="hero-img">
         <span class="img-chip">🔥 Up to 30% off</span>
@@ -688,15 +689,15 @@
           <h3>Shop Electronics, Fashion, Books &amp; more</h3>
           <p>Browse curated products, save items to your cart, and track orders from your dashboard.</p>
         </div>
-      </div>
-
+      </div> !-->
+      <!----
       <div class="fbadge fbadge-a">
         <span class="fb-icon">🔥</span>
         <div>
           <div class="fb-lbl">Trending Today</div>
           <div class="fb-val">+2,400 sold</div>
         </div>
-      </div>
+      </div>!-->x
       <!--div class="fbadge fbadge-b">
         <span class="fb-icon">⭐</span>
         <div><!--
@@ -707,6 +708,46 @@
       </div>
     </div>
 
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     NEW ARRIVALS
+════════════════════════════════════════ -->
+<section class="sec-container" id="new-arrivals">
+  <div class="sec-inner">
+    <div class="sec-header">
+      <div>
+        <div class="sec-eyebrow">✦ Just In</div>
+        <h2 class="sec-title">New Arrivals</h2>
+      </div>
+      <a href="{{ url_for('customer.shop_home') }}" class="see-all">Explore Collections →</a>
+    </div>
+
+    <div class="grid">
+      {% for product in new_arrivals %}
+      <div class="pcard slide-up" data-delay="{{ (loop.index0 * 0.1)|round(2) }}">
+        <div class="pimg">
+          <span class="plabel l-new">New</span>
+          <span class="pwish">🤍</span>
+          {% if product.image_url %}
+            <img src="{{ product.image_url }}" class="img-main-p" alt="{{ product.name }}">
+          {% else %}
+            <span class="pemoji">{{ product.icon }}</span>
+          {% endif %}
+          <button class="qadd">+ Add to Cart</button>
+        </div>
+        <div class="pbody">
+          <div class="pname">{{ product.name }}</div>
+          <div class="pmeta">
+            <span class="pprice">₹{{ product.discount_price }}</span>
+            <span class="prating"><i class="fas fa-star"></i> 5.0 (Fresh)</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
   </div>
 </section>
 

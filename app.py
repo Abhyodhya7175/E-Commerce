@@ -12,15 +12,18 @@ def home():
     if current_user.is_authenticated:
         if current_user.role == 'admin':
             return redirect(url_for('admin.dashboard'))
-        return redirect(url_for('customer.shop_home'))
+        # Logged-in customers should still be able to view the marketing homepage.
+        # (Shop pages remain available via their own routes.)
     
     # Fetch data for various sections
+    new_arrivals = Product.query.filter_by(active=True).order_by(Product.id.desc()).limit(4).all()
     trending_products = Product.query.filter_by(active=True).limit(4).all()
     personalized_products = Product.query.filter_by(active=True, category='electronics').limit(4).all()
-    wishlisted_products = Product.query.filter_by(active=True).order_by(Product.id.desc()).limit(4).all()
-    flash_deals = Product.query.filter_by(active=True).offset(4).limit(4).all()
+    wishlisted_products = Product.query.filter_by(active=True).offset(2).limit(4).all()
+    flash_deals = Product.query.filter_by(active=True).offset(6).limit(4).all()
 
     return render_template('home.html', 
+                          new_arrivals=new_arrivals,
                           trending_products=trending_products,
                           personalized_products=personalized_products,
                           wishlisted_products=wishlisted_products,
