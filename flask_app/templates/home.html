@@ -1,215 +1,1057 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UrbanCart - Home</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UrbanCart - Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,800;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --ink: #1a1a2e;
-    --ink-light: #4a4a6a;
-    --cream: #faf8f3;
-    --gold: #c9a84c;
-    --gold-dark: #8b6914;
-    --border: #e8e3d8;
-  }
-
-  body {
-    min-height: 100vh;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--ink);
-    background: var(--cream);
-  }
-
-  nav {
-    height: 64px;
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #fff;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.45rem;
-    font-weight: 600;
-    color: var(--ink);
-  }
-  .logo span { color: var(--gold); }
-
-  .nav-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 40px;
-    padding: 0.65rem 1rem;
-    border-radius: 9px;
-    font-size: 0.84rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: transform 0.15s, background 0.15s, border-color 0.15s;
-  }
-  .btn:hover { transform: translateY(-1px); }
-  .btn.primary { background: var(--ink); color: #fff; }
-  .btn.secondary { background: #fff; color: var(--ink); border: 1px solid var(--border); }
-
-  .hero {
-    min-height: calc(100vh - 64px);
-    display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
-    align-items: center;
-    gap: 3rem;
-    padding: 4rem 6vw;
-  }
-
-  .eyebrow {
-    color: var(--gold-dark);
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    margin-bottom: 0.9rem;
-  }
-
-  h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.4rem, 6vw, 5rem);
-    line-height: 1.02;
-    max-width: 680px;
-    margin-bottom: 1rem;
-  }
-
-  .hero-copy {
-    color: var(--ink-light);
-    font-size: 1rem;
-    line-height: 1.7;
-    max-width: 540px;
-    margin-bottom: 1.7rem;
-  }
-
-  .hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.8rem;
-    margin-bottom: 2rem;
-  }
-
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.9rem;
-    max-width: 520px;
-  }
-
-  .stat {
-    padding: 0.9rem;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: #fff;
-  }
-  .stat strong { display: block; font-size: 1.05rem; margin-bottom: 0.2rem; }
-  .stat span { color: var(--ink-light); font-size: 0.76rem; }
-
-  .visual {
-    min-height: 520px;
-    border-radius: 18px;
-    background:
-      linear-gradient(135deg, rgba(26,26,46,0.92), rgba(26,26,46,0.74)),
-      url("https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=1100&q=80");
-    background-size: cover;
-    background-position: center;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(26,26,46,0.16);
-  }
-
-  .deal-panel {
-    position: absolute;
-    left: 1.2rem;
-    right: 1.2rem;
-    bottom: 1.2rem;
-    padding: 1.1rem;
-    border-radius: 12px;
-    background: rgba(255,255,255,0.92);
-    border: 1px solid rgba(255,255,255,0.5);
-  }
-
-  .deal-panel h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-    margin-bottom: 0.35rem;
-  }
-  .deal-panel p { color: var(--ink-light); font-size: 0.86rem; line-height: 1.5; }
-
-  .floating-tag {
-    position: absolute;
-    top: 1.2rem;
-    left: 1.2rem;
-    padding: 0.45rem 0.8rem;
-    border-radius: 999px;
-    background: rgba(201,168,76,0.95);
-    color: var(--ink);
-    font-weight: 700;
-    font-size: 0.78rem;
-  }
-
-  @media (max-width: 850px) {
-    nav { padding: 0 1rem; }
-    .hero {
-      grid-template-columns: 1fr;
-      padding: 2.2rem 1rem;
-      gap: 2rem;
+    /* ── THEME TOKENS ── */
+    :root {
+      --bg:         #faf8f3;
+      --surface:    #ffffff;
+      --text:       #1a1a2e;
+      --muted:      #5a5a7a;
+      --gold:       #c9a84c;
+      --gold-dk:    #8b6914;
+      --gold-lt:    #f5edd8;
+      --border:     #e8e3d8;
+      --nav-bg:     rgba(255,255,255,0.92);
+      --card:       #ffffff;
+      --shadow:     0 4px 24px rgba(26,26,46,0.08);
+      --shadow-lg:  0 16px 56px rgba(26,26,46,0.13);
     }
-    .visual { min-height: 360px; }
-    .stats { grid-template-columns: 1fr; }
-  }
-</style>
+    [data-theme="dark"] {
+      --bg:         #0f0f1a;
+      --surface:    #18182b;
+      --text:       #eeeaf5;
+      --muted:      #8080aa;
+      --gold:       #d4aa5a;
+      --gold-dk:    #c9a84c;
+      --gold-lt:    #1e1c14;
+      --border:     #2a2a42;
+      --nav-bg:     rgba(15,15,26,0.95);
+      --card:       #18182b;
+      --shadow:     0 4px 24px rgba(0,0,0,0.38);
+      --shadow-lg:  0 16px 56px rgba(0,0,0,0.52);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background .4s, color .4s;
+      overflow-x: hidden;
+    }
+
+    /* ══════════ NAVBAR ══════════ */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+      height: 68px;
+      background: var(--nav-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: background .4s, box-shadow .3s, border-color .4s;
+    }
+    .navbar.scrolled { box-shadow: var(--shadow); }
+
+    .nav-inner {
+      max-width: 1380px; margin: 0 auto;
+      padding: 0 2rem; height: 100%;
+      display: flex; align-items: center; gap: 1.2rem;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem; font-weight: 800;
+      color: var(--text); text-decoration: none;
+      letter-spacing: -.01em; white-space: nowrap;
+    }
+    .logo span { color: var(--gold); }
+
+    .nav-cats {
+      display: flex; align-items: center; list-style: none; gap: .8rem; flex-shrink: 0;
+    }
+    .nav-cats a {
+      padding: .4rem .9rem;
+      font-size: 1rem; font-weight: 600;
+      color: var(--text); text-decoration: none;
+      border-radius: 8px;
+      transition: all .2s;
+    }
+    .nav-cats a:hover { color: var(--gold-dk); }
+    .nav-cats a.shop-now {
+      background: #ffcc00; /* Matching the yellow from the reference */
+      color: #000;
+      padding: .6rem 1.4rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      font-weight: 800;
+    }
+    .nav-cats a.shop-now:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      background: #ffdb4d;
+    }
+
+    .nav-search {
+      flex: 1; max-width: 310px;
+      position: relative; margin-left: auto;
+    }
+    .nav-search i {
+      position: absolute; left: .9rem; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: .78rem; pointer-events: none;
+    }
+    .nav-search input {
+      width: 100%;
+      padding: .5rem 1rem .5rem 2.3rem;
+      border: 1.5px solid var(--border); border-radius: 50px;
+      background: var(--surface); color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: .82rem;
+      outline: none;
+      transition: border-color .3s, box-shadow .3s, background .4s;
+    }
+    .nav-search input::placeholder { color: var(--muted); }
+    .nav-search input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-lt); }
+
+    .nav-icons { display: flex; align-items: center; gap: .25rem; flex-shrink: 0; }
+    .icon-btn {
+      position: relative; width: 40px; height: 40px;
+      border-radius: 10px; border: none; background: transparent;
+      color: var(--text); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .95rem; text-decoration: none;
+      transition: background .2s, color .2s;
+    }
+    .icon-btn:hover { background: var(--gold-lt); color: var(--gold-dk); }
+    .icon-btn .dot {
+      position: absolute; top: 6px; right: 6px;
+      width: 15px; height: 15px;
+      background: var(--gold); color: #fff;
+      font-size: .56rem; font-weight: 700;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    }
+
+    .nav-auth { display: flex; gap: .5rem; flex-shrink: 0; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+      min-height: 38px; padding: .48rem 1.1rem;
+      border-radius: 9px;
+      font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: transform .18s, background .2s, box-shadow .2s, border-color .2s;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-solid { background: var(--text); color: var(--bg); }
+    .btn-solid:hover { background: var(--gold); color: #fff; box-shadow: var(--shadow); }
+    .btn-ghost { background: transparent; color: var(--text); border: 1.5px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold-dk); }
+
+    /* Theme toggle pill */
+    .theme-pill {
+      width: 48px; height: 26px; border-radius: 50px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      cursor: pointer; position: relative; flex-shrink: 0;
+      transition: background .3s, border-color .3s;
+    }
+    .theme-pill::after {
+      content: ''; position: absolute;
+      top: 2px; left: 2px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--gold); transition: transform .3s;
+    }
+    [data-theme="dark"] .theme-pill::after { transform: translateX(22px); }
+
+    /* ══════════ HERO ══════════ */
+    .hero {
+      min-height: 100vh; padding: 92px 2rem 60px;
+      display: flex; align-items: center;
+      position: relative; overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 62% 65% at 80% 38%, var(--gold-lt) 0%, transparent 65%),
+        radial-gradient(ellipse 32% 45% at 12% 82%, rgba(201,168,76,.1) 0%, transparent 55%);
+      transition: background .4s;
+    }
+    .hero-dots {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image: radial-gradient(var(--border) 1.5px, transparent 1.5px);
+      background-size: 36px 36px; opacity: .45;
+    }
+
+    .hero-inner {
+      max-width: 1380px; margin: 0 auto; width: 100%;
+      display: grid; grid-template-columns: 1.1fr .9fr;
+      gap: 4rem; align-items: center; position: relative;
+    }
+
+    /* Greeting chip */
+    .hero-chip {
+      display: inline-flex; align-items: center; gap: .55rem;
+      padding: .36rem 1rem;
+      background: var(--gold-lt); border: 1px solid rgba(201,168,76,.28);
+      border-radius: 50px; font-size: .78rem; font-weight: 500;
+      color: var(--gold-dk); letter-spacing: .03em;
+      margin-bottom: 1.5rem;
+      animation: up .6s ease both;
+    }
+    .chip-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--gold); animation: blink 2.2s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    h1.hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.5rem, 5.5vw, 4.6rem);
+      font-weight: 800; line-height: 1.06;
+      letter-spacing: -.02em; margin-bottom: 1.2rem;
+      animation: up .7s .1s ease both;
+    }
+    h1.hero-title em { font-style: italic; color: var(--gold); }
+
+    .hero-tag {
+      color: var(--muted); font-size: 1.04rem; line-height: 1.75;
+      max-width: 480px; margin-bottom: 2rem;
+      animation: up .7s .18s ease both;
+    }
+
+    /* Search */
+    .search-bar {
+      display: flex; border: 2px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      background: var(--surface); box-shadow: var(--shadow-lg);
+      margin-bottom: 1.8rem;
+      transition: border-color .3s, box-shadow .3s;
+      animation: up .7s .26s ease both;
+    }
+    .search-bar:focus-within {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 4px var(--gold-lt), var(--shadow-lg);
+    }
+    .search-bar select {
+      padding: 0 1.05rem; border: none;
+      border-right: 1.5px solid var(--border);
+      background: var(--bg); color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: .81rem; font-weight: 500;
+      cursor: pointer; outline: none; flex-shrink: 0;
+      transition: background .4s;
+    }
+    .search-bar input {
+      flex: 1; padding: 1rem 1.1rem;
+      border: none; background: transparent; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: .92rem; outline: none;
+    }
+    .search-bar input::placeholder { color: var(--muted); }
+    .search-bar button {
+      padding: 0 1.5rem; background: var(--text); border: none;
+      color: var(--bg); font-family: 'DM Sans', sans-serif;
+      font-size: .87rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: .45rem;
+      transition: background .2s; white-space: nowrap;
+    }
+    .search-bar button:hover { background: var(--gold); color: #fff; }
+
+    /* CTA row */
+    .hero-ctas {
+      display: flex; gap: .85rem; flex-wrap: wrap;
+      animation: up .7s .34s ease both;
+    }
+    .cta-primary {
+      padding: .85rem 2rem; background: var(--text); color: var(--bg);
+      border-radius: 11px; font-size: .9rem; font-weight: 600;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: .4rem;
+      transition: background .2s, transform .18s, box-shadow .2s;
+    }
+    .cta-primary:hover { background: var(--gold); color: #fff; transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .cta-outline {
+      padding: .85rem 2rem; background: transparent; color: var(--text);
+      border: 1.5px solid var(--border); border-radius: 11px;
+      font-size: .9rem; font-weight: 600; text-decoration: none;
+      display: inline-flex; align-items: center; gap: .4rem;
+      transition: border-color .2s, color .2s, transform .18s;
+    }
+    .cta-outline:hover { border-color: var(--gold); color: var(--gold-dk); transform: translateY(-2px); }
+
+    /* Stats */
+    .hero-stats {
+      display: flex; gap: 1.5rem; margin-top: 2.4rem;
+      animation: up .7s .42s ease both;
+    }
+    .stat-item { text-align: left; }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.45rem; font-weight: 800; line-height: 1;
+      margin-bottom: .15rem;
+    }
+    .stat-lbl { font-size: .73rem; color: var(--muted); font-weight: 500; }
+    .stat-sep { width: 1px; background: var(--border); align-self: stretch; }
+
+    /* Visual card */
+    .hero-visual { position: relative; animation: up .8s .22s ease both; }
+    .hero-img {
+      border-radius: 22px; overflow: hidden;
+      position: relative; box-shadow: var(--shadow-lg);
+      aspect-ratio: 4/5;
+      background:
+        linear-gradient(145deg, rgba(26,26,46,.9), rgba(26,26,46,.7)),
+        url("https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=1100&q=80")
+        center/cover;
+    }
+    .img-chip {
+      position: absolute; top: 1.1rem; left: 1.1rem;
+      padding: .4rem .85rem; border-radius: 50px;
+      background: rgba(201,168,76,.95); color: #1a1a2e;
+      font-weight: 700; font-size: .74rem;
+    }
+    .img-panel {
+      position: absolute; left: 1rem; right: 1rem; bottom: 1rem;
+      padding: 1.05rem 1.15rem; border-radius: 13px;
+      background: rgba(250,248,243,.93);
+      border: 1px solid rgba(255,255,255,.45);
+      backdrop-filter: blur(14px);
+      transition: background .4s;
+    }
+    [data-theme="dark"] .img-panel {
+      background: rgba(24,24,43,.94);
+      border-color: rgba(255,255,255,.05);
+    }
+    .img-panel h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem; font-weight: 700; margin-bottom: .28rem;
+    }
+    .img-panel p { font-size: .82rem; color: var(--muted); line-height: 1.55; }
+
+    /* Floating badges */
+    .fbadge {
+      position: absolute;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 13px; box-shadow: var(--shadow-lg);
+      padding: .75rem .95rem;
+      display: flex; align-items: center; gap: .65rem;
+      transition: background .4s, border-color .4s;
+    }
+    .fbadge-a { top: 1.6rem; right: -1.7rem; animation: fa 4s ease-in-out infinite; }
+    .fbadge-b { bottom: 5.5rem; left: -1.9rem; animation: fb 4s 2s ease-in-out infinite; }
+    @keyframes fa { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+    @keyframes fb { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    .fb-icon { font-size: 1.35rem; }
+    .fb-lbl { font-size: .66rem; color: var(--muted); font-weight: 500; }
+    .fb-val { font-size: .9rem; font-weight: 700; margin-top: 1px; }
+    .fb-stars { color: #f59e0b; font-size: .66rem; }
+
+    /* ══════════ SECTION COMMON ══════════ */
+    .sec-container { padding: 80px 2rem 70px; }
+    .sec-inner { max-width: 1380px; margin: 0 auto; }
+
+    /* ══════════ TRENDING ══════════ */
+    .trending { padding: 80px 2rem 0; }
+
+    .sec-header {
+      display: flex; align-items: flex-end;
+      justify-content: space-between; margin-bottom: 2.4rem;
+    }
+    .sec-eyebrow {
+      font-size: .7rem; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: .38rem;
+    }
+    .sec-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; font-weight: 800; line-height: 1.15;
+    }
+    .see-all {
+      font-size: .83rem; font-weight: 600; color: var(--muted);
+      text-decoration: none; display: flex; align-items: center; gap: .3rem;
+      border-bottom: 1px solid transparent; padding-bottom: 2px;
+      transition: color .2s, border-color .2s;
+    }
+    .see-all:hover { color: var(--gold); border-color: var(--gold); }
+
+    .grid {
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 1.4rem;
+    }
+
+    .pcard {
+      background: var(--card); border-radius: 18px; overflow: hidden;
+      border: 1px solid var(--border); cursor: pointer;
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1),
+                  box-shadow .35s, border-color .3s, background .4s;
+    }
+    .pcard:hover { transform: translateY(-7px); box-shadow: var(--shadow-lg); border-color: var(--gold-lt); }
+
+    .pimg {
+      aspect-ratio: 1; background: var(--gold-lt);
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .4s;
+    }
+    .pimg img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      transition: transform .5s ease, opacity .4s;
+    }
+    .img-hover-overlay {
+      position: absolute; inset: 0; opacity: 0;
+      transition: opacity .4s;
+    }
+    .pcard:hover .img-main-p { transform: scale(1.07); }
+    .pcard:hover .img-hover-overlay { opacity: 1; }
+
+    .plabel {
+      position: absolute; top: .75rem; left: .75rem;
+      padding: .2rem .55rem; border-radius: 6px;
+      font-size: .61rem; font-weight: 700; letter-spacing: .07em;
+      text-transform: uppercase; color: #fff; z-index: 1;
+    }
+    .l-hot { background: #ef4444; }
+    .l-new { background: #3b82f6; }
+    .l-sale { background: #10b981; }
+
+    .pwish {
+      position: absolute; top: .75rem; right: .75rem;
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--surface); box-shadow: var(--shadow);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .82rem; opacity: 0; transition: opacity .3s; z-index: 1;
+    }
+    .pcard:hover .pwish { opacity: 1; }
+
+    .qadd {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(26,26,46,.88);
+      color: #fff; padding: .72rem;
+      text-align: center; font-size: .77rem; font-weight: 600;
+      letter-spacing: .05em;
+      transform: translateY(100%); transition: transform .3s;
+      backdrop-filter: blur(8px);
+      border: none; cursor: pointer; width: 100%;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .pcard:hover .qadd { transform: translateY(0); }
+    .qadd:hover { background: rgba(201,168,76,.92); }
+
+    .pemoji {
+      font-size: 3.6rem; user-select: none; opacity: .6;
+      transition: transform .5s ease;
+    }
+    .pcard:hover .pemoji { transform: scale(1.15) rotate(6deg); }
+
+    .pbody { padding: 1.05rem 1.1rem 1.15rem; }
+    .pname {
+      font-family: 'Playfair Display', serif;
+      font-size: .97rem; font-weight: 700; margin-bottom: .45rem;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .pmeta { display: flex; align-items: center; justify-content: space-between; }
+    .pprice { font-weight: 700; font-size: .98rem; color: var(--gold-dk); }
+    .prating { font-size: .72rem; color: var(--muted); display: flex; align-items: center; gap: .22rem; }
+    .prating i { color: #f59e0b; font-size: .68rem; }
+
+    /* ══════════ FLASH DEALS ══════════ */
+    .flash-deals { background: linear-gradient(135deg, rgba(201,168,76,.08), rgba(239,68,68,.08)); padding: 80px 2rem 70px; }
+    .deal-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.4rem; }
+    .deal-card {
+      background: var(--card); border-radius: 18px; overflow: hidden;
+      border: 2px solid var(--gold); cursor: pointer; position: relative;
+      transition: transform .35s, box-shadow .35s, border-color .3s;
+    }
+    .deal-card:hover { transform: translateY(-7px); box-shadow: var(--shadow-lg); }
+    .deal-badge {
+      position: absolute; top: .75rem; right: .75rem; z-index: 2;
+      background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+      color: #fff; padding: .3rem .7rem; border-radius: 50px;
+      font-size: .65rem; font-weight: 700; letter-spacing: .05em;
+    }
+    .countdown {
+      padding: 1rem; background: rgba(239,68,68,.1); border-bottom: 1px solid var(--border);
+      text-align: center; font-weight: 600; color: var(--gold);
+      font-size: .9rem; letter-spacing: .03em;
+    }
+    .timer-boxes { display: flex; justify-content: center; gap: .5rem; margin-top: .6rem; }
+    .timer-box {
+      background: var(--gold); color: #fff; width: 40px; height: 40px;
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .85rem;
+    }
+    .timer-label { font-size: .55rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+    .stock-bar {
+      padding: .8rem 1rem; border-bottom: 1px solid var(--border);
+    }
+    .stock-label { font-size: .7rem; color: var(--muted); margin-bottom: .4rem; display: flex; justify-content: space-between; }
+    .stock-fill {
+      height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
+    }
+    .stock-progress {
+      height: 100%; background: linear-gradient(90deg, #f59e0b, #ef4444);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.8} }
+    .live-update {
+      padding: .6rem 1rem; background: rgba(16,185,129,.08); color: #10b981;
+      font-size: .75rem; font-weight: 600; text-align: center;
+      border-top: 1px solid var(--border); animation: slide-in .5s ease;
+    }
+    @keyframes slide-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    .scratch-card {
+      padding: 1.2rem 1rem; text-align: center; border-top: 1px solid var(--border);
+      background: linear-gradient(135deg, var(--gold-lt), rgba(201,168,76,.08));
+    }
+    .scratch-btn {
+      width: 100%; padding: .7rem; margin-top: .6rem;
+      background: var(--text); color: var(--bg); border: none; border-radius: 8px;
+      font-weight: 600; font-size: .85rem; cursor: pointer; font-family: 'DM Sans', sans-serif;
+      transition: background .2s, transform .15s;
+    }
+    .scratch-btn:hover { background: var(--gold); transform: scale(1.02); }
+    .scratch-btn:active { transform: scale(0.98); }
+    .scratch-hint { font-size: .7rem; color: var(--muted); margin-top: .5rem; }
+
+    /* ══════════ MOST WISHLISTED ══════════ */
+    .most-wishlisted { padding: 70px 2rem 80px; }
+    .wishlist-badge {
+      position: absolute; top: .75rem; left: .75rem;
+      background: linear-gradient(135deg, #ec4899, #f472b6);
+      color: #fff; padding: .3rem .6rem; border-radius: 50px;
+      font-size: .65rem; font-weight: 700; z-index: 1;
+      display: flex; align-items: center; gap: .3rem;
+    }
+    .wish-count { font-size: .75rem; }
+
+    /* Animations */
+    @keyframes up {
+      from { opacity: 0; transform: translateY(26px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .slide-up { animation: up .6s ease both; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      .nav-cats { display: none; }
+      .grid { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 860px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 3rem; }
+      .hero-visual { max-width: 480px; margin: 0 auto; }
+      .fbadge { display: none; }
+      .hero-stats { flex-wrap: wrap; gap: 1rem; }
+    }
+    @media (max-width: 560px) {
+      .nav-search { display: none; }
+      .hero { padding-top: 84px; }
+      .search-bar select { display: none; }
+      .nav-auth .btn-ghost { display: none; }
+      .grid { gap: 1rem; }
+    }
+  </style>
 </head>
 <body>
-<nav>
-  <div class="logo">Urban<span>Cart</span></div>
-  <div class="nav-actions">
-    <a class="btn secondary" href="{{ url_for('auth.login') }}">Login</a>
-    <a class="btn primary" href="{{ url_for('auth.register') }}">Register</a>
+
+<!-- ════════════════════════════════════════
+     SMART NAVBAR
+════════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+
+    <a href="{{ url_for('customer.shop_home') }}" class="logo">Urban<span>Cart</span></a>
+
+    <ul class="nav-cats">
+      <li><a href="/">Home</a></li>
+      <li><a href="{{ url_for('customer.shop_home') }}" class="shop-now">Shop Now</a></li>
+      <li><a href="#">Blogs</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+
+    <form class="nav-search" action="{{ url_for('customer.shop_home') }}" method="GET">
+      <i class="fas fa-search"></i>
+      <input type="text" name="q" placeholder="Search products…">
+    </form>
+
+    <div class="nav-icons">
+      <a href="#" class="icon-btn" title="Wishlist">
+        <i class="fas fa-heart"></i>
+        <span class="dot">3</span>
+      </a>
+      <a href="{{ url_for('customer.cart') if current_user.is_authenticated else url_for('auth.login') }}" class="icon-btn" title="Cart">
+        <i class="fas fa-shopping-bag"></i>
+        <span class="dot">2</span>
+      </a>
+      {% if current_user.is_authenticated %}
+      <a href="{{ url_for('customer.dashboard') }}" class="icon-btn" title="My Account">
+        <i class="fas fa-user"></i>
+      </a>
+      {% endif %}
+    </div>
+
+    <div class="nav-auth">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost">Logout</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn btn-ghost">Login</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-solid">Register</a>
+      {% endif %}
+    </div>
+
+    <button class="theme-pill" id="themeToggle" aria-label="Toggle dark mode"></button>
+
   </div>
 </nav>
 
-<main class="hero">
-  <section>
-    <div class="eyebrow">Premium shopping, made simple</div>
-    <h1>Find everyday favorites and standout deals in one place.</h1>
-    <p class="hero-copy">
-      UrbanCart brings curated products, clear offers, and a smooth shopping dashboard together for customers and admins.
-    </p>
-    <div class="hero-actions">
-      <a class="btn primary" href="{{ url_for('auth.register') }}">Create Account</a>
-      <a class="btn secondary" href="{{ url_for('auth.login') }}">Sign In</a>
-    </div>
-    <div class="stats">
-      <div class="stat"><strong>Fresh Deals</strong><span>Daily offers across categories</span></div>
-      <div class="stat"><strong>Easy Cart</strong><span>Fast shopping and checkout flow</span></div>
-      <div class="stat"><strong>Admin Tools</strong><span>Manage products from one panel</span></div>
-    </div>
-  </section>
 
-  <section class="visual" aria-label="UrbanCart shopping preview">
-    <div class="floating-tag">Up to 30% off</div>
-    <div class="deal-panel">
-      <h2>Shop Electronics, Fashion, Books and more</h2>
-      <p>Login to browse products, save items to cart, and track your orders from your customer dashboard.</p>
+<!-- ════════════════════════════════════════
+     HERO SECTION
+════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-dots"></div>
+
+  <div class="hero-inner">
+
+    <!-- ── Left: Content ── -->
+    <div>
+      <!-- Personalized greeting -->
+      <div class="hero-chip">
+        <span class="chip-dot"></span>
+        {% if current_user.is_authenticated %}
+          Good <span id="timeGreet">day</span>, {{ current_user.username }} — here's what's new for you
+        {% else %}
+          Welcome to UrbanCart — discover what's trending today
+        {% endif %}
+      </div>
+
+      <!-- Headline -->
+      <h1 class="hero-title">
+        Experience Tech in<br>
+        <em>Full View.</em>
+      </h1>
+      <p class="hero-tag">
+        Discover premium RGB peripherals, high-performance electronics, and curated fashion — all in one seamless store.
+      </p>
+
+      <!-- Search bar -->
+      <form class="search-bar" action="{{ url_for('customer.shop_home') }}" method="GET">
+        <select name="category">
+          <option value="">All</option>
+          <option value="electronics">Electronics</option>
+          <option value="fashion">Fashion</option>
+          <option value="beauty">Beauty</option>
+          <option value="books">Books</option>
+        </select>
+        <input type="text" name="q" placeholder="Search for your next upgrade (e.g. Mechanical Keyboard)…">
+        <button type="submit"><i class="fas fa-search"></i> Search</button>
+      </form>
+
+      <!-- CTA Buttons -->
+      <div class="hero-ctas">
+        <a href="{{ url_for('customer.shop_home') }}" class="cta-primary">
+          Shop Now <i class="fas fa-arrow-right" style="font-size:.76rem"></i>
+        </a>
+        {% if not current_user.is_authenticated %}
+          <a href="{{ url_for('auth.register') }}" class="cta-outline">Create Account</a>
+        {% else %}
+          <a href="{{ url_for('customer.dashboard') }}" class="cta-outline">My Dashboard</a>
+        {% endif %}
+      </div>
+
+      <!-- Stats -->
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num">50k+</div>
+          <div class="stat-lbl">Happy Customers</div>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat-item">
+          <div class="stat-num">1,200+</div>
+          <div class="stat-lbl">Products</div>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat-item">
+          <div class="stat-num">30%</div>
+          <div class="stat-lbl">Off in Sale</div>
+        </div>
+      </div>
     </div>
-  </section>
-</main>
+
+    <!-- ── Right: Visual ── -->
+    <div class="hero-visual">
+      <div class="hero-img">
+        <span class="img-chip">🔥 Up to 30% off</span>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:7rem;opacity:.4;user-select:none">🖥️</div>
+        <div class="img-panel">
+          <h3>Shop Electronics, Fashion, Books &amp; more</h3>
+          <p>Browse curated products, save items to your cart, and track orders from your dashboard.</p>
+        </div>
+      </div>
+
+      <div class="fbadge fbadge-a">
+        <span class="fb-icon">🔥</span>
+        <div>
+          <div class="fb-lbl">Trending Today</div>
+          <div class="fb-val">+2,400 sold</div>
+        </div>
+      </div>
+      <!--div class="fbadge fbadge-b">
+        <span class="fb-icon">⭐</span>
+        <div><!--
+          <div class="fb-stars">★★★★★</div>
+          <div class="fb-lbl">Customer Rating</div>
+          <div class="fb-val">4.9 / 5.0</div!-->
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     TRENDING PRODUCTS
+════════════════════════════════════════ -->
+<section class="trending" id="trending">
+  <div class="trending-inner">
+    <div class="sec-header">
+      <div>
+        <div class="sec-eyebrow">✦ Curated picks</div>
+        <h2 class="sec-title">Trending Now</h2>
+      </div>
+      <a href="{{ url_for('customer.shop_home') }}" class="see-all">View All →</a>
+    </div>
+
+    <div class="grid">
+      {% for product in trending_products %}
+      <div class="pcard slide-up" data-delay="{{ (loop.index0 * 0.08)|round(2) }}">
+        <div class="pimg">
+          {% if loop.index0 == 0 %}<span class="plabel l-hot">Hot</span>
+          {% elif loop.index0 == 1 %}<span class="plabel l-new">New</span>
+          {% elif loop.index0 == 2 %}<span class="plabel l-sale">Sale</span>{% endif %}
+          <span class="pwish">🤍</span>
+          {% if product.image_url %}
+            <img src="{{ product.image_url }}" class="img-main-p" alt="{{ product.name }}">
+          {% else %}
+            <span class="pemoji">{{ product.icon }}</span>
+          {% endif %}
+          <button class="qadd">+ Add to Cart</button>
+        </div>
+        <div class="pbody">
+          <div class="pname">{{ product.name }}</div>
+          <div class="pmeta">
+            <span class="pprice">₹{{ product.discount_price }}</span>
+            <span class="prating"><i class="fas fa-star"></i> 4.8 (120)</span>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      {# Fallback demo cards shown when trending_products is empty #}
+      {% for item in [
+          ('🖥️','UltraWide Monitor','₹42,999','hot'),
+          ('⌨️','Mech Keyboard RGB','₹7,499','new'),
+          ('🎧','Noise-Cancel Buds','₹5,999','sale'),
+          ('🖱️','Precision Mouse','₹2,799','')
+        ] %}
+      <div class="pcard slide-up" data-delay="{{ (loop.index0 * 0.08)|round(2) }}">
+        <div class="pimg">
+          {% if item[3]=='hot' %}<span class="plabel l-hot">Hot</span>
+          {% elif item[3]=='new' %}<span class="plabel l-new">New</span>
+          {% elif item[3]=='sale' %}<span class="plabel l-sale">Sale</span>{% endif %}
+          <span class="pwish">🤍</span>
+          <span class="pemoji">{{ item[0] }}</span>
+          <button class="qadd">+ Add to Cart</button>
+        </div>
+        <div class="pbody">
+          <div class="pname">{{ item[1] }}</div>
+          <div class="pmeta">
+            <span class="pprice">{{ item[2] }}</span>
+            <span class="prating"><i class="fas fa-star"></i> 4.8 (120)</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     PERSONALIZED RECOMMENDATIONS
+════════════════════════════════════════ -->
+<section class="sec-container" id="personalized">
+  <div class="sec-inner">
+    <div class="sec-header">
+      <div>
+        <div class="sec-eyebrow">✨ Just for you</div>
+        <h2 class="sec-title">Personalized Picks</h2>
+      </div>
+      <a href="#" class="see-all">Explore More →</a>
+    </div>
+
+    <div class="grid">
+      {% for product in personalized_products %}
+      <div class="pcard slide-up" data-delay="{{ (loop.index0 * 0.08)|round(2) }}">
+        <div class="pimg">
+          <span class="plabel" style="background: #8b5cf6;">RECOMMENDED</span>
+          <span class="pwish">🤍</span>
+          {% if product.image_url %}
+            <img src="{{ product.image_url }}" class="img-main-p" alt="{{ product.name }}">
+          {% else %}
+            <span class="pemoji">{{ product.icon }}</span>
+          {% endif %}
+          <button class="qadd">+ Add to Cart</button>
+        </div>
+        <div class="pbody">
+          <div class="pname">{{ product.name }}</div>
+          <div class="pmeta">
+            <span class="pprice">₹{{ product.discount_price }}</span>
+            <span class="prating"><i class="fas fa-star"></i> 4.7 (89)</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     MOST WISHLISTED
+════════════════════════════════════════ -->
+<section class="sec-container most-wishlisted">
+  <div class="sec-inner">
+    <div class="sec-header">
+      <div>
+        <div class="sec-eyebrow">❤️ Fan favorites</div>
+        <h2 class="sec-title">Most Wishlisted</h2>
+      </div>
+      <a href="#" class="see-all">See All →</a>
+    </div>
+
+    <div class="grid">
+      {% for product in wishlisted_products %}
+      <div class="pcard slide-up" data-delay="{{ (loop.index0 * 0.08)|round(2) }}">
+        <div class="pimg">
+          <span class="wishlist-badge">💖 <span class="wish-count">{{ (range(500, 15000) | random) }}</span></span>
+          <span class="pwish">❤️</span>
+          {% if product.image_url %}
+            <img src="{{ product.image_url }}" class="img-main-p" alt="{{ product.name }}">
+          {% else %}
+            <span class="pemoji">{{ product.icon }}</span>
+          {% endif %}
+          <button class="qadd">+ Add to Cart</button>
+        </div>
+        <div class="pbody">
+          <div class="pname">{{ product.name }}</div>
+          <div class="pmeta">
+            <span class="pprice">₹{{ product.discount_price }}</span>
+            <span class="prating"><i class="fas fa-star"></i> 4.9 (256)</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     FLASH DEALS
+════════════════════════════════════════ -->
+<section class="flash-deals">
+  <div class="sec-inner">
+    <div class="sec-header">
+      <div>
+        <div class="sec-eyebrow">⚡ Limited time</div>
+        <h2 class="sec-title">Flash Deals</h2>
+      </div>
+      <a href="#" class="see-all">View All Deals →</a>
+    </div>
+
+    <div class="deal-grid">
+      {% for product in flash_deals %}
+      <div class="deal-card" id="deal-{{ loop.index0 }}">
+        <span class="deal-badge">{{ (range(20, 60) | random) }}% OFF</span>
+        
+        <div class="countdown">
+          <div>Deal ends in:</div>
+          <div class="timer-boxes">
+            <div>
+              <div class="timer-box" data-type="hours">00</div>
+              <div class="timer-label">H</div>
+            </div>
+            <div>
+              <div class="timer-box" data-type="minutes">00</div>
+              <div class="timer-label">M</div>
+            </div>
+            <div>
+              <div class="timer-box" data-type="seconds">00</div>
+              <div class="timer-label">S</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding: 1rem 1rem 0; text-align: center;">
+          <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: .3rem;">
+            {% if product.image_url %}<img src="{{ product.image_url }}" style="height:40px; vertical-align:middle; margin-right:5px;">{% else %}{{ product.icon }}{% endif %}
+            {{ product.name }}
+          </div>
+          <div style="font-size: .85rem; color: var(--muted); margin-bottom: .8rem;">Originally ₹{{ product.mrp }}</div>
+        </div>
+
+        <div class="stock-bar">
+          <div class="stock-label">
+            <span>Stock</span>
+            <span><strong class="sold-count" data-index="{{ loop.index0 }}">{{ (range(1000, 20000) | random) }}</strong> sold</span>
+          </div>
+          <div class="stock-fill">
+            <div class="stock-progress" data-stock-width="{{ (range(40, 95) | random) }}"></div>
+          </div>
+        </div>
+
+        <div class="live-update" id="live-{{ loop.index0 }}">
+          ✓ 5 people viewing • 2 just bought
+        </div>
+
+        <div class="scratch-card">
+          <div style="font-weight: 600; margin-bottom: .4rem;">💳 Scratch for extra discount</div>
+          <button class="scratch-btn" data-discount-index="{{ loop.index0 }}">Scratch Card</button>
+          <div class="scratch-hint">You could win 5-20% extra off!</div>
+          <div class="discount-reveal" data-index="{{ loop.index0 }}" style="display: none; margin-top: .8rem; padding: .6rem; background: var(--gold); color: #1a1a2e; border-radius: 8px; font-weight: 700;"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+<script>
+  // Sticky nav shadow on scroll
+  const nav = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 10);
+  }, { passive: true });
+
+  // Dark / light mode toggle — persists via localStorage
+  const html = document.documentElement;
+  const saved = localStorage.getItem('uc_theme');
+  if (saved) html.dataset.theme = saved;
+
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('uc_theme', html.dataset.theme);
+  });
+
+  // Time-based greeting
+  const greetEl = document.getElementById('timeGreet');
+  if (greetEl) {
+    const h = new Date().getHours();
+    greetEl.textContent = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+  }
+
+  // Apply staggered card delays without embedding Jinja inside inline CSS.
+  document.querySelectorAll('.pcard[data-delay]').forEach((card) => {
+    card.style.animationDelay = `${card.dataset.delay}s`;
+  });
+
+  // Apply stock progress widths from data attributes
+  document.querySelectorAll('.stock-progress[data-stock-width]').forEach((bar) => {
+    bar.style.width = `${bar.dataset.stockWidth}%`;
+  });
+
+  // Countdown timers for flash deals
+  function initCountdowns() {
+    document.querySelectorAll('.deal-card').forEach((card, idx) => {
+      const endTime = Date.now() + (4 + idx) * 60 * 60 * 1000; // Each deal lasts different hours
+      
+      function updateTimer() {
+        const now = Date.now();
+        const diff = endTime - now;
+        
+        if (diff <= 0) {
+          card.querySelector('[data-type="hours"]').textContent = '00';
+          card.querySelector('[data-type="minutes"]').textContent = '00';
+          card.querySelector('[data-type="seconds"]').textContent = '00';
+          return;
+        }
+        
+        const hours = Math.floor(diff / (1000 * 60 * 60)) % 24;
+        const minutes = Math.floor(diff / (1000 * 60)) % 60;
+        const seconds = Math.floor(diff / 1000) % 60;
+        
+        card.querySelector('[data-type="hours"]').textContent = String(hours).padStart(2, '0');
+        card.querySelector('[data-type="minutes"]').textContent = String(minutes).padStart(2, '0');
+        card.querySelector('[data-type="seconds"]').textContent = String(seconds).padStart(2, '0');
+      }
+      
+      updateTimer();
+      setInterval(updateTimer, 1000);
+    });
+  }
+  initCountdowns();
+
+  // Live purchase update simulator
+  function simulateLiveUpdates() {
+    document.querySelectorAll('.live-update').forEach((el) => {
+      setInterval(() => {
+        const viewers = Math.floor(Math.random() * 8) + 2;
+        const buyers = Math.floor(Math.random() * 4) + 1;
+        el.textContent = `✓ ${viewers} people viewing • ${buyers} just bought`;
+      }, 8000);
+    });
+  }
+  simulateLiveUpdates();
+
+  // Scratch card reveal with gamified discounts
+  document.querySelectorAll('.scratch-btn').forEach((btn) => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const index = this.dataset.discountIndex;
+      const discountEl = document.querySelector(`.discount-reveal[data-index="${index}"]`);
+      
+      if (discountEl.style.display === 'none') {
+        const discounts = ['5% Extra', '8% Extra', '12% Extra', '15% Extra', '20% Extra'];
+        const bonus = discounts[Math.floor(Math.random() * discounts.length)];
+        discountEl.textContent = `🎉 You won ${bonus} off! Copy code: LUCKY${Math.floor(Math.random() * 10000)}`;
+        discountEl.style.display = 'block';
+        discountEl.style.animation = 'slideUp .4s ease';
+        this.textContent = '✓ Scratched!';
+        this.disabled = true;
+        this.style.opacity = '0.6';
+      }
+    });
+  });
+
+  // Animate sold count increases
+  document.querySelectorAll('.sold-count').forEach((el) => {
+    setInterval(() => {
+      const current = parseInt(el.textContent);
+      const increase = Math.floor(Math.random() * 5) + 1;
+      el.textContent = current + increase;
+      el.style.animation = 'pop .5s ease';
+      setTimeout(() => el.style.animation = '', 500);
+    }, 15000);
+  });
+
+  // Pop animation for sold count
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes pop {
+      0% { transform: scale(1); color: var(--gold); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); color: var(--text); }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
 </body>
 </html>

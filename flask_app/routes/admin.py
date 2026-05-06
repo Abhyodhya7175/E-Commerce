@@ -150,22 +150,29 @@ def save_product():
     product.description = desc
     product.icon = icon
     product.active = is_active
+    
+    # Check if this is a new product
+    is_new = not product_id or not product.id
+
+    if is_new:
+        db.session.add(product)
+        # Flush to get the product ID if it's new
+        db.session.flush()
+
     # If multiple images were uploaded, create ProductImage records; otherwise keep legacy image_url
     if saved_image_urls:
         # If updating existing product, preserve ordering by finding max existing order_index
-        base_index = 0
-        if product.id:
-            max_idx = db.session.query(db.func.max(ProductImage.order_index)).filter_by(product_id=product.id).scalar()
-            base_index = (max_idx or 0) + 1
+        max_idx = db.session.query(db.func.max(ProductImage.order_index)).filter_by(product_id=product.id).scalar()
+        base_index = (max_idx or 0) + 1
+        
         for idx, img_url in enumerate(saved_image_urls):
-            pi = ProductImage(product=product, image_url=img_url, order_index=base_index + idx)
+            pi = ProductImage(product_id=product.id, image_url=img_url, order_index=base_index + idx)
             db.session.add(pi)
-        # Also set legacy field for compatibility
-        if saved_image_urls:
+        
+        # Also update legacy field for compatibility if it was empty
+        if not product.image_url:
             product.image_url = saved_image_urls[0]
 
-    if not product_id:
-        db.session.add(product)
     db.session.commit()
 
     return jsonify(success=True, product=product.to_dict())
@@ -175,7 +182,7 @@ def save_product():
 @login_required
 @admin_required
 def api_toggle_product(product_id):
-    product = Product.query.get(product_id)
+    product = db.session.get(Product, product_id)
     if product is None:
         return jsonify(error='Product not found'), 404
     product.active = not product.active
@@ -187,30 +194,26 @@ def api_toggle_product(product_id):
 @login_required
 @admin_required
 def api_delete_product(product_id):
-    product = Product.query.get(product_id)
+    product = db.session.get(Product, product_id)
     if not product:
         return jsonify(error='Product not found'), 404
 
-    if product.image_url and '/static/' in product.image_url:
-        # delete legacy primary image
-        rel = product.image_url.split('/static/', 1)[1]
-        image_path = os.path.join(current_app.static_folder, *rel.split('/'))
-        if os.path.exists(image_path):
-            try:
-                os.remove(image_path)
-            except OSError:
-                pass
+    # Delete associated images from disk
+    all_images = []
+    if product.image_url:
+        all_images.append(product.image_url)
+    for img in product.images:
+        all_images.append(img.image_url)
 
-    # delete any ProductImage files
-    for img in getattr(product, 'images', []) or []:
-        if img.image_url and '/static/' in img.image_url:
-            rel = img.image_url.split('/static/', 1)[1]
-            image_path = os.path.join(current_app.static_folder, *rel.split('/'))
-            if os.path.exists(image_path):
-                try:
+    for url in set(all_images):
+        if url and '/static/' in url:
+            try:
+                rel = url.split('/static/', 1)[1]
+                image_path = os.path.join(current_app.static_folder, *rel.split('/'))
+                if os.path.exists(image_path):
                     os.remove(image_path)
-                except OSError:
-                    pass
+            except Exception as e:
+                print(f"Error deleting image: {e}")
 
     db.session.delete(product)
     db.session.commit()
