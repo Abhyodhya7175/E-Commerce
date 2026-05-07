@@ -1,0 +1,57 @@
+{# Premium reusable product card macro (server-rendered, JS click-handling) #}
+{% macro premium_product_card(p, url=None) %}
+  {% set href = url or url_for('public.product_public', slug=p.slug) %}
+  <article class="uc-card" data-href="{{ href }}" aria-label="{{ p.name }}">
+    <div class="uc-media">
+      {% if p.discountPercent %}
+        <span class="uc-badge uc-badge-discount">{{ p.discountPercent }}% OFF</span>
+      {% endif %}
+
+      {% if p.freeShipping %}
+        <span class="uc-badge uc-badge-soft uc-badge-ship">Free Shipping</span>
+      {% endif %}
+      {% if p.freeGift %}
+        <span class="uc-badge uc-badge-soft uc-badge-gift">Free Gift</span>
+      {% endif %}
+
+      <button class="uc-wish" type="button" aria-label="Add to wishlist" data-wishlist-id="{{ p.id }}">
+        <span aria-hidden="true">♡</span>
+      </button>
+
+      <div class="uc-imgwrap">
+        {% if p.imageUrl %}
+          <img src="{{ p.imageUrl }}" alt="{{ p.name }}" loading="lazy">
+        {% else %}
+          <div class="uc-fallback" aria-hidden="true">{{ p.icon or '📦' }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="uc-body">
+      <h3 class="uc-title">{{ p.name }}</h3>
+      <div class="uc-sku">SKU: {{ p.sku }}</div>
+
+      <div class="uc-row uc-rating">
+        <div class="uc-stars" aria-label="Rating {{ p.rating }} out of 5">
+          {% for _ in range(5) %}
+            <span class="uc-star" aria-hidden="true">★</span>
+          {% endfor %}
+        </div>
+        <div class="uc-reviews">({{ p.reviewCount }})</div>
+      </div>
+
+      <div class="uc-row uc-price">
+        <div class="uc-now">₹{{ (p.discountPrice or 0) | int }}</div>
+        <div class="uc-was">₹{{ (p.mrp or 0) | int }}</div>
+      </div>
+
+      <div class="uc-row uc-bottom">
+        <span class="uc-stock {{ 'uc-stock-out' if (p.stockStatus or '')|lower != 'in stock' else '' }}">
+          {{ p.stockStatus or 'In Stock' }}
+        </span>
+        <button class="uc-cart" type="button" data-cart-id="{{ p.id }}">Add to Cart</button>
+      </div>
+    </div>
+  </article>
+{% endmacro %}
+

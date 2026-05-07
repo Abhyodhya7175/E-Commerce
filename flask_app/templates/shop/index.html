@@ -4,27 +4,65 @@
 
 {% block content %}
 
+{% from 'components/product_card.html' import product_card %}
 
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.1rem;
+  }
+  /* Minimal card styles (shared classnames with home.html) */
+  .pcard {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .2s ease;
+  }
+  .pcard:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(0,0,0,0.10); }
+  .pimg { aspect-ratio: 1; background: #f6f2e8; position: relative; overflow: hidden; display:flex; align-items:center; justify-content:center; }
+  .pimg img { width:100%; height:100%; object-fit:cover; display:block; }
+  .plabel {
+    position:absolute; top:.75rem; left:.75rem;
+    padding:.2rem .55rem; border-radius: 6px;
+    font-size:.61rem; font-weight: 700; letter-spacing:.07em;
+    text-transform: uppercase; color:#fff; z-index: 1;
+  }
+  .l-hot { background: #ef4444; }
+  .l-new { background: #3b82f6; }
+  .l-sale { background: #10b981; }
+  .pwish {
+    position:absolute; top:.75rem; right:.75rem;
+    width:30px; height:30px; border-radius:50%;
+    background: rgba(255,255,255,0.92);
+    display:flex; align-items:center; justify-content:center;
+    font-size:.82rem; z-index: 1;
+  }
+  .qadd {
+    position:absolute; bottom:0; left:0; right:0;
+    background: rgba(26,26,46,.88); color:#fff;
+    padding:.72rem; text-align:center; font-size:.77rem; font-weight:600;
+    border:none; cursor:pointer; width:100%;
+  }
+  .pemoji { font-size: 3.2rem; opacity:.65; user-select:none; }
+  .pbody { padding: 1.05rem 1.1rem 1.15rem; }
+  .pname { font-family: 'Playfair Display', serif; font-size: .97rem; font-weight: 700; margin-bottom: .45rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pmeta { display:flex; align-items:center; justify-content:space-between; }
+  .pprice { font-weight: 700; font-size: .98rem; color: #8b6914; }
+  .prating { font-size: .72rem; color: rgba(0,0,0,0.55); display:flex; align-items:center; gap:.22rem; }
+  .prating i { color: #f59e0b; font-size: .68rem; }
+</style>
 
-
-
-
-
-<div class="row">
+<div class="grid">
   {% for p in products %}
-  <div class="col-md-4">
-    <div class="card mb-4 shadow-sm">
-      <img src="{{ p.image_url }}" class="card-img-top" alt="{{ p.name }}">
-      <div class="card-body">
-        <h5 class="card-title">{{ p.name }}</h5>
-        <p class="card-text">${{ '%.2f'|format(p.price) }}</p>
-        <div class="d-flex justify-content-between align-items-center">
-          <a href="{{ url_for('customer.product_detail', id=p.id) }}" class="btn btn-sm btn-primary">View</a>
-          <small class="text-muted">Stock: {{ p.stock }}</small>
-        </div>
-      </div>
-    </div>
-  </div>
+    {{ product_card(
+      p,
+      rating_text=('Stock: ' ~ (p.stock if p.stock is not none else '—')),
+      show_quick_add=false,
+      href=url_for('customer.product_detail', id=p.id)
+    ) }}
   {% endfor %}
 </div>
 {% endblock %}

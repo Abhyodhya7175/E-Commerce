@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title }} — UrbanCart</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/product_card_premium.css') }}">
+  <style>
+    body{ margin:0; background:#fbfaf7; }
+    .wrap{ max-width:1200px; margin:0 auto; padding:24px 18px; }
+    .top{
+      display:flex; align-items:flex-end; justify-content:space-between;
+      gap:12px; flex-wrap:wrap; margin-bottom:16px;
+    }
+    .eyebrow{ color:#c9a84c; font-weight:900; letter-spacing:.12em; text-transform:uppercase; font-size:12px; }
+    .title{ font-family:'Playfair Display',serif; font-weight:800; font-size:28px; color:#151827; }
+    .back{ text-decoration:none; color:#151827; font-weight:800; padding:10px 12px; border-radius:12px; border:1px solid rgba(21,24,39,.10); background:#fff; }
+    .back:hover{ background: rgba(21,24,39,.05); }
+  </style>
+</head>
+<body>
+  {% from 'components/product_card_premium.html' import premium_product_card %}
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <div class="eyebrow">{{ eyebrow }}</div>
+        <div class="title">{{ title }}</div>
+      </div>
+      <a class="back" href="{{ url_for('home') }}">← Back</a>
+    </div>
+
+    <div class="uc-grid">
+      {% for p in products %}
+        {{ premium_product_card(p) }}
+      {% endfor %}
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/product_card_premium.js') }}"></script>
+</body>
+</html>
+

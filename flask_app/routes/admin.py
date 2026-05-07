@@ -53,6 +53,22 @@ def admin_required(fn):
 def dashboard():
     return render_template('admin/dashboard.html')
 
+@admin_bp.route('/products')
+@login_required
+@admin_required
+def products_grid():
+    products = Product.query.order_by(Product.id.desc()).limit(24).all()
+    enriched = [p.to_dict() for p in products]
+    for idx, d in enumerate(enriched):
+        d["freeShipping"] = idx % 3 == 0
+        d["freeGift"] = idx % 4 == 0
+    return render_template(
+        'product/grid_page.html',
+        title='Products',
+        eyebrow='Admin',
+        products=enriched,
+    )
+
 
 @admin_bp.route('/api/products')
 @login_required

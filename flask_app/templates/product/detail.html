@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ product.name }} — UrbanCart</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/product_detail.css') }}">
+</head>
+<body>
+  <div class="pd-bg"></div>
+
+  <header class="pd-top">
+    <div class="pd-top-inner">
+      <a class="pd-logo" href="{{ url_for('home') }}">Urban<span>Cart</span></a>
+      <nav class="pd-nav">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('customer.shop_home') }}">Shop</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="pd-container">
+    <section class="pd-grid">
+      <!-- LEFT: GALLERY -->
+      <div class="pd-gallery">
+        <div class="pd-main-image" id="pd-main">
+          {% if product.discountPercent %}
+            <span class="pd-badge pd-badge-discount">{{ product.discountPercent }}% OFF</span>
+          {% endif %}
+          {% if product.freeShipping %}<span class="pd-badge pd-badge-soft pd-badge-ship">Free Shipping</span>{% endif %}
+          {% if product.freeGift %}<span class="pd-badge pd-badge-soft pd-badge-gift">Free Gift</span>{% endif %}
+
+          {% if images and images[0] %}
+            <img id="pd-main-img" src="{{ images[0] }}" alt="{{ product.name }}">
+          {% else %}
+            <div class="pd-fallback" aria-hidden="true">{{ product.icon or '📦' }}</div>
+          {% endif %}
+        </div>
+
+        {% if images|length > 1 %}
+        <div class="pd-thumbs" role="list">
+          {% for img in images %}
+            <button type="button"
+                    class="pd-thumb {{ 'active' if loop.index0 == 0 else '' }}"
+                    data-img="{{ img }}"
+                    aria-label="View image {{ loop.index }}">
+              <img src="{{ img }}" alt="{{ product.name }} thumbnail {{ loop.index }}">
+            </button>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- RIGHT: DETAILS -->
+      <div class="pd-panel">
+        <h1 class="pd-title">{{ product.name }}</h1>
+        <div class="pd-sku">SKU: <strong>{{ product.sku }}</strong></div>
+
+        <div class="pd-rating">
+          <div class="pd-stars" aria-label="Rating {{ product.rating }} out of 5">
+            {% for _ in range(5) %}<span aria-hidden="true">★</span>{% endfor %}
+          </div>
+          <div class="pd-reviews">{{ product.rating }} · {{ product.reviewCount }} reviews</div>
+        </div>
+
+        <div class="pd-pricebox">
+          <div class="pd-now">₹{{ (product.discountPrice or 0) | int }}</div>
+          <div class="pd-was">₹{{ (product.mrp or 0) | int }}</div>
+          {% if product.discountPercent %}
+            <div class="pd-save">You save {{ product.discountPercent }}%</div>
+          {% endif %}
+          <span class="pd-stock {{ 'pd-stock-out' if (product.stockStatus or '')|lower != 'in stock' else '' }}">
+            {{ product.stockStatus or 'In Stock' }}
+          </span>
+        </div>
+
+        <div class="pd-card">
+          <div class="pd-pin">
+            <div class="pd-label">Delivery pincode</div>
+            <div class="pd-pinrow">
+              <input id="pd-pincode" inputmode="numeric" maxlength="6" placeholder="e.g. 560001" />
+              <button type="button" class="pd-btn pd-btn-ghost" id="pd-pincheck">Check</button>
+            </div>
+            <div class="pd-pinmsg" id="pd-pinmsg"></div>
+          </div>
+        </div>
+
+        <div class="pd-card">
+          <div class="pd-label">Options</div>
+          <div class="pd-options" role="list">
+            
+            <label class="pd-opt"><input type="checkbox" name="gift"> Gift Wrap</label>
+          </div>
+        </div>
+
+        <div class="pd-qty">
+          <div class="pd-label">Quantity</div>
+          <div class="pd-qtyrow">
+            <button class="pd-qtybtn" type="button" data-qty="-1">−</button>
+            <input id="pd-qty" value="1" inputmode="numeric" />
+            <button class="pd-qtybtn" type="button" data-qty="1">+</button>
+          </div>
+        </div>
+
+        <div class="pd-actions">
+          <button class="pd-btn pd-btn-primary" type="button" id="pd-add">Add to Cart</button>
+          <button class="pd-btn pd-btn-dark" type="button" id="pd-buy">Buy Now</button>
+          <button class="pd-btn pd-btn-ghost" type="button" id="pd-wish">Wishlist</button>
+        </div>
+
+        <div class="pd-share">
+          <span class="pd-label">Share</span>
+          <button class="pd-sharebtn" type="button" data-share="whatsapp">WhatsApp</button>
+          <button class="pd-sharebtn" type="button" data-share="facebook">Facebook</button>
+          <button class="pd-sharebtn" type="button" data-share="copy">Copy Link</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- BELOW: DESCRIPTION + SPECS + REVIEWS -->
+    <section class="pd-below">
+      <div class="pd-tabs">
+        <div class="pd-section">
+          <h2>Product Description</h2>
+          <p>{{ product.desc or 'Premium quality product crafted for modern lifestyles.' }}</p>
+        </div>
+
+        <div class="pd-section">
+          <h2>Highlights</h2>
+          <ul class="pd-list">
+            <li>Premium build with clean finishing</li>
+            <li>Designed for everyday performance</li>
+            <li>Great gifting option with add-ons</li>
+          </ul>
+        </div>
+
+        <div class="pd-section">
+          <h2>Specifications</h2>
+          <div class="pd-specs">
+            <div class="pd-spec"><span>Category</span><strong>{{ product.category }}</strong></div>
+            <div class="pd-spec"><span>SKU</span><strong>{{ product.sku }}</strong></div>
+            <div class="pd-spec"><span>Status</span><strong>{{ product.stockStatus }}</strong></div>
+            <div class="pd-spec"><span>Discount</span><strong>{{ product.discountPercent }}%</strong></div>
+          </div>
+        </div>
+
+        <div class="pd-section">
+          <h2>Reviews & Ratings</h2>
+          <div class="pd-review-summary">
+            <div class="pd-review-score">
+              <div class="pd-score">{{ product.rating }}</div>
+              <div class="pd-stars">{% for _ in range(5) %}<span aria-hidden="true">★</span>{% endfor %}</div>
+              <div class="pd-reviews">{{ product.reviewCount }} reviews</div>
+            </div>
+            <div class="pd-review-hint">
+              Verified reviews help shoppers choose with confidence.
+            </div>
+          </div>
+
+          <div class="pd-review-list" id="pd-review-list">
+            <div class="pd-review">
+              <div class="pd-review-head">
+                <strong>Riya</strong>
+                <span class="pd-mini-stars">★★★★★</span>
+              </div>
+              <p>Looks premium, delivery was fast. Great value for the price.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pd-section">
+          <h2>Write a Review</h2>
+          <form class="pd-form" id="pd-review-form">
+            <div class="pd-field">
+              <label>Name</label>
+              <input name="name" required placeholder="Your name" />
+            </div>
+            <div class="pd-field">
+              <label>Review message</label>
+              <textarea name="message" required placeholder="Share your experience…"></textarea>
+            </div>
+            <div class="pd-field">
+              <label>Star rating</label>
+              <div class="pd-star-select" id="pd-star-select" data-value="5">
+                {% for i in range(1,6) %}
+                  <button type="button" class="pd-starbtn" data-star="{{ i }}" aria-label="{{ i }} stars">★</button>
+                {% endfor %}
+              </div>
+              <input type="hidden" name="rating" id="pd-rating" value="5" />
+            </div>
+            <button class="pd-btn pd-btn-primary" type="submit">Submit Review</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/product_detail.js') }}"></script>
+
+  <script>
+  
+  document.addEventListener("DOMContentLoaded", function () {
+  
+      const reviewForm = document.getElementById("pd-review-form");
+  
+      if (reviewForm) {
+  
+          reviewForm.addEventListener("submit", async function(e) {
+  
+              e.preventDefault();
+  
+              const formData = {
+                product_id: {{ product.id }},
+                name: reviewForm.querySelector('[name="name"]').value,
+                message: reviewForm.querySelector('[name="message"]').value,
+                rating: reviewForm.querySelector('[name="rating"]').value
+              };
+  
+              try {
+  
+                  const response = await fetch("/shop/api/reviews/add", {
+                      method: "POST",
+                      headers: {
+                          "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify(formData)
+                  });
+  
+                  const data = await response.json();
+  
+                  if (data.success) {
+  
+                      alert("Review submitted successfully");
+  
+                      reviewForm.reset();
+  
+                      location.reload();
+  
+                  } else {
+  
+                      alert(data.error || "Failed to submit review");
+                  }
+  
+              } catch (error) {
+  
+                  console.error(error);
+  
+                  alert("Something went wrong");
+              }
+  
+          });
+  
+      }
+  
+  });
+  
+  </script>
+  
+</body>
+</html>
+

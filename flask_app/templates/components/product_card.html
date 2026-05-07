@@ -1,0 +1,42 @@
+{# Reusable product card macro (Jinja) #}
+{% macro product_card(product, badge_text=None, badge_class=None, rating_text=None, delay=None, wish_emoji='🤍', extra_badge_html=None, show_quick_add=True, quick_add_text='+ Add to Cart', href=None) %}
+  <div class="pcard slide-up"
+       {% if delay is not none %}data-delay="{{ delay }}"{% endif %}>
+    <div class="pimg">
+      {% if badge_text %}
+        <span class="plabel {{ badge_class or '' }}">{{ badge_text }}</span>
+      {% endif %}
+      {% if extra_badge_html %}
+        {{ extra_badge_html | safe }}
+      {% endif %}
+      <span class="pwish">{{ wish_emoji }}</span>
+
+      {% if product.image_url %}
+        <img src="{{ product.image_url }}" class="img-main-p" alt="{{ product.name }}">
+      {% else %}
+        <span class="pemoji">{{ product.icon }}</span>
+      {% endif %}
+
+      {% if show_quick_add %}
+        <button class="qadd" type="button">{{ quick_add_text }}</button>
+      {% endif %}
+    </div>
+
+    <div class="pbody">
+      <div class="pname">
+        {% if href %}
+          <a href="{{ href }}" style="color:inherit;text-decoration:none;">{{ product.name }}</a>
+        {% else %}
+          {{ product.name }}
+        {% endif %}
+      </div>
+      <div class="pmeta">
+        <span class="pprice">₹{{ product.discount_price }}</span>
+        {% if rating_text %}
+          <span class="prating"><i class="fas fa-star"></i> {{ rating_text }}</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endmacro %}
+

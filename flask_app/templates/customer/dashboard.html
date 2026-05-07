@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UrbanCart — Shop</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/product_card_premium.css') }}">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -759,6 +760,8 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<script src="{{ url_for('static', filename='js/product_card_premium.js') }}"></script>
+
 <script>
   // User data from Flask context
   const userData = {
@@ -824,60 +827,83 @@
   function renderProducts() {
     const grid = document.getElementById('product-grid');
     grid.innerHTML = filteredProducts.map(p => {
-      const offerPercent = calculateOfferPercent(p.mrp, p.discountPrice);
-      const inCart = cart.find(c => c.id === p.id);
       const outOfStock = isOutOfStock(p);
+
       const rawImageUrls = Array.isArray(p.imageUrls) ? p.imageUrls : (p.imageUrl ? [p.imageUrl] : []);
       const imageUrls = Array.from(new Set(rawImageUrls.filter(Boolean)));
       const primary = imageUrls.length ? imageUrls[0] : null;
-      const visibleImages = imageUrls.length > 5 ? imageUrls.slice(0, 4) : imageUrls.slice(0, 5);
-      const imageMarkup = primary
-        ? `
-          <div class="product-gallery">
-            <div class="product-gallery-main"><img src="${escapeAttr(primary)}" alt="${escapeAttr(p.name)}"></div>
-            ${imageUrls.length > 1 ? `
-              <div class="product-gallery-thumbs">
-                ${visibleImages.map((url, index) => `
-                  <button type="button"
-                    class="product-gallery-thumb ${index === 0 ? 'active' : ''}"
-                    data-image-url="${escapeAttr(url)}"
-                    data-image-alt="${escapeAttr(`${p.name} image ${index + 1}`)}"
-                    onclick="changeProductImage(event, this)"
-                    aria-label="Show ${escapeAttr(p.name)} image ${index + 1}">
-                    <img src="${escapeAttr(url)}" alt="${escapeAttr(p.name)} ${index + 1}">
-                  </button>
-                `).join('')}
-                ${imageUrls.length > visibleImages.length ? `<div class="product-gallery-more">+${imageUrls.length - visibleImages.length}</div>` : ''}
-              </div>
-            ` : ''}
-          </div>`
-        : (p.icon || '📦');
+
+      const discountPercent = (typeof p.discountPercent !== 'undefined' && p.discountPercent !== null)
+        ? p.discountPercent
+        : calculateOfferPercent(p.mrp, p.discountPrice);
+
+      const slug = p.slug || ((p.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'product');
+      const sku = p.sku || `UC-${String(p.id || 0).padStart(5, '0')}`;
+
+      const stockStatus = p.stockStatus || (outOfStock ? 'Out of Stock' : 'In Stock');
+      const rating = p.rating || 4.6;
+      const reviewCount = p.reviewCount || 128;
+
+      const badgeDiscount = discountPercent ? `<span class="uc-badge uc-badge-discount">${discountPercent}% OFF</span>` : '';
+      const badgeShip = p.freeShipping ? `<span class="uc-badge uc-badge-soft uc-badge-ship">Free Shipping</span>` : '';
+      const badgeGift = p.freeGift ? `<span class="uc-badge uc-badge-soft uc-badge-gift">Free Gift</span>` : '';
+
+      const stockClass = outOfStock ? 'uc-stock-out' : '';
+      const stockText = stockStatus || (outOfStock ? 'Out of Stock' : 'In Stock');
+
+      const stars = Array.from({ length: 5 }).map(() => `<span class="uc-star" aria-hidden="true">★</span>`).join('');
+
+      const wasPrice = (p.mrp ?? 0);
+      const nowPrice = (p.discountPrice ?? 0);
+
       return `
-        <div class="product-card ${outOfStock ? 'out-of-stock' : ''}">
-          ${outOfStock ? '<div class="stock-badge">Out of Stock</div>' : ''}
-          <div class="product-img">${imageMarkup}</div>
-          <div class="product-body">
-            <div class="product-category">${p.category}</div>
-            <div class="product-name">${p.name}</div>
-            <div class="product-desc">${p.desc}</div>
-            <div class="product-footer">
-              <div class="product-price">
-                <div class="current-price">₹${p.discountPrice.toLocaleString()}</div>
-                <div class="mrp-price">₹${p.mrp.toLocaleString()}</div>
-              </div>
-              <span class="offer-badge">${offerPercent}% OFF</span>
+        <article class="uc-card" data-href="/product/${slug}" aria-label="${escapeAttr(p.name)}">
+          <div class="uc-media">
+            ${badgeDiscount}
+            ${badgeShip}
+            ${badgeGift}
+
+            <button class="uc-wish" type="button" aria-label="Add to wishlist" data-wishlist-id="${p.id}">
+              <span aria-hidden="true">♡</span>
+            </button>
+
+            <div class="uc-imgwrap">
+              ${primary
+                ? `<img src="${escapeAttr(primary)}" alt="${escapeAttr(p.name)}" loading="lazy">`
+                : `<div class="uc-fallback" aria-hidden="true">${escapeAttr(p.icon || '📦')}</div>`
+              }
             </div>
-            ${outOfStock ? `
-              <button class="notify-btn" onclick="notifyWhenAvailable(${p.id})">Notify Me</button>
-            ` : `
-              <button class="add-btn ${inCart ? 'added' : ''}" onclick="addToCart(${p.id})">
-                ${inCart ? '✓ Added' : '+ Add to Cart'}
-              </button>
-            `}
           </div>
-        </div>`;
+
+          <div class="uc-body">
+            <h3 class="uc-title">${escapeAttr(p.name)}</h3>
+            <div class="uc-sku">SKU: ${escapeAttr(sku)}</div>
+
+            <div class="uc-row uc-rating">
+              <div class="uc-stars" aria-label="Rating ${rating} out of 5">${stars}</div>
+              <div class="uc-reviews">(${reviewCount})</div>
+            </div>
+
+            <div class="uc-row uc-price">
+              <div class="uc-now">₹${Number(nowPrice).toLocaleString()}</div>
+              <div class="uc-was">₹${Number(wasPrice).toLocaleString()}</div>
+            </div>
+
+            <div class="uc-row uc-bottom">
+              <span class="uc-stock ${stockClass}">${escapeAttr(stockText)}</span>
+              <button class="uc-cart" type="button" data-cart-id="${p.id}">Add to Cart</button>
+            </div>
+          </div>
+        </article>
+      `;
     }).join('');
+
     document.getElementById('results-count').textContent = `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''}`;
+
+    // Re-bind premium card click handlers for newly created cards
+    if (typeof ucInitProductCards === 'function') {
+      ucInitProductCards(document);
+    }
   }
 
   function filterProducts() {
@@ -908,6 +934,14 @@
     showToast(`${product.name} added to cart`);
     renderProducts();
   }
+
+  // Premium card hooks (so "Add to Cart" and "Wishlist" buttons work on this page)
+  window.ucAddToCart = function (productId) {
+    addToCart(productId);
+  };
+  window.ucToggleWishlist = function (productId) {
+    console.log('Toggle wishlist (customer)', productId);
+  };
 
   function notifyWhenAvailable(id) {
     const product = PRODUCTS.find(p => p.id === id);

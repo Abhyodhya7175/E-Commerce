@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Product Cards — Demo</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/product_card_premium.css') }}">
+</head>
+<body style="margin:0;background:#fbfaf7;">
+  {% from 'components/product_card_premium.html' import premium_product_card %}
+
+  <div style="max-width:1200px;margin:0 auto;padding:24px 18px;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+      <div>
+        <div style="color:#c9a84c;font-weight:900;letter-spacing:.12em;text-transform:uppercase;font-size:12px;">Premium UI</div>
+        <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:28px;color:#151827;">Product Cards</div>
+      </div>
+      <a href="{{ url_for('home') }}" style="text-decoration:none;color:#151827;font-weight:800;">← Back</a>
+    </div>
+
+    <div class="uc-grid">
+      {% for p in products %}
+        {{ premium_product_card(p) }}
+      {% endfor %}
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/product_card_premium.js') }}"></script>
+</body>
+</html>
+

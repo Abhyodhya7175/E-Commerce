@@ -1,6 +1,14 @@
 from .extensions import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+import re
+from datetime import datetime
+
+
+def _slugify(value: str) -> str:
+    value = (value or "").strip().lower()
+    value = re.sub(r"[^a-z0-9]+", "-", value)
+    return value.strip("-") or "product"
 
 
 class User(UserMixin, db.Model):
@@ -27,31 +35,47 @@ class Product(db.Model):
     icon = db.Column(db.String(20), nullable=False, default='📦')
     image_url = db.Column(db.String(255), nullable=True)
     active = db.Column(db.Boolean, nullable=False, default=True)
-    
-    # Relationship for multiple images
-    images = db.relationship('ProductImage', backref='product', cascade='all, delete-orphan', lazy='joined', order_by='ProductImage.order_index')
+
+    reviews = db.relationship(
+        "Review",
+        backref="product",
+        lazy=True,
+        cascade="all, delete-orphan")
+
+    images = db.relationship(
+    "ProductImage",
+    backref="product",
+    lazy=True,
+    cascade="all, delete-orphan")
 
     def to_dict(self):
-        # Keep the legacy primary image and any gallery images together.
-        image_urls = []
-        seen_urls = set()
-        if self.image_url:
-            seen_urls.add(self.image_url)
-            image_urls.append(self.image_url)
-        for img in (self.images or []):
-            if not img.image_url or img.image_url in seen_urls:
-                continue
-            seen_urls.add(img.image_url)
-            image_urls.append(img.image_url)
+
+        mrp = float(self.mrp or 0)
+        discount_price = float(self.discount_price or 0)
+        discount_percent = 0
+        if mrp > 0 and 0 <= discount_price <= mrp:
+            discount_percent = round(((mrp - discount_price) / mrp) * 100)
+
+
+        image_urls = [img.image_url for img in self.images]
+
+        if not image_urls and self.image_url:
+            image_urls = [self.image_url]
 
         return {
             'id': self.id,
+            'slug': _slugify(self.name),
             'name': self.name,
             'category': self.category,
-            'mrp': self.mrp,
-            'discountPrice': self.discount_price,
+            'mrp': mrp,
+            'discountPrice': discount_price,
+            'discountPercent': discount_percent,
             'desc': self.description or '',
             'icon': self.icon,
+            'sku': f"UC-{(self.id or 0):05d}",
+            'rating': 4.6,
+            'reviewCount': 128,
+            'stockStatus': 'In Stock' if self.active else 'Out of Stock',
             'imageUrls': image_urls,
             'imageUrl': image_urls[0] if len(image_urls) else None,
             'active': self.active,
@@ -63,3 +87,14 @@ class ProductImage(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id', ondelete='CASCADE'), nullable=False)
     image_url = db.Column(db.String(255), nullable=False)
     order_index = db.Column(db.Integer, nullable=False, default=0)
+
+class Review(db.Model):
+    id=db.Column(db.Integer,primary_key=True)
+    product_id=db.Column(db.Integer,db.ForeignKey('product.id'),nullable=False)
+    name=db.Column(db.String(100),nullable=False)
+    message=db.Column(db.Text,nullable=False)
+    rating=db.Column(db.Integer,nullable=False)
+    created_at=db.Column(db.DateTime,default=datetime.utcnow)
+    
+
+

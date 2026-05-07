@@ -49,6 +49,7 @@ def create_app():
         from .routes.auth import auth_bp
         from .routes.admin import admin_bp
         from .routes.customer import customer_bp
+        from .routes.public import public_bp
 
         @app.errorhandler(RequestEntityTooLarge)
         def handle_request_too_large(error):
@@ -57,5 +58,6 @@ def create_app():
         app.register_blueprint(auth_bp)
         app.register_blueprint(admin_bp, url_prefix='/admin')
         app.register_blueprint(customer_bp, url_prefix='/shop')
+        app.register_blueprint(public_bp)
 
     return app

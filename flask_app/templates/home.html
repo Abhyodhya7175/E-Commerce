@@ -6,6 +6,8 @@
   <title>UrbanCart - Home</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,800;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/product_card_premium.css') }}">
+  {% from 'components/product_card_premium.html' import premium_product_card %}
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -350,6 +352,7 @@
     /* ══════════ SECTION COMMON ══════════ */
     .sec-container { padding: 80px 2rem 70px; }
     .sec-inner { max-width: 1380px; margin: 0 auto; }
+    .trending-inner { max-width: 1380px; margin: 0 auto; }
 
     /* ══════════ TRENDING ══════════ */
     .trending { padding: 80px 2rem 0; }
@@ -375,17 +378,11 @@
     }
     .see-all:hover { color: var(--gold); border-color: var(--gold); }
 
-    .grid {
-      display: grid; grid-template-columns: repeat(4,1fr); gap: 1.4rem;
-    }
+    /* Premium cards grid */
+    .grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.4rem; }
 
-    .pcard {
-      background: var(--card); border-radius: 18px; overflow: hidden;
-      border: 1px solid var(--border); cursor: pointer;
-      transition: transform .35s cubic-bezier(.34,1.56,.64,1),
-                  box-shadow .35s, border-color .3s, background .4s;
-    }
-    .pcard:hover { transform: translateY(-7px); box-shadow: var(--shadow-lg); border-color: var(--gold-lt); }
+    /* Hide legacy home cards if any remain */
+    .pcard { display: none; }
 
     .pimg {
       aspect-ratio: 1; background: var(--gold-lt);
@@ -535,19 +532,52 @@
     @media (max-width: 1100px) {
       .nav-cats { display: none; }
       .grid { grid-template-columns: repeat(2,1fr); }
+      .deal-grid { grid-template-columns: repeat(2,1fr); }
+      .nav-inner { padding: 0 1.25rem; }
     }
     @media (max-width: 860px) {
       .hero-inner { grid-template-columns: 1fr; gap: 3rem; }
       .hero-visual { max-width: 480px; margin: 0 auto; }
       .fbadge { display: none; }
       .hero-stats { flex-wrap: wrap; gap: 1rem; }
+      .sec-container { padding: 70px 1.5rem 60px; }
+      .trending { padding: 70px 1.5rem 0; }
+      .flash-deals { padding: 70px 1.5rem 60px; }
     }
     @media (max-width: 560px) {
+      .navbar { height: auto; }
+      .nav-inner {
+        height: auto;
+        padding: .6rem 1rem;
+        gap: .6rem 0.75rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
       .nav-search { display: none; }
-      .hero { padding-top: 84px; }
+      .nav-icons { margin-left: auto; }
+      .nav-auth { margin-left: auto; }
+      .hero { padding-top: 92px; }
       .search-bar select { display: none; }
       .nav-auth .btn-ghost { display: none; }
-      .grid { gap: 1rem; }
+      .grid { grid-template-columns: 1fr; gap: 1rem; }
+      .deal-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .hero { padding-left: 1rem; padding-right: 1rem; }
+      .sec-container { padding-left: 1rem; padding-right: 1rem; }
+      .trending { padding-left: 1rem; padding-right: 1rem; }
+      .flash-deals { padding-left: 1rem; padding-right: 1rem; }
+      .hero-ctas a { width: 100%; justify-content: center; }
+      .hero-stats { justify-content: space-between; }
+      .search-bar { border-radius: 12px; }
+      .search-bar input { padding: .95rem 1rem; }
+    }
+    @media (max-width: 420px) {
+      .icon-btn { width: 38px; height: 38px; border-radius: 10px; }
+      .logo { font-size: 1.35rem; }
+      .hero-title { font-size: 2.25rem; }
+      .hero-tag { font-size: .98rem; }
+      .sec-title { font-size: 1.65rem; }
+      .sec-header { gap: .8rem; align-items: flex-start; }
+      .see-all { white-space: nowrap; }
     }
   </style>
 </head>
@@ -584,7 +614,7 @@
         <span class="dot">2</span>
       </a>
       {% if current_user.is_authenticated %}
-      <a href="{{ url_for('customer.dashboard') }}" class="icon-btn" title="My Account">
+      <a href="{{ url_for('customer.shop_home') }}" class="icon-btn" title="My Account">
         <i class="fas fa-user"></i>
       </a>
       {% endif %}
@@ -656,7 +686,7 @@
         {% if not current_user.is_authenticated %}
           <a href="{{ url_for('auth.register') }}" class="cta-outline">Create Account</a>
         {% else %}
-          <a href="{{ url_for('customer.dashboard') }}" class="cta-outline">My Dashboard</a>
+          <a href="{{ url_for('customer.shop_home') }}" class="cta-outline">My Dashboard</a>
         {% endif %}
       </div>
 
@@ -727,25 +757,7 @@
 
     <div class="grid">
       {% for product in new_arrivals %}
-      <div class="pcard slide-up" data-delay="{{ (loop.index0 * 0.1)|round(2) }}">
-        <div class="pimg">
-          <span class="plabel l-new">New</span>
-          <span class="pwish">🤍</span>
-          {% if product.image_url %}
-            <img src="{{ product.image_url }}" class="img-main-p" alt="{{ product.name }}">
-          {% else %}
-            <span class="pemoji">{{ product.icon }}</span>
-          {% endif %}
-          <button class="qadd">+ Add to Cart</button>
-        </div>
-        <div class="pbody">
-          <div class="pname">{{ product.name }}</div>
-          <div class="pmeta">
-            <span class="pprice">₹{{ product.discount_price }}</span>
-            <span class="prating"><i class="fas fa-star"></i> 5.0 (Fresh)</span>
-          </div>
-        </div>
-      </div>
+        {{ premium_product_card(product) }}
       {% endfor %}
     </div>
   </div>
@@ -767,27 +779,7 @@
 
     <div class="grid">
       {% for product in trending_products %}
-      <div class="pcard slide-up" data-delay="{{ (loop.index0 * 0.08)|round(2) }}">
-        <div class="pimg">
-          {% if loop.index0 == 0 %}<span class="plabel l-hot">Hot</span>
-          {% elif loop.index0 == 1 %}<span class="plabel l-new">New</span>
-          {% elif loop.index0 == 2 %}<span class="plabel l-sale">Sale</span>{% endif %}
-          <span class="pwish">🤍</span>
-          {% if product.image_url %}
-            <img src="{{ product.image_url }}" class="img-main-p" alt="{{ product.name }}">
-          {% else %}
-            <span class="pemoji">{{ product.icon }}</span>
-          {% endif %}
-          <button class="qadd">+ Add to Cart</button>
-        </div>
-        <div class="pbody">
-          <div class="pname">{{ product.name }}</div>
-          <div class="pmeta">
-            <span class="pprice">₹{{ product.discount_price }}</span>
-            <span class="prating"><i class="fas fa-star"></i> 4.8 (120)</span>
-          </div>
-        </div>
-      </div>
+        {{ premium_product_card(product) }}
       {% else %}
       {# Fallback demo cards shown when trending_products is empty #}
       {% for item in [
@@ -835,25 +827,7 @@
 
     <div class="grid">
       {% for product in personalized_products %}
-      <div class="pcard slide-up" data-delay="{{ (loop.index0 * 0.08)|round(2) }}">
-        <div class="pimg">
-          <span class="plabel" style="background: #8b5cf6;">RECOMMENDED</span>
-          <span class="pwish">🤍</span>
-          {% if product.image_url %}
-            <img src="{{ product.image_url }}" class="img-main-p" alt="{{ product.name }}">
-          {% else %}
-            <span class="pemoji">{{ product.icon }}</span>
-          {% endif %}
-          <button class="qadd">+ Add to Cart</button>
-        </div>
-        <div class="pbody">
-          <div class="pname">{{ product.name }}</div>
-          <div class="pmeta">
-            <span class="pprice">₹{{ product.discount_price }}</span>
-            <span class="prating"><i class="fas fa-star"></i> 4.7 (89)</span>
-          </div>
-        </div>
-      </div>
+        {{ premium_product_card(product) }}
       {% endfor %}
     </div>
   </div>
@@ -875,25 +849,7 @@
 
     <div class="grid">
       {% for product in wishlisted_products %}
-      <div class="pcard slide-up" data-delay="{{ (loop.index0 * 0.08)|round(2) }}">
-        <div class="pimg">
-          <span class="wishlist-badge">💖 <span class="wish-count">{{ (range(500, 15000) | random) }}</span></span>
-          <span class="pwish">❤️</span>
-          {% if product.image_url %}
-            <img src="{{ product.image_url }}" class="img-main-p" alt="{{ product.name }}">
-          {% else %}
-            <span class="pemoji">{{ product.icon }}</span>
-          {% endif %}
-          <button class="qadd">+ Add to Cart</button>
-        </div>
-        <div class="pbody">
-          <div class="pname">{{ product.name }}</div>
-          <div class="pmeta">
-            <span class="pprice">₹{{ product.discount_price }}</span>
-            <span class="prating"><i class="fas fa-star"></i> 4.9 (256)</span>
-          </div>
-        </div>
-      </div>
+        {{ premium_product_card(product) }}
       {% endfor %}
     </div>
   </div>
@@ -970,6 +926,7 @@
   </div>
 </section>
 
+<script src="{{ url_for('static', filename='js/product_card_premium.js') }}"></script>
 
 <script>
   // Sticky nav shadow on scroll

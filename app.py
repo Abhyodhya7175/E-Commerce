@@ -16,11 +16,16 @@ def home():
         # (Shop pages remain available via their own routes.)
     
     # Fetch data for various sections
-    new_arrivals = Product.query.filter_by(active=True).order_by(Product.id.desc()).limit(4).all()
-    trending_products = Product.query.filter_by(active=True).limit(4).all()
-    personalized_products = Product.query.filter_by(active=True, category='electronics').limit(4).all()
-    wishlisted_products = Product.query.filter_by(active=True).offset(2).limit(4).all()
+    new_arrivals = [p.to_dict() for p in Product.query.filter_by(active=True).order_by(Product.id.desc()).limit(4).all()]
+    trending_products = [p.to_dict() for p in Product.query.filter_by(active=True).limit(4).all()]
+    personalized_products = [p.to_dict() for p in Product.query.filter_by(active=True, category='electronics').limit(4).all()]
+    wishlisted_products = [p.to_dict() for p in Product.query.filter_by(active=True).offset(2).limit(4).all()]
     flash_deals = Product.query.filter_by(active=True).offset(6).limit(4).all()
+
+    # Add optional premium badges for UI richness
+    for idx, d in enumerate(new_arrivals + trending_products + personalized_products + wishlisted_products):
+        d["freeShipping"] = idx % 3 == 0
+        d["freeGift"] = idx % 4 == 0
 
     return render_template('home.html', 
                           new_arrivals=new_arrivals,
