@@ -7,7 +7,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,800;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/product_card_premium.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/carousel.css') }}">
   {% from 'components/product_card_premium.html' import premium_product_card %}
+  {% from 'components/product_carousel.html' import product_carousel %}
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -765,6 +767,23 @@
 
 
 <!-- ════════════════════════════════════════
+     FEATURED PRODUCTS CAROUSEL
+════════════════════════════════════════ -->
+<section class="carousel-wrapper-section">
+  {% set featured_products = carousel_products or [] %}
+  {% if featured_products %}
+    {{ product_carousel(
+      carousel_id="featured-carousel",
+      products=featured_products,
+      title="⭐ Featured Products",
+      autoplay=true,
+      autoplay_delay=6000
+    ) }}
+  {% endif %}
+</section>
+
+
+<!-- ════════════════════════════════════════
      TRENDING PRODUCTS
 ════════════════════════════════════════ -->
 <section class="trending" id="trending">
@@ -927,6 +946,7 @@
 </section>
 
 <script src="{{ url_for('static', filename='js/product_card_premium.js') }}"></script>
+<script src="{{ url_for('static', filename='js/carousel.js') }}"></script>
 
 <script>
   // Sticky nav shadow on scroll

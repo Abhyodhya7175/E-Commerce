@@ -48,6 +48,19 @@ class Product(db.Model):
     lazy=True,
     cascade="all, delete-orphan")
 
+    @property
+    def average_rating(self):
+        """Calculate average rating from all reviews for this product"""
+        if not self.reviews:
+            return 0
+        total = sum(review.rating for review in self.reviews)
+        return round(total / len(self.reviews), 1)
+
+    @property
+    def review_count(self):
+        """Get total number of reviews for this product"""
+        return len(self.reviews)
+
     def to_dict(self):
 
         mrp = float(self.mrp or 0)
@@ -73,8 +86,8 @@ class Product(db.Model):
             'desc': self.description or '',
             'icon': self.icon,
             'sku': f"UC-{(self.id or 0):05d}",
-            'rating': 4.6,
-            'reviewCount': 128,
+            'rating': self.average_rating,
+            'reviewCount': self.review_count,
             'stockStatus': 'In Stock' if self.active else 'Out of Stock',
             'imageUrls': image_urls,
             'imageUrl': image_urls[0] if len(image_urls) else None,

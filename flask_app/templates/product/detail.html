@@ -147,7 +147,7 @@
           </div>
         </div>
 
-        <div class="pd-section">
+        <div class="pd-section">  
           <h2>Reviews & Ratings</h2>
           <div class="pd-review-summary">
             <div class="pd-review-score">
@@ -161,26 +161,48 @@
           </div>
 
           <div class="pd-review-list" id="pd-review-list">
-            <div class="pd-review">
-              <div class="pd-review-head">
-                <strong>Riya</strong>
-                <span class="pd-mini-stars">★★★★★</span>
-              </div>
-              <p>Looks premium, delivery was fast. Great value for the price.</p>
-            </div>
+            {% if reviews %}
+              {% for review in reviews %}
+                <div class="pd-review">
+                  <div class="pd-review-head">
+                    <strong>{{ review.name }}</strong>
+                    <span class="pd-mini-stars">
+                      {% for i in range(1, 6) %}
+                        {% if review.rating >= i %}★{% else %}☆{% endif %}
+                      {% endfor %}
+                    </span>
+                  </div>
+                  <p>{{ review.message }}</p>
+                  <small>{{ review.created_at.strftime('%Y-%m-%d') }}</small>
+                </div>
+              {% endfor %}
+            {% else %}
+              <p>No reviews yet. Be the first to review this product!</p>
+            {% endif %}
           </div>
         </div>
 
         <div class="pd-section">
           <h2>Write a Review</h2>
-          <form class="pd-form" id="pd-review-form">
+          <form class="pd-form" id="pd-review-form" data-product-id="{{ product.id }}">
             <div class="pd-field">
               <label>Name</label>
-              <input name="name" required placeholder="Your name" />
+              <input
+              type="text"
+              id="review-name"
+              name="name"
+              required
+              placeholder="Your name"
+              />
             </div>
             <div class="pd-field">
               <label>Review message</label>
-              <textarea name="message" required placeholder="Share your experience…"></textarea>
+              <textarea
+              id="review-message"
+              name="message"
+              required
+              placeholder="Share your experience…"
+              ></textarea>
             </div>
             <div class="pd-field">
               <label>Star rating</label>
@@ -200,65 +222,6 @@
 
   <script src="{{ url_for('static', filename='js/product_detail.js') }}"></script>
 
-  <script>
-  
-  document.addEventListener("DOMContentLoaded", function () {
-  
-      const reviewForm = document.getElementById("pd-review-form");
-  
-      if (reviewForm) {
-  
-          reviewForm.addEventListener("submit", async function(e) {
-  
-              e.preventDefault();
-  
-              const formData = {
-                product_id: {{ product.id }},
-                name: reviewForm.querySelector('[name="name"]').value,
-                message: reviewForm.querySelector('[name="message"]').value,
-                rating: reviewForm.querySelector('[name="rating"]').value
-              };
-  
-              try {
-  
-                  const response = await fetch("/shop/api/reviews/add", {
-                      method: "POST",
-                      headers: {
-                          "Content-Type": "application/json"
-                      },
-                      body: JSON.stringify(formData)
-                  });
-  
-                  const data = await response.json();
-  
-                  if (data.success) {
-  
-                      alert("Review submitted successfully");
-  
-                      reviewForm.reset();
-  
-                      location.reload();
-  
-                  } else {
-  
-                      alert(data.error || "Failed to submit review");
-                  }
-  
-              } catch (error) {
-  
-                  console.error(error);
-  
-                  alert("Something went wrong");
-              }
-  
-          });
-  
-      }
-  
-  });
-  
-  </script>
-  
 </body>
 </html>
 

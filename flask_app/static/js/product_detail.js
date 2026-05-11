@@ -89,26 +89,64 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = $('pd-review-form');
   const list = $('pd-review-list');
   if (form && list) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const fd = new FormData(form);
       const name = String(fd.get('name') || '').trim() || 'Anonymous';
       const msg = String(fd.get('message') || '').trim();
       const rating = String(fd.get('rating') || '5').trim();
-      if (!msg) return;
-      const stars = '★★★★★'.slice(0, Math.min(5, Math.max(1, parseInt(rating, 10) || 5)));
-      const div = document.createElement('div');
-      div.className = 'pd-review';
-      div.innerHTML = `
-        <div class="pd-review-head">
-          <strong>${name.replace(/</g,'&lt;')}</strong>
-          <span class="pd-mini-stars">${stars}</span>
-        </div>
-        <p>${msg.replace(/</g,'&lt;')}</p>
-      `;
-      list.prepend(div);
-      form.reset();
-      setStars(5);
+      if (!msg) {
+        alert("Please enter a message");
+        return;
+      }
+
+      // Get product ID from form data attribute
+      const productId = form.dataset.productId || form.getAttribute('data-product-id');
+      if (!productId) {
+        alert("Product ID not found");
+        return;
+      }
+
+      // Send to backend
+      try {
+        const response = await fetch("/shop/api/reviews/add", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            product_id: parseInt(productId),
+            name: name,
+            message: msg,
+            rating: parseInt(rating)
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Add to UI
+          const stars = '★★★★★'.slice(0, Math.min(5, Math.max(1, parseInt(rating, 10) || 5)));
+          const div = document.createElement('div');
+          div.className = 'pd-review';
+          div.innerHTML = `
+            <div class="pd-review-head">
+              <strong>${name.replace(/</g,'&lt;')}</strong>
+              <span class="pd-mini-stars">${stars}</span>
+            </div>
+            <p>${msg.replace(/</g,'&lt;')}</p>
+          `;
+          list.prepend(div);
+          form.reset();
+          setStars(5);
+          alert("Review saved successfully!");
+        } else {
+          alert(data.error || "Failed to save review");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Error saving review: " + error.message);
+      }
     });
   }
 });

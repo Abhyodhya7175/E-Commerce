@@ -1,0 +1,82 @@
+{# Product Carousel Component #}
+{% macro product_carousel(carousel_id, products, title="Featured Products", autoplay=true, autoplay_delay=5000) %}
+<div class="carousel-section">
+  <div class="carousel-header">
+    <h2 class="carousel-title">{{ title }}</h2>
+    <div class="carousel-controls">
+      <button class="carousel-btn carousel-prev" aria-label="Previous products" data-carousel="{{ carousel_id }}">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <button class="carousel-btn carousel-next" aria-label="Next products" data-carousel="{{ carousel_id }}">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="carousel-wrapper">
+    <div class="carousel-container" id="{{ carousel_id }}" data-autoplay="{{ autoplay|lower }}" data-autoplay-delay="{{ autoplay_delay }}">
+      <div class="carousel-track">
+        {% for product in products %}
+          <div class="carousel-item">
+            <div class="product-card-carousel">
+              {# Product Image #}
+              <div class="card-image-container">
+                <img 
+                  src="{{ product.imageUrl or product.get('imageUrl', 'https://via.placeholder.com/300x300?text=No+Image') }}" 
+                  alt="{{ product.name }}"
+                  class="card-image"
+                  loading="lazy"
+                />
+                {% if product.get('discountPercent', 0) > 0 %}
+                  <div class="discount-badge">-{{ product.discountPercent }}%</div>
+                {% endif %}
+                {% if product.get('freeShipping') %}
+                  <div class="badge badge-free-shipping">FREE SHIPPING</div>
+                {% endif %}
+              </div>
+
+              {# Product Info #}
+              <div class="card-content">
+                <h3 class="product-name">{{ product.name }}</h3>
+                
+                {# Rating #}
+                <div class="rating-section">
+                  <div class="stars">
+                    {% for i in range(5) %}
+                      {% if i < product.rating %}
+                        <span class="star filled">★</span>
+                      {% else %}
+                        <span class="star empty">☆</span>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                  <span class="rating-value">{{ product.rating }}</span>
+                  <span class="review-count">({{ product.reviewCount }})</span>
+                </div>
+
+                {# Price Section #}
+                <div class="price-section">
+                  {% if product.discountPrice < product.mrp %}
+                    <span class="price-current">₹{{ product.discountPrice|int }}</span>
+                    <span class="price-original">₹{{ product.mrp|int }}</span>
+                  {% else %}
+                    <span class="price-current">₹{{ product.mrp|int }}</span>
+                  {% endif %}
+                </div>
+
+                {# Category Tag #}
+                <div class="category-tag">{{ product.category }}</div>
+
+                {# Add to Cart Button #}
+                <button class="add-to-cart-btn" data-product-id="{{ product.id }}">
+                  <i class="fas fa-shopping-bag"></i> Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endmacro %}
