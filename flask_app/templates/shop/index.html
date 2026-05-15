@@ -1,17 +1,111 @@
 {% extends 'shop/base.html' %}
 
-{% block title %}Products - My Shop{% endblock %}
+{% block title %}Shop{% if search_query %} - Search: {{ search_query }}{% endif %}{% endblock %}
 
 {% block content %}
 
 {% from 'components/product_card.html' import product_card %}
 
 <style>
+  .shop-header {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f5edd8 0%, #faf8f3 100%);
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .search-info {
+    flex: 1;
+    min-width: 250px;
+  }
+  
+  .search-info h2 {
+    margin: 0 0 0.3rem 0;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: #1a1a2e;
+  }
+  
+  .search-info p {
+    margin: 0;
+    color: #5a5a7a;
+    font-size: 0.9rem;
+  }
+  
+  .filter-sort {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .filter-sort select {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #e8e3d8;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+  }
+  
+  .filter-sort select:focus {
+    outline: none;
+    border-color: #c9a84c;
+    box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.2);
+  }
+  
+  .clear-search {
+    padding: 0.6rem 1rem;
+    background: #c9a84c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+  }
+  
+  .clear-search:hover {
+    background: #8b6914;
+  }
+  
+  .no-results {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: #faf8f3;
+    border-radius: 12px;
+    margin: 2rem 0;
+  }
+  
+  .no-results i {
+    font-size: 3rem;
+    color: #c9a84c;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  
+  .no-results h3 {
+    color: #1a1a2e;
+    margin-bottom: 0.5rem;
+  }
+  
+  .no-results p {
+    color: #5a5a7a;
+    margin-bottom: 1rem;
+  }
+  
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 1.1rem;
   }
+  
   /* Minimal card styles (shared classnames with home.html) */
   .pcard {
     background: #fff;
@@ -55,14 +149,113 @@
   .prating i { color: #f59e0b; font-size: .68rem; }
 </style>
 
-<div class="grid">
-  {% for p in products %}
-    {{ product_card(
-      p,
-      rating_text=('Stock: ' ~ (p.stock if p.stock is not none else '—')),
-      show_quick_add=false,
-      href=url_for('customer.product_detail', id=p.id)
-    ) }}
-  {% endfor %}
+<!-- Search & Filter Header -->
+<div class="shop-header">
+  <div class="search-info">
+    {% if search_query %}
+      <h2>
+        <i class="fas fa-search" style="color: #c9a84c; margin-right: 0.5rem;"></i>
+        Search Results
+      </h2>
+      <p>
+        Found <strong>{{ result_count }}</strong> product{% if result_count != 1 %}s{% endif %}
+        {% if search_query %}for "<strong>{{ search_query }}</strong>"{% endif %}
+        {% if selected_category %}in <strong>{{ selected_category }}</strong>{% endif %}
+      </p>
+    {% else %}
+      <h2>All Products</h2>
+      <p>Browse our complete collection of {{ result_count }} product{% if result_count != 1 %}s{% endif %}</p>
+    {% endif %}
+  </div>
+  
+  <div class="filter-sort">
+    <!-- Category Filter -->
+    <select onchange="filterByCategory(this.value)">
+      <option value="">All Categories</option>
+      {% for cat in categories %}
+        <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+      {% endfor %}
+    </select>
+    
+    <!-- Sort Options -->
+    <select onchange="sortProducts(this.value)">
+      <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+      <option value="price_low" {% if sort_by == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+      <option value="price_high" {% if sort_by == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+    </select>
+    
+    <!-- Clear Search Button -->
+    {% if search_query or selected_category %}
+      <button class="clear-search" onclick="clearFilters()">
+        <i class="fas fa-times"></i> Clear Filters
+      </button>
+    {% endif %}
+  </div>
 </div>
+
+<!-- Products Grid or No Results Message -->
+{% if products %}
+  <div class="grid">
+    {% for p in products %}
+      {{ product_card(
+        p,
+        rating_text=('Stock: ' ~ (p.stock if p.stock is not none else '—')),
+        show_quick_add=false,
+        href=url_for('customer.product_detail', id=p.id)
+      ) }}
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="no-results">
+    <i class="fas fa-search"></i>
+    <h3>No Products Found</h3>
+    <p>
+      {% if search_query %}
+        We couldn't find any products matching "<strong>{{ search_query }}</strong>"
+        {% if selected_category %}in {{ selected_category }}{% endif %}.
+        <br><small>Try using different keywords or browse all products.</small>
+      {% else %}
+        No products available in this category.
+      {% endif %}
+    </p>
+    {% if search_query or selected_category %}
+      <button class="clear-search" onclick="clearFilters()" style="margin-top: 1rem;">
+        <i class="fas fa-times"></i> Clear All Filters
+      </button>
+    {% endif %}
+  </div>
+{% endif %}
+
+<script>
+  function filterByCategory(category) {
+    let url = '/shop/';
+    const params = new URLSearchParams();
+    const searchQuery = '{{ search_query }}';
+    
+    if (searchQuery) params.append('q', searchQuery);
+    if (category) params.append('category', category);
+    
+    if (params.toString()) {
+      url += '?' + params.toString();
+    }
+    window.location.href = url;
+  }
+  
+  function sortProducts(sort) {
+    const params = new URLSearchParams();
+    const searchQuery = '{{ search_query }}';
+    const category = '{{ selected_category }}';
+    
+    if (searchQuery) params.append('q', searchQuery);
+    if (category) params.append('category', category);
+    if (sort) params.append('sort', sort);
+    
+    window.location.href = '/shop/?' + params.toString();
+  }
+  
+  function clearFilters() {
+    window.location.href = '/shop/';
+  }
+</script>
+
 {% endblock %}

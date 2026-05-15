@@ -118,5 +118,125 @@
     "desc": "Innovation methods used by top firms.",
     "icon": "📖",
     "active": true
+  },
+  {
+    "id": 13,
+    "name": "Ultra HD 4K Webcam",
+    "category": "Electronics",
+    "mrp": 3999.0,
+    "discountPrice": 2999.0,
+    "desc": "1080p resolution, built-in mic, auto focus.",
+    "icon": "📹",
+    "active": true
+  },
+  {
+    "id": 14,
+    "name": "Cotton Jersey T-Shirt",
+    "category": "Fashion",
+    "mrp": 899.0,
+    "discountPrice": 599.0,
+    "desc": "Soft, breathable, trendy designs.",
+    "icon": "👕",
+    "active": true
+  },
+  {
+    "id": 15,
+    "name": "Professional Camera Tripod",
+    "category": "Electronics",
+    "mrp": 1999.0,
+    "discountPrice": 1499.0,
+    "desc": "Aluminum alloy, compact, quick-release head.",
+    "icon": "📷",
+    "active": true
+  },
+  {
+    "id": 16,
+    "name": "Organic Green Tea Set",
+    "category": "Home",
+    "mrp": 799.0,
+    "discountPrice": 549.0,
+    "desc": "100% natural, premium loose leaf tea.",
+    "icon": "🍵",
+    "active": true
+  },
+  {
+    "id": 17,
+    "name": "Denim Jacket Classic",
+    "category": "Fashion",
+    "mrp": 2499.0,
+    "discountPrice": 1799.0,
+    "desc": "Premium denim, timeless style.",
+    "icon": "🧥",
+    "active": true
+  },
+  {
+    "id": 18,
+    "name": "Resistance Bands Set",
+    "category": "Sports",
+    "mrp": 1299.0,
+    "discountPrice": 899.0,
+    "desc": "5-band set, portable fitness equipment.",
+    "icon": "💪",
+    "active": true
+  },
+  {
+    "id": 19,
+    "name": "Python Programming Guide",
+    "category": "Books",
+    "mrp": 1299.0,
+    "discountPrice": 899.0,
+    "desc": "Complete guide for beginners to advanced.",
+    "icon": "🐍",
+    "active": true
+  },
+  {
+    "id": 20,
+    "name": "Wireless Mouse Pro",
+    "category": "Electronics",
+    "mrp": 1599.0,
+    "discountPrice": 999.0,
+    "desc": "Ergonomic design, 2.4GHz, 12-month battery.",
+    "icon": "🖱️",
+    "active": true
+  },
+  {
+    "id": 21,
+    "name": "Wall Clock Modern",
+    "category": "Home",
+    "mrp": 1499.0,
+    "discountPrice": 999.0,
+    "desc": "Minimalist design, silent mechanism.",
+    "icon": "⏰",
+    "active": true
+  },
+  {
+    "id": 22,
+    "name": "Running Shorts Mesh",
+    "category": "Sports",
+    "mrp": 899.0,
+    "discountPrice": 599.0,
+    "desc": "Breathable mesh, quick-dry technology.",
+    "icon": "🩳",
+    "active": true
+  },
+  {
+    "id": 23,
+    "name": "Web Development Bootcamp",
+    "category": "Books",
+    "mrp": 1599.0,
+    "discountPrice": 1099.0,
+    "desc": "HTML, CSS, JavaScript, React mastery.",
+    "icon": "💻",
+    "active": true
+  },
+  {
+    "id": 24,
+    "name": "USB-C Charging Hub",
+    "category": "Electronics",
+    "mrp": 2299.0,
+    "discountPrice": 1699.0,
+    "desc": "7-in-1 hub, fast charging, compact.",
+    "icon": "🔌",
+    "active": true
   }
 ]

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UrbanCart — Admin Panel</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/product_card_premium.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -90,6 +90,31 @@
   .nav-item.active { background: rgba(201,168,76,0.15); color: var(--gold); font-weight: 500; }
   .nav-item .nav-icon { font-size: 15px; flex-shrink: 0; }
 
+
+  .nav-home {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 9px;
+    text-decoration: none;
+    font-size: 0.90rem; 
+    font-weight: 500;
+    color: rgba(255,255,255,0.75);
+    transition: all 0.15s;
+    margin-bottom: 4px;
+}
+
+.nav-home:hover {
+    background: rgba(201,168,76,0.15);
+    color: var(--gold);
+}
+
+.nav-home .nav-icon {
+    font-size: 15px;
+}
+
+
   .sidebar-footer {
     padding: 0.8rem;
     border-top: 1px solid rgba(255,255,255,0.08);
@@ -98,7 +123,7 @@
   .admin-badge {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
+    gap: 0.7rem;    
     padding: 0.6rem 0.7rem;
     border-radius: 10px;
     background: rgba(255,255,255,0.05);
@@ -137,6 +162,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
   }
 
   .topbar {
@@ -174,7 +200,9 @@
     display: flex; align-items: center; gap: 4px;
   }
 
-  .content { padding: 1.8rem 2rem; }
+  .content { 
+    flex: 1;
+    padding: 1.8rem 2rem; }
 
   /* SECTION DISPLAY */
   .page-section { display: none; }
@@ -514,12 +542,22 @@
     <small>Admin Panel</small>
   </div>
   <nav class="sidebar-nav">
+    <a href="{{ url_for('home') }}" class="nav-item" >
+      <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
+    </a>
     <div class="nav-item active" onclick="showSection('dashboard', this)">
       <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
     </div>
     <div class="nav-item" onclick="showSection('products', this)">
       <span class="nav-icon">📦</span><span class="nav-label">Products</span>
     </div>
+
+    <a href="{{ url_for('admin.banners') }}" class="nav-item">
+    <span class="nav-icon">🎁</span>
+    <span class="nav-label">Banners</span>
+    </a>
+
+
     <div class="nav-item" onclick="showSection('orders', this)">
       <span class="nav-icon">🧾</span><span class="nav-label">Orders</span>
     </div>
@@ -597,7 +635,6 @@
             <button class="btn-sm primary" onclick="openProductModal()">+ Add Product</button>
           </div>
         </div>
-        <div class="uc-grid" id="admin-products-grid" style="margin: 0 1.4rem 1.4rem;"></div>
         <table>
           <thead>
             <tr><th>Product</th><th>Price</th><th>Offer</th><th>Status</th><th>Actions</th></tr>
@@ -640,6 +677,8 @@
           <tbody id="users-table"></tbody>
         </table>
       </div>
+      {% from 'components/footer.html' import footer %}
+      {{ footer() }}
     </div>
 
   </div>
@@ -711,21 +750,14 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script src="{{ url_for('static', filename='js/product_card_premium.js') }}"></script>
-
 <script>
   // DATA
-  const PRODUCTS_API_URL = '{{ url_for("admin.api_products") }}';
+  /*const PRODUCTS_API_URL = '{{ url_for("admin.api_products") }}';
   const PRODUCT_IMAGE_DELETE_API_URL = '{{ url_for("admin.api_delete_product_image") }}';
   let products = [];
-
-  // Premium card hooks: admin page preview only
-  window.ucAddToCart = function () {};
-  window.ucToggleWishlist = function () {};
-
   let currentEditImageUrls = [];
   let selectedProductImageFiles = [];
-  let selectedProductImagePreviews = [];
+  let selectedProductImagePreviews = [];*/
 
   let orders = [
     { id:'#ORD-1034', customer:'Alex Johnson', email:'customer@demo.com', items:'Headphones × 1', total:7999, status:'delivered', date:'Apr 28, 2025' },
@@ -864,87 +896,30 @@
   function renderProducts() {
     const q = currentFilter.products.toLowerCase();
     const filtered = products.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
-
-    // premium cards grid
-    const grid = document.getElementById('admin-products-grid');
-    if (grid) {
-      grid.innerHTML = filtered.length === 0
-        ? ''
-        : filtered.map(p => {
-            const outOfStock = !p?.active;
-            const slug = p.slug || ((p.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'product');
-            const sku = p.sku || `UC-${String(p.id || 0).padStart(5, '0')}`;
-            const discountPercent = (typeof p.discountPercent !== 'undefined' && p.discountPercent !== null) ? p.discountPercent : calculateOfferPercent(p.mrp, p.discountPrice);
-            const stockStatus = p.stockStatus || (outOfStock ? 'Out of Stock' : 'In Stock');
-            const rating = p.rating || 4.6;
-            const reviewCount = p.reviewCount || 128;
-            const primary = (Array.isArray(p.imageUrls) && p.imageUrls.length) ? p.imageUrls[0] : (p.imageUrl || null);
-            const badgeDiscount = discountPercent ? `<span class="uc-badge uc-badge-discount">${discountPercent}% OFF</span>` : '';
-            const badgeShip = p.freeShipping ? `<span class="uc-badge uc-badge-soft uc-badge-ship">Free Shipping</span>` : '';
-            const badgeGift = p.freeGift ? `<span class="uc-badge uc-badge-soft uc-badge-gift">Free Gift</span>` : '';
-            const stockClass = outOfStock ? 'uc-stock-out' : '';
-            const stars = Array.from({ length: 5 }).map(() => `<span class="uc-star" aria-hidden="true">★</span>`).join('');
-            return `
-              <article class="uc-card" data-href="/product/${slug}" aria-label="${escapeAttr(p.name)}">
-                <div class="uc-media">
-                  ${badgeDiscount}${badgeShip}${badgeGift}
-                  <button class="uc-wish" type="button" aria-label="Add to wishlist" data-wishlist-id="${p.id}">
-                    <span aria-hidden="true">♡</span>
-                  </button>
-                  <div class="uc-imgwrap">
-                    ${primary ? `<img src="${escapeAttr(primary)}" alt="${escapeAttr(p.name)}" loading="lazy">` : `<div class="uc-fallback" aria-hidden="true">${escapeAttr(p.icon || '📦')}</div>`}
-                  </div>
-                </div>
-                <div class="uc-body">
-                  <h3 class="uc-title">${escapeAttr(p.name)}</h3>
-                  <div class="uc-sku">SKU: ${escapeAttr(sku)}</div>
-                  <div class="uc-row uc-rating">
-                    <div class="uc-stars" aria-label="Rating ${rating} out of 5">${stars}</div>
-                    <div class="uc-reviews">(${reviewCount})</div>
-                  </div>
-                  <div class="uc-row uc-price">
-                    <div class="uc-now">₹${Number(p.discountPrice ?? 0).toLocaleString()}</div>
-                    <div class="uc-was">₹${Number(p.mrp ?? 0).toLocaleString()}</div>
-                  </div>
-                  <div class="uc-row uc-bottom">
-                    <span class="uc-stock ${stockClass}">${escapeAttr(stockStatus)}</span>
-                    <button class="uc-cart" type="button" data-cart-id="${p.id}" title="Cart disabled on admin page">Add to Cart</button>
-                  </div>
-                </div>
-              </article>
-            `;
-          })
-          .join('');
-      if (typeof ucInitProductCards === 'function') ucInitProductCards(document);
-    }
-
-    // keep legacy table for admin actions
     const tbody = document.getElementById('products-table');
-    if (tbody) {
-      tbody.innerHTML = filtered.length === 0
-        ? `<tr><td colspan="5" class="no-data">No products found</td></tr>`
-        : filtered.map(p => `
-          <tr>
-            <td>
-              <div class="product-cell">
-                <div class="product-icon-sm">${productVisual(p)}</div>
-                <div><div class="name">${p.name}</div><div class="cat">${p.category}</div></div>
-              </div>
-            </td>
-            <td>
-              <div style="font-weight:600;">₹${p.discountPrice.toLocaleString()}</div>
-              <div style="font-size:0.72rem;color:var(--ink-light);text-decoration:line-through;">₹${p.mrp.toLocaleString()}</div>
-            </td>
-            <td><span class="badge badge-active">${calculateOfferPercent(p.mrp, p.discountPrice)}% OFF</span></td>
-            <td><span class="badge ${p.active ? 'badge-active' : 'badge-inactive'}">${p.active ? 'Active' : 'Inactive'}</span></td>
-            <td>
-              <div class="actions">
-                <button class="btn-sm" onclick="editProduct(${p.id})">Edit</button>
-                <button class="btn-sm" onclick="toggleProduct(${p.id})">${p.active ? 'Disable' : 'Enable'}</button>
-              </div>
-            </td>
-          </tr>`).join('');
-    }
+    tbody.innerHTML = filtered.length === 0 ? `<tr><td colspan="5" class="no-data">No products found</td></tr>` :
+      filtered.map(p => `
+        <tr>
+          <td>
+            <div class="product-cell">
+              <div class="product-icon-sm">${productVisual(p)}</div>
+              <div><div class="name">${p.name}</div><div class="cat">${p.category}</div></div>
+            </div>
+          </td>
+          <td>
+            <div style="font-weight:600;">₹${p.discountPrice.toLocaleString()}</div>
+            <div style="font-size:0.72rem;color:var(--ink-light);text-decoration:line-through;">₹${p.mrp.toLocaleString()}</div>
+          </td>
+          <td><span class="badge badge-active">${calculateOfferPercent(p.mrp, p.discountPrice)}% OFF</span></td>
+          <td><span class="badge ${p.active ? 'badge-active' : 'badge-inactive'}">${p.active ? 'Active' : 'Inactive'}</span></td>
+          <td>
+            <div class="actions">
+              <button class="btn-sm" onclick="editProduct(${p.id})">Edit</button>
+              <button class="btn-sm" onclick="toggleProduct(${p.id})">${p.active ? 'Disable' : 'Enable'}</button>
+              <button class="btn-sm danger" onclick="deleteProduct(${p.id})">Delete</button>
+            </div>
+          </td>
+        </tr>`).join('');
     document.getElementById('stat-products').textContent = products.length;
   }
 
@@ -1069,11 +1044,15 @@
     if (editId) formData.append('id', editId);
     formData.append('name', name);
     formData.append('category', cat);
-    formData.append('mrp', mrp);
+    formData.append('mrp', mrp);  
     formData.append('discountPrice', discountPrice);
     formData.append('desc', desc);
     formData.append('icon', existing?.icon || icons[cat] || '📦');
-    formData.append('active', (existing?.active ?? true) ? 'true' : 'false');
+    
+    // Fix: Ensure active status is sent correctly as 'true' or 'false' string
+    const isActive = existing ? existing.active : true;
+    formData.append('active', isActive ? 'true' : 'false');
+
     // Append all selected files under the 'images' field
     for (let i = 0; i < imageFiles.length; i++) {
       formData.append('images', imageFiles[i]);
@@ -1152,6 +1131,15 @@
     if (!response.ok) { showToast(data.error || 'Error updating product.'); return; }
     await loadProducts();
     showToast(data.product.active ? 'Product enabled.' : 'Product disabled.');
+  }
+
+  async function deleteProduct(id) {
+    if (!confirm('Delete this product?')) return;
+    const response = await fetch(`/admin/api/products/delete/${id}`, { method: 'POST' });
+    const data = await response.json();
+    if (!response.ok) { showToast(data.error || 'Error deleting product.'); return; }
+    await loadProducts();
+    showToast('Product deleted.');
   }
 
   function updateOrderStatus(orderId, status) {
@@ -1248,5 +1236,8 @@
   renderOrders();
   renderUsers();
 </script>
+
+
+
 </body>
 </html>

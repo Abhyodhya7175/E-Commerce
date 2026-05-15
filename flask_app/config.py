@@ -11,4 +11,5 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAX_CONTENT_LENGTH = 20 * 1024 * 1024
     PRODUCT_UPLOAD_SUBDIR = "uploads/products"
+    OFFER_BANNER_UPLOAD_SUBDIR = "uploads/banners"
     ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "gif"}

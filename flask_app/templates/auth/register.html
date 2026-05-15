@@ -6,6 +6,7 @@
 <title>UrbanCart — Register</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
 </head>
 <body>
 <div class="card">
@@ -81,5 +82,9 @@
     // Allow the POST to the server (it will store the user in DB).
   });
 </script>
+
+{% from 'components/footer.html' import footer %}
+{{ footer() }}
+
 </body>
 </html>

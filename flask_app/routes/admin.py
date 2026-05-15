@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, abort, request, jsonify, current_app, url_for
 from flask_login import login_required, current_user
 from ..extensions import db
-from ..models import User, Product, ProductImage
+from ..models import User, Product, ProductImage, OfferBanner
 from werkzeug.utils import secure_filename
+from sqlalchemy.exc import SQLAlchemyError
 from uuid import uuid4
+from datetime import datetime
 import os
 
 admin_bp = Blueprint('admin', __name__, template_folder='../templates')
@@ -16,13 +18,12 @@ def _is_allowed_image(filename):
     return ext in current_app.config.get('ALLOWED_IMAGE_EXTENSIONS', set())
 
 
-def _save_product_image(file_storage):
+def _save_static_image(file_storage, upload_subdir):
     if not file_storage or not file_storage.filename:
         return None, None
     if not _is_allowed_image(file_storage.filename):
         return None, 'Invalid image format. Allowed: png, jpg, jpeg, webp, gif.'
 
-    upload_subdir = current_app.config.get('PRODUCT_UPLOAD_SUBDIR', 'uploads/products')
     upload_dir = os.path.join(current_app.static_folder, *upload_subdir.split('/'))
     os.makedirs(upload_dir, exist_ok=True)
 
@@ -34,6 +35,53 @@ def _save_product_image(file_storage):
 
     static_rel = f"{upload_subdir}/{filename}".replace('\\', '/')
     return url_for('static', filename=static_rel), None
+
+
+def _save_product_image(file_storage):
+    upload_subdir = current_app.config.get('PRODUCT_UPLOAD_SUBDIR', 'uploads/products')
+    return _save_static_image(file_storage, upload_subdir)
+
+
+def _save_banner_image(file_storage):
+    upload_subdir = current_app.config.get('OFFER_BANNER_UPLOAD_SUBDIR', 'uploads/banners')
+    return _save_static_image(file_storage, upload_subdir)
+
+
+def _delete_static_file(file_url):
+    if not file_url or '/static/' not in file_url:
+        return
+    try:
+        rel = file_url.split('/static/', 1)[1]
+        image_path = os.path.join(current_app.static_folder, *rel.split('/'))
+        if os.path.exists(image_path):
+            os.remove(image_path)
+    except OSError:
+        pass
+
+
+def _form_bool(value, default=True):
+    if value is None:
+        return default
+    return str(value).lower() in ['1', 'true', 'yes', 'on']
+
+
+def _parse_datetime_field(value):
+    value = str(value or '').strip()
+    if not value:
+        return None
+
+    for fmt in ('%Y-%m-%dT%H:%M', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d'):
+        try:
+            return datetime.strptime(value, fmt)
+        except ValueError:
+            continue
+    raise ValueError('Invalid date format')
+
+
+def _normalize_banner_order():
+    banners = OfferBanner.query.order_by(OfferBanner.display_order.asc(), OfferBanner.id.asc()).all()
+    for index, banner in enumerate(banners):
+        banner.display_order = index
 
 def admin_required(fn):
     from functools import wraps
@@ -76,6 +124,143 @@ def products_grid():
 def api_products():
     products = Product.query.order_by(Product.id.asc()).all()
     return jsonify(products=[product.to_dict() for product in products])
+
+
+@admin_bp.route('/api/banners')
+@login_required
+@admin_required
+def api_banners():
+    banners = OfferBanner.query.order_by(OfferBanner.display_order.asc(), OfferBanner.id.asc()).all()
+    return jsonify(banners=[banner.to_dict() for banner in banners])
+
+
+@admin_bp.route('/api/banners/save', methods=['POST'])
+@admin_bp.route('/api/banners/create', methods=['POST'])
+@admin_bp.route('/api/banners/edit/<int:route_banner_id>', methods=['POST'])
+@login_required
+@admin_required
+def api_save_banner(route_banner_id=None):
+    try:
+        data = request.form.copy() if request.form else dict(request.get_json() or {})
+        title = str(data.get('title', '')).strip()
+        subtitle = str(data.get('subtitle', '')).strip()
+        button_text = str(data.get('buttonText', '')).strip()
+        button_link = str(data.get('buttonLink', '')).strip()
+        background_color = str(data.get('backgroundColor', '#f5f5f5')).strip() or '#f5f5f5'
+        banner_id = int(route_banner_id if route_banner_id is not None else (data.get('id') or 0))
+        start_date = _parse_datetime_field(data.get('startDate'))
+        end_date = _parse_datetime_field(data.get('endDate'))
+    except (TypeError, ValueError):
+        return jsonify(error='Invalid banner data'), 400
+
+    if not title:
+        return jsonify(error='Banner title is required'), 400
+    if len(background_color) > 20:
+        return jsonify(error='Background color is too long'), 400
+    if start_date and end_date and start_date > end_date:
+        return jsonify(error='Start date cannot be after end date'), 400
+
+    image_url = None
+    try:
+        banner = db.session.get(OfferBanner, banner_id) if banner_id else OfferBanner()
+        if banner_id and not banner:
+            return jsonify(error='Banner not found'), 404
+
+        uploaded = request.files.get('image') if request.files else None
+        if uploaded and uploaded.filename:
+            image_url, err = _save_banner_image(uploaded)
+            if err:
+                return jsonify(error=err), 400
+
+        if not banner_id and not image_url:
+            return jsonify(error='Banner image is required'), 400
+
+        old_image = banner.image if image_url else None
+        banner.title = title
+        banner.subtitle = subtitle
+        banner.button_text = button_text
+        banner.button_link = button_link
+        banner.background_color = background_color
+        banner.is_active = _form_bool(data.get('active'), True)
+        banner.start_date = start_date
+        banner.end_date = end_date
+        if image_url:
+            banner.image = image_url
+
+        if not banner_id:
+            max_order = db.session.query(db.func.max(OfferBanner.display_order)).scalar()
+            banner.display_order = (max_order if max_order is not None else -1) + 1
+            db.session.add(banner)
+
+        db.session.commit()
+        if old_image and old_image != banner.image:
+            _delete_static_file(old_image)
+
+        return jsonify(success=True, banner=banner.to_dict())
+    except SQLAlchemyError as error:
+        db.session.rollback()
+        if image_url:
+            _delete_static_file(image_url)
+        current_app.logger.exception('Could not save offer banner')
+        return jsonify(error=f'Database error while saving banner: {error.__class__.__name__}'), 500
+    except OSError as error:
+        db.session.rollback()
+        current_app.logger.exception('Could not save banner image')
+        return jsonify(error=f'Could not save banner image: {error}'), 500
+
+
+@admin_bp.route('/api/banners/toggle/<int:banner_id>', methods=['POST'])
+@login_required
+@admin_required
+def api_toggle_banner(banner_id):
+    banner = db.session.get(OfferBanner, banner_id)
+    if not banner:
+        return jsonify(error='Banner not found'), 404
+
+    banner.is_active = not banner.is_active
+    db.session.commit()
+    return jsonify(success=True, banner=banner.to_dict())
+
+
+@admin_bp.route('/api/banners/delete/<int:banner_id>', methods=['POST'])
+@login_required
+@admin_required
+def api_delete_banner(banner_id):
+    banner = db.session.get(OfferBanner, banner_id)
+    if not banner:
+        return jsonify(error='Banner not found'), 404
+
+    image_url = banner.image
+    db.session.delete(banner)
+    db.session.flush()
+    _normalize_banner_order()
+    db.session.commit()
+    _delete_static_file(image_url)
+    return jsonify(success=True)
+
+
+@admin_bp.route('/api/banners/reorder', methods=['POST'])
+@login_required
+@admin_required
+def api_reorder_banners():
+    data = request.get_json() or {}
+    ordered_ids = data.get('orderedIds') or data.get('ids') or []
+
+    try:
+        ordered_ids = [int(item) for item in ordered_ids]
+    except (TypeError, ValueError):
+        return jsonify(error='Invalid banner order'), 400
+
+    existing = {banner.id: banner for banner in OfferBanner.query.all()}
+    if set(ordered_ids) != set(existing.keys()):
+        return jsonify(error='Banner order must include every banner exactly once'), 400
+
+    for index, banner_id in enumerate(ordered_ids):
+        existing[banner_id].display_order = index
+
+    db.session.commit()
+    banners = OfferBanner.query.order_by(OfferBanner.display_order.asc(), OfferBanner.id.asc()).all()
+    return jsonify(success=True, banners=[banner.to_dict() for banner in banners])
 
 
 @admin_bp.route('/add-user', methods=['POST'])

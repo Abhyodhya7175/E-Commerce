@@ -6,6 +6,7 @@
 <title>UrbanCart — Shop</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/product_card_premium.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1059,5 +1060,9 @@
   loadProducts();
   updateCartUI();
 </script>
+
+{% from 'components/footer.html' import footer %}
+{{ footer() }}
+
 </body>
 </html>

@@ -215,9 +215,9 @@
 
     /* ══════════ HERO ══════════ */
     .hero {
-     padding:6px 1.5rem 10px;
-     display:flex;
-     align-items:center;
+      min-height: 100vh; padding: 92px 2rem 60px;
+      display: flex; align-items: center;
+      position: relative; overflow: hidden;
     }
     .hero-glow {
       position: absolute; inset: 0; pointer-events: none;
@@ -233,11 +233,9 @@
     }
 
     .hero-inner {
-      width:100%;
-      max-width:100%;
-      display:block;
-      position: relative;
-     
+      max-width: 1380px; margin: 0 auto; width: 100%;
+      display: grid; grid-template-columns: 1.1fr .9fr;
+      gap: 4rem; align-items: center; position: relative;
     }
 
     /* Greeting chip */
@@ -435,172 +433,6 @@
     .fb-val { font-size: .9rem; font-weight: 700; margin-top: 1px; }
     .fb-stars { color: #f59e0b; font-size: .66rem; }
 
-    /* ════════ OFFER BANNER ════════ */
-    .offer-banner-wrapper {
-      padding:0;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .offer-label {
-      display: inline-flex; align-items: center; gap: 0.6rem;
-      background: #1a2a4e; color: var(--gold); padding: 0.5rem 1.2rem;
-      border-radius: 50px; font-size: 0.8rem; font-weight: 700;
-      letter-spacing: 0.05em; width: fit-content;
-      animation: slideInDown 0.6s ease-out;
-    }
-    .offer-label i { font-size: 1.1rem; }
-
-    .offer-main {
-      display: grid;
-      grid-template-columns: minmax(240px, 0.8fr) minmax(280px, 1.3fr);
-      align-items: center;
-      gap: 1.4rem;
-      padding: clamp(1rem, 2vw, 1.8rem);
-      border-radius: 18px;
-      min-height: 240px;
-      overflow: hidden;
-      border: 1px solid rgba(232,227,216,0.8);
-      box-shadow: var(--shadow);
-    }
-    .offer-main.image-only {
-      grid-template-columns: 1fr;
-      padding: 0.6rem;
-      min-height: auto;
-    }
-
-    .offer-left {
-      flex:0.9;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      gap:1.5rem;
-      z-index:2;
-    }
-
-    /* Large Discount Display */
-    .offer-discount {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 0.5rem;
-    }
-    .offer-percent {
-      font-family: 'Playfair Display', serif;
-      font-size: 7rem; font-weight: 800; color: var(--gold);
-      line-height: 1;
-    }
-    .offer-text {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem; font-weight: 800; color: #1a2a4e;
-      line-height: 1.2;
-      text-align: center;
-    }
-
-    /* Offer Details */
-    .offer-details {
-      display: flex; flex-direction: column; gap: 1rem;
-    }
-    .offer-subtitle {
-      font-size: 1rem; font-weight: 600; letter-spacing: 0.1em;
-      text-transform: uppercase; color: #1a2a4e;
-      margin: 0; display: flex; align-items: center; gap: 1rem;
-    }
-    .offer-subtitle::before,
-    .offer-subtitle::after {
-      content: ''; flex: 1; height: 2px; background: var(--gold);
-    }
-    .offer-description {
-      font-size: 1.1rem; color: var(--text); line-height: 1.6;
-      margin: 0;
-    }
-
-    .offer-btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
-      background: #1a2a4e; color: white; padding: 0.9rem 2rem;
-      border-radius: 50px; font-size: 0.95rem; font-weight: 700;
-      letter-spacing: 0.05em; text-decoration: none;
-      transition: all 0.3s; width: fit-content;
-      box-shadow: 0 6px 20px rgba(26,42,78,0.25);
-    }
-    .offer-btn:hover {
-      background: var(--gold); color: #1a2a4e; transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(201,168,76,0.35);
-    }
-
-    /* Image Section */
-    .offer-image {
-      width: 100%;
-      min-height: clamp(180px, 30vw, 420px);
-      overflow: hidden;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.38);
-    }
-    .offer-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .offer-main.image-only .offer-img {
-      object-fit: contain;
-    }
-    
-    .offer-image:hover .offer-img { transform: scale(1.02); }
-    .offer-image a {
-      display: block;
-      height: 100%;
-      text-decoration: none;
-    }
-    .offer-content {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 0.85rem;
-      min-width: 0;
-    }
-    .offer-content h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(1.8rem, 4vw, 4rem);
-      line-height: 1.05;
-      color: var(--text);
-      margin: 0;
-    }
-    .offer-content p {
-      color: var(--muted);
-      font-size: clamp(0.95rem, 1.4vw, 1.15rem);
-      line-height: 1.6;
-      max-width: 52ch;
-    }
-    .offer-content .offer-btn {
-      margin-top: 0.25rem;
-    }
-
-    /* Trust Indicators Row */
-    .offer-trust {
-      display: flex; justify-content: center; gap: 2rem;
-      padding: 1.5rem 0; border-top: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-    .trust-item {
-      display: flex; align-items: center; gap: 0.8rem;
-      padding: 0.5rem 0; min-width: 180px;
-    }
-    .trust-item i {
-      font-size: 1.8rem; color: var(--gold);
-    }
-    .trust-title {
-      font-size: 0.85rem; font-weight: 700; color: #1a2a4e;
-      letter-spacing: 0.05em;
-    }
-    .trust-desc {
-      font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem;
-    }
-    .trust-sep {
-      width: 1px; background: var(--border); height: 40px;
-    }
-
-    @keyframes slideInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-
     /* ══════════ SECTION COMMON ══════════ */
     .sec-container { padding: 80px 2rem 70px; }
     .sec-inner { max-width: 1380px; margin: 0 auto; }
@@ -633,145 +465,8 @@
     /* Premium cards grid */
     .grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.4rem; }
 
-    /* ════════ PREMIUM PRODUCT CARDS ════════ */
-    .pcard {
-      background: var(--card); border-radius: 14px; overflow: hidden;
-      border: 1px solid var(--border); transition: all .35s cubic-bezier(0.4,0,0.2,1);
-      display: flex; flex-direction: column; height: 100%;
-      animation: fadeIn .6s ease-out backwards;
-    }
-    .pcard:hover {
-      transform: translateY(-8px); box-shadow: var(--shadow-lg);
-      border-color: var(--gold);
-    }
-
-    .pcard-inner { display: flex; flex-direction: column; height: 100%; }
-
-    /* Image Section */
-    .pcard-img {
-      position: relative; aspect-ratio: 1; overflow: hidden;
-      background: linear-gradient(135deg, var(--gold-lt) 0%, var(--gold-lt) 100%);
-      flex-shrink: 0;
-    }
-    .pcard-img img {
-      width: 100%; height: 100%; object-fit: cover; display: block;
-      transition: transform .45s cubic-bezier(0.4,0,0.2,1);
-    }
-    .pcard:hover .pcard-img img { transform: scale(1.12); }
-
-    /* Badges */
-    .pcard-badge {
-      position: absolute; top: 0.75rem; z-index: 2;
-      padding: 0.35rem 0.75rem; border-radius: 50px;
-      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em;
-      backdrop-filter: blur(8px);
-    }
-    .pcard-new {
-      left: 0.75rem; background: rgba(59,130,246,0.9); color: white;
-      animation: slideInLeft .5s ease-out;
-    }
-    .pcard-discount {
-      right: 0.75rem; background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
-      color: white; font-weight: 800;
-    }
-
-    /* Wishlist Button */
-    .pcard-wishlist {
-      position: absolute; top: 0.75rem; right: 0.75rem;
-      width: 40px; height: 40px; border-radius: 50%;
-      background: rgba(255,255,255,0.95); border: none; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem; color: #e5e7eb;
-      transition: all .3s, transform .2s;
-      z-index: 3; opacity: 0;
-    }
-    .pcard:hover .pcard-wishlist { opacity: 1; }
-    .pcard-wishlist:hover { transform: scale(1.15); color: #ef4444; }
-    .pcard-wishlist.active { color: #ef4444; }
-
-    /* Info Section */
-    .pcard-info {
-      padding: 1.1rem; flex-grow: 1; display: flex; flex-direction: column; gap: 0.65rem;
-    }
-
-    .pcard-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1rem; font-weight: 700; line-height: 1.3;
-      color: var(--text); margin: 0;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-      line-clamp: 2; overflow: hidden; text-overflow: ellipsis;
-    }
-
-    .pcard-rating {
-      display: flex; align-items: center; gap: 0.5rem;
-    }
-    .pcard-rating .stars {
-      display: flex; gap: 0.15rem;
-    }
-    .pcard-rating .stars i {
-      font-size: 0.75rem;
-    }
-    .pcard-rating .star-filled { color: #fbbf24; }
-    .pcard-rating .star-empty { color: #e5e7eb; }
-    .pcard-rating .rating-text {
-      font-size: 0.75rem; color: var(--muted); font-weight: 500;
-    }
-
-    .pcard-price {
-      display: flex; align-items: center; gap: 0.6rem;
-    }
-    .pcard-price .current-price {
-      font-size: 1.1rem; font-weight: 800; color: var(--gold);
-      font-family: 'DM Sans', sans-serif;
-    }
-    .pcard-price .original-price {
-      font-size: 0.85rem; color: var(--muted);
-      text-decoration: line-through; font-weight: 500;
-    }
-
-    .pcard-stock {
-      display: flex; align-items: center; gap: 0.4rem;
-    }
-    .pcard-stock .stock-badge {
-      display: inline-block; padding: 0.3rem 0.7rem;
-      border-radius: 6px; font-size: 0.7rem; font-weight: 600;
-      letter-spacing: 0.03em;
-    }
-    .pcard-stock .in-stock {
-      background: rgba(16,185,129,0.1); color: #059669;
-    }
-    .pcard-stock .out-of-stock {
-      background: rgba(239,68,68,0.1); color: #dc2626;
-    }
-
-    /* CTA Section */
-    .pcard-cta {
-      padding-top: 0.8rem; border-top: 1px solid var(--border);
-    }
-
-    .pcard-btn-add {
-      width: 100%; padding: 0.75rem 1rem;
-      background: var(--gold); color: white; border: none;
-      border-radius: 8px; font-size: 0.85rem; font-weight: 700;
-      letter-spacing: 0.03em; cursor: pointer; font-family: 'DM Sans', sans-serif;
-      transition: all .3s;
-      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-    }
-    .pcard-btn-add:hover {
-      background: var(--gold-dk); transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(201,168,76,0.3);
-    }
-    .pcard-btn-add:active { transform: translateY(0); }
-
-    /* Animations */
-    @keyframes slideInLeft {
-      from { opacity: 0; transform: translateX(-10px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    /* Hide legacy home cards if any remain */
+    .pcard { display: none; }
 
     .pimg {
       aspect-ratio: 1; background: var(--gold-lt);
@@ -920,13 +615,9 @@
     /* ── RESPONSIVE ── */
     @media (max-width: 1100px) {
       .nav-cats { display: none; }
-      .grid { grid-template-columns: repeat(3,1fr); gap: 1.2rem; }
+      .grid { grid-template-columns: repeat(2,1fr); }
       .deal-grid { grid-template-columns: repeat(2,1fr); }
       .nav-inner { padding: 0 1.25rem; }
-      .pcard-img { aspect-ratio: 1; }
-      .offer-main { gap: 2rem; }
-      .offer-image { min-height: 380px; }
-      .offer-percent { font-size: 3.8rem; }
     }
     @media (max-width: 860px) {
       .hero-inner { grid-template-columns: 1fr; gap: 3rem; }
@@ -936,17 +627,6 @@
       .sec-container { padding: 70px 1.5rem 60px; }
       .trending { padding: 70px 1.5rem 0; }
       .flash-deals { padding: 70px 1.5rem 60px; }
-      .grid { grid-template-columns: repeat(2,1fr); gap: 1rem; }
-      .pcard { border-radius: 12px; }
-      .pcard-name { font-size: 0.95rem; }
-      .pcard-price .current-price { font-size: 1rem; }
-      .offer-banner-wrapper { padding: 2rem 1.5rem; }
-      .offer-main { grid-template-columns: 1fr; gap: 1.2rem; }
-      .offer-content { order: 2; }
-      .offer-image { order: 1; }
-      .offer-left { gap: 1.5rem; }
-      .offer-percent { font-size: 3.2rem; }
-      .offer-image { min-height: 350px; }
     }
     @media (max-width: 560px) {
       .navbar { height: auto; }
@@ -963,7 +643,7 @@
       .hero { padding-top: 92px; }
       .search-bar select { display: none; }
       .nav-auth .btn-ghost { display: none; }
-      .grid { grid-template-columns: repeat(2,1fr); gap: 0.8rem; }
+      .grid { grid-template-columns: 1fr; gap: 1rem; }
       .deal-grid { grid-template-columns: 1fr; gap: 1rem; }
       .hero { padding-left: 1rem; padding-right: 1rem; }
       .sec-container { padding-left: 1rem; padding-right: 1rem; }
@@ -973,21 +653,6 @@
       .hero-stats { justify-content: space-between; }
       .search-bar { border-radius: 12px; }
       .search-bar input { padding: .95rem 1rem; }
-      .pcard-info { padding: 0.9rem; }
-      .pcard-name { font-size: 0.9rem; }
-      .pcard-price { gap: 0.4rem; }
-      .pcard-btn-add { font-size: 0.75rem; padding: 0.6rem 0.8rem; }
-      .offer-banner-wrapper { padding: 1.5rem 1rem; }
-      .offer-label { font-size: 0.7rem; }
-      .offer-left { gap: 1rem; }
-      .offer-percent { font-size: 2.5rem; }
-      .offer-text { font-size: 1.1rem; }
-      .offer-description { font-size: 1rem; }
-      .offer-btn { padding: 0.75rem 1.5rem; font-size: 0.85rem; }
-      .offer-image { min-height: 250px; }
-      .offer-trust { flex-direction: column; gap: 1rem; border: none; padding: 1rem 0; }
-      .trust-item { min-width: auto; padding: 0.75rem 0; }
-      .trust-sep { display: none; }
     }
     @media (max-width: 420px) {
       .icon-btn { width: 38px; height: 38px; border-radius: 10px; }
@@ -997,29 +662,11 @@
       .sec-title { font-size: 1.65rem; }
       .sec-header { gap: .8rem; align-items: flex-start; }
       .see-all { white-space: nowrap; }
-      .grid { grid-template-columns: 1fr; gap: 0.75rem; }
-      .pcard-name { font-size: 0.85rem; }
-      .pcard-rating .stars i { font-size: 0.65rem; }
-      .pcard-rating .rating-text { font-size: 0.65rem; }
-      .pcard-price .current-price { font-size: 0.95rem; }
-      .pcard-price .original-price { font-size: 0.75rem; }
-      .pcard-stock .stock-badge { font-size: 0.65rem; padding: 0.25rem 0.6rem; }
-      .offer-banner-wrapper { padding: 1rem; }
-      .offer-label { font-size: 0.65rem; }
-      .offer-left { flex-direction: column; gap: 0.8rem; }
-      .offer-percent { font-size: 2rem; }
-      .offer-text { font-size: 0.95rem; }
-      .offer-subtitle { font-size: 0.8rem; }
-      .offer-description { font-size: 0.9rem; }
-      .offer-btn { padding: 0.65rem 1.25rem; font-size: 0.8rem; }
-      .offer-image { min-height: 200px; }
-      .trust-item { font-size: 0.85rem; }
-      .trust-item i { font-size: 1.4rem; }
     }
 
     /* CATEGORIES SECTION */
     .categories {
-      padding: 20px 2rem 50px;
+      padding: 70px 2rem;
       background: linear-gradient(135deg, rgba(201,168,76,.05), transparent);
     }
     .categories-inner { max-width: 1380px; margin: 0 auto; }
@@ -1277,43 +924,80 @@
 
   <div class="hero-inner">
 
-    <!-- ── OFFER BANNER ── -->
-    {% if offer_banners %}
-    <div class="offer-banner-wrapper" aria-label="Current offers">
-      {% for banner in offer_banners %}
-      <article class="offer-main{% if not banner.title and not banner.subtitle and not banner.button_text %} image-only{% endif %}" style="background: {{ banner.background_color or '#f5f5f5' }};">
-        {% if banner.title or banner.subtitle or banner.button_text %}
-        <div class="offer-content">
-          {% if banner.title %}<h2>{{ banner.title }}</h2>{% endif %}
-          {% if banner.subtitle %}<p>{{ banner.subtitle }}</p>{% endif %}
-          {% if banner.button_text and banner.button_link %}
-            <a href="{{ banner.button_link }}" class="offer-btn">
-              <i class="fas fa-shopping-bag"></i> {{ banner.button_text }}
-            </a>
-          {% endif %}
-        </div>
+    <!-- ── Left: Content ── -->
+    <div>
+      <!-- Personalized greeting -->
+      <div class="hero-chip">
+        <span class="chip-dot"></span>
+        {% if current_user.is_authenticated %}
+          Good <span id="timeGreet">day</span>, {{ current_user.username }} — here's what's new for you
+        {% else %}
+          Welcome to UrbanCart — discover what's trending today
         {% endif %}
-        <div class="offer-image">
-          {% if banner.button_link %}
-            <a href="{{ banner.button_link }}" aria-label="{{ banner.button_text or banner.title }}">
-              <img src="{{ banner.image }}" alt="{{ banner.title }}" class="offer-img">
-            </a>
-          {% else %}
-            <img src="{{ banner.image }}" alt="{{ banner.title }}" class="offer-img">
-          {% endif %}
+      </div>
+
+      <!-- Headline -->
+      <h1 class="hero-title">
+        Experience Tech in<br>
+        <em>Full View.</em>
+      </h1>
+      <p class="hero-tag">
+        Discover premium RGB peripherals, high-performance electronics, and curated fashion — all in one seamless store.
+      </p>
+
+      <!-- Search bar with autocomplete -->
+      <div class="search-wrapper">
+        <form class="search-bar" action="{{ url_for('customer.shop_home') }}" method="GET" id="hero-search-form">
+          <select name="category">
+            <option value="">All</option>
+            <option value="electronics">Electronics</option>
+            <option value="fashion">Fashion</option>
+            <option value="beauty">Beauty</option>
+            <option value="books">Books</option>
+          </select>
+          <input type="text" name="q" id="hero-search-input" placeholder="Search for your next upgrade (e.g. Mechanical Keyboard)…" autocomplete="off">
+          <button type="submit"><i class="fas fa-search"></i> Search</button>
+        </form>
+        <div class="search-suggestions" id="hero-search-suggestions"></div>
+      </div>
+
+      <!-- CTA Buttons -->
+      <div class="hero-ctas">
+        <a href="{{ url_for('customer.shop_home') }}" class="cta-primary">
+          Shop Now <i class="fas fa-arrow-right" style="font-size:.76rem"></i>
+        </a>
+        {% if not current_user.is_authenticated %}
+          <a href="{{ url_for('auth.register') }}" class="cta-outline">Create Account</a>
+        {% else %}
+          <a href="{{ url_for('customer.shop_home') }}" class="cta-outline">My Dashboard</a>
+        {% endif %}
+      </div>
+
+      <!-- Stats -->
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num">50k+</div>
+          <div class="stat-lbl">Happy Customers</div>
         </div>
-      </article>
-      {% endfor %}
+        <div class="stat-sep"></div>
+        <div class="stat-item">
+          <div class="stat-num">1,200+</div>
+          <div class="stat-lbl">Products</div>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat-item">
+          <div class="stat-num">30%</div>
+          <div class="stat-lbl">Off in Sale</div>
+        </div>
+      </div>
     </div>
-    {% endif %}
-      
 
     <!-- Right: Visual -->
-    <!--div class="hero-visual">
+    <div class="hero-visual">
       <div class="hero-img">
         <span class="img-chip">🔥 Up to 40% off</span>
       </div>
-    </div-->
+    </div>
 
   </div>
 </section>
@@ -1350,102 +1034,13 @@
   </div>
 </section>
 
-<!-- ════════ JUST LANDED - NEW ARRIVALS ════════ -->
-<section class="sec-container" id="just-landed">
-  <div class="sec-inner">
-    <div class="sec-header">
-      <div>
-        <div class="sec-eyebrow">🆕 NEWEST</div>
-        <h2 class="sec-title">Just Landed</h2>
-      </div>
-      <a href="{{ url_for('customer.shop_home') }}" class="see-all">View All →</a>
-    </div>
-
-    {% if just_landed %}
-      <div class="grid">
-        {% for product in just_landed[:6] %}
-          <div class="pcard" data-delay="{{ loop.index0 * 0.08 }}">
-            <!-- Card Container -->
-            <div class="pcard-inner">
-              <!-- Image Section -->
-              <div class="pcard-img">
-                <img 
-                  src="{{ product.imageUrl or 'https://via.placeholder.com/300x300?text=Product' }}" 
-                  alt="{{ product.name }}"
-                  loading="lazy"
-                  onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'"
-                >
-                
-                <!-- NEW Badge -->
-                <div class="pcard-badge pcard-new">🆕 NEW</div>
-                
-                <!-- Discount Badge -->
-                {% if product.discountPercent > 0 %}
-                  <div class="pcard-badge pcard-discount">-{{ product.discountPercent }}%</div>
-                {% endif %}
-                
-                <!-- Wishlist Button -->
-                <button class="pcard-wishlist" title="Add to Wishlist" data-product-id="{{ product.id }}">
-                  <i class="fas fa-heart"></i>
-                </button>
-              </div>
-
-              <!-- Info Section -->
-              <div class="pcard-info">
-                <!-- Product Name -->
-                <h3 class="pcard-name">{{ product.name }}</h3>
-                
-                <!-- Rating -->
-                <div class="pcard-rating">
-                  <div class="stars">
-                    {% set rating = product.rating|int %}
-                    {% for i in range(5) %}
-                      <i class="fas fa-star" class="{% if i < rating %}star-filled{% else %}star-empty{% endif %}"></i>
-                    {% endfor %}
-                  </div>
-                  <span class="rating-text">({{ product.reviewCount }})</span>
-                </div>
-                
-                <!-- Pricing -->
-                <div class="pcard-price">
-                  <span class="current-price">₹{{ "%.0f"|format(product.discountPrice) }}</span>
-                  {% if product.mrp > product.discountPrice %}
-                    <span class="original-price">₹{{ "%.0f"|format(product.mrp) }}</span>
-                  {% endif %}
-                </div>
-                
-                <!-- Stock Status -->
-                <div class="pcard-stock">
-                  <span class="stock-badge {% if product.active %}in-stock{% else %}out-of-stock{% endif %}">
-                    {{ "In Stock" if product.active else "Out of Stock" }}
-                  </span>
-                </div>
-              </div>
-
-              <!-- CTA Section -->
-              <div class="pcard-cta">
-                <button class="pcard-btn-add" data-product-id="{{ product.id }}" data-product-name="{{ product.name }}">
-                  <i class="fas fa-shopping-bag"></i> Quick Add
-                </button>
-              </div>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div style="text-align: center; padding: 3rem 1rem; color: var(--muted);">
-        <i class="fas fa-inbox" style="font-size: 3rem; opacity: 0.5; margin-bottom: 1rem; display: block;"></i>
-        <p>No new products yet. Check back soon!</p>
-      </div>
-    {% endif %}
-  </div>
-</section>
+<!-- NEW ARRIVALS -->
 <section class="sec-container" id="new-arrivals">
   <div class="sec-inner">
     <div class="sec-header">
       <div>
-        
-        <h2 class="sec-title">Best Rated</h2>
+        <div class="sec-eyebrow"></div>
+        <h2 class="sec-title">New Arrivals</h2>
       </div>
       <a href="{{ url_for('customer.shop_home') }}" class="see-all">Explore All →</a>
     </div>
@@ -1477,7 +1072,7 @@
   <div class="trending-inner">
     <div class="sec-header">
       <div>
-        
+        <div class="sec-eyebrow">✦ Popular picks</div>
         <h2 class="sec-title">Trending Now</h2>
       </div>
       <a href="{{ url_for('customer.shop_home') }}" class="see-all">View All →</a>
@@ -1496,7 +1091,7 @@
   <div class="sec-inner">
     <div class="sec-header">
       <div>
-        
+        <div class="sec-eyebrow">✨ Just for you</div>
         <h2 class="sec-title">Personalized Picks</h2>
       </div>
       <a href="{{ url_for('customer.shop_home') }}" class="see-all">Explore More →</a>
@@ -1515,7 +1110,7 @@
   <div class="sec-inner">
     <div class="sec-header">
       <div>
-        
+        <div class="sec-eyebrow">🏆 Top rated</div>
         <h2 class="sec-title">Best Sellers</h2>
       </div>
       <a href="{{ url_for('customer.shop_home') }}" class="see-all">See All →</a>
@@ -1534,7 +1129,7 @@
   <div class="sec-inner">
     <div class="sec-header">
       <div>
-        
+        <div class="sec-eyebrow">⚡ Limited time</div>
         <h2 class="sec-title">Flash Deals</h2>
       </div>
       <a href="{{ url_for('customer.shop_home') }}" class="see-all">View All Deals →</a>
@@ -1621,11 +1216,11 @@
         <div class="badge-title">Fast Delivery</div>
         <div class="badge-text">Get your orders delivered in 2-3 business days</div>
       </div>
-        <div class="badge-item">
-          <div class="badge-icon">🔒</div>
-          <div class="badge-title">Secure Payment</div>
-          <div class="badge-text">100% secure transactions with SSL encryption</div>
-        </div>
+      <div class="badge-item">
+        <div class="badge-icon">🔒</div>
+        <div class="badge-title">Secure Payment</div>
+        <div class="badge-text">100% secure transactions with SSL encryption</div>
+      </div>
       <div class="badge-item">
         <div class="badge-icon">↩️</div>
         <div class="badge-title">Easy Returns</div>
@@ -1804,9 +1399,9 @@
       el.style.animation = 'pop .5s ease';
       setTimeout(() => el.style.animation = '', 500);
     }, 15000);
-    });
+  });
 
-    // Pop animation for sold count
+  // Pop animation for sold count
   const style = document.createElement('style');
   style.textContent = `
     @keyframes pop {
@@ -2029,49 +1624,6 @@
     const email = e.target.querySelector('input[type="email"]').value;
     alert('Thank you for subscribing! Check your email for a special offer.');
     e.target.reset();
-  });
-
-  // ════════════════════════════════════════
-  // JUST LANDED PRODUCT CARDS - EVENT HANDLERS
-  // ════════════════════════════════════════
-  
-  // Wishlist toggle
-  document.querySelectorAll('.pcard-wishlist').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const productId = btn.dataset.productId;
-      btn.classList.toggle('active');
-      console.log('Wishlist toggled for product:', productId);
-      // TODO: Add wishlist API call here
-    });
-  });
-
-  // Quick add to cart
-  document.querySelectorAll('.pcard-btn-add').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const productId = btn.dataset.productId;
-      const productName = btn.dataset.productName;
-      console.log('Quick add to cart:', { productId, productName });
-      
-      // Show feedback
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-check"></i> Added!';
-      btn.style.background = '#10b981';
-      
-      setTimeout(() => {
-        btn.innerHTML = originalText;
-        btn.style.background = '';
-      }, 2000);
-      
-      // TODO: Add cart API call here
-    });
-  });
-
-  // Apply staggered animation delays to product cards
-  document.querySelectorAll('.pcard[data-delay]').forEach((card) => {
-    const delay = parseFloat(card.dataset.delay);
-    card.style.animationDelay = `${delay}s`;
   });
 </script>
 

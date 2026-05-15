@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/product_detail.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
 </head>
 <body>
   <div class="pd-bg"></div>
@@ -61,7 +62,9 @@
 
         <div class="pd-rating">
           <div class="pd-stars" aria-label="Rating {{ product.rating }} out of 5">
-            {% for _ in range(5) %}<span aria-hidden="true">★</span>{% endfor %}
+              {% for i in range(1, 6) %}
+              {% if i <= product.rating %}<span aria-hidden="true">★</span>{% else %}<span aria-hidden="true">☆</span>{% endif %}
+            {% endfor %}
           </div>
           <div class="pd-reviews">{{ product.rating }} · {{ product.reviewCount }} reviews</div>
         </div>
@@ -152,7 +155,7 @@
           <div class="pd-review-summary">
             <div class="pd-review-score">
               <div class="pd-score">{{ product.rating }}</div>
-              <div class="pd-stars">{% for _ in range(5) %}<span aria-hidden="true">★</span>{% endfor %}</div>
+              <div class="pd-stars">{% for i in range(1, 6) %}{% if i <= product.rating %}<span aria-hidden="true">★</span>{% else %}<span aria-hidden="true">☆</span>{% endif %}{% endfor %}</div>
               <div class="pd-reviews">{{ product.reviewCount }} reviews</div>
             </div>
             <div class="pd-review-hint">
@@ -221,6 +224,9 @@
   </main>
 
   <script src="{{ url_for('static', filename='js/product_detail.js') }}"></script>
+
+  {% from 'components/footer.html' import footer %}
+  {{ footer() }}
 
 </body>
 </html>

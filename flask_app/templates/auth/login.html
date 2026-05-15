@@ -6,9 +6,13 @@
 <title>UrbanCart — Sign In</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+<style>
+  html { scroll-behavior: smooth; }
+  body { display: flex; flex-direction: column; }
+</style>
 </head>
 <body>
-<div class="layout">
   <!-- Left Brand Panel -->
   <div class="brand-panel">
     <div class="brand-logo">Urban<span>Cart</span></div>
@@ -97,6 +101,9 @@
     document.getElementById('tab-admin').classList.toggle('active', role === 'admin');
   }
 </script>
+
+{% from 'components/footer.html' import footer %}
+{{ footer() }}
 
 </body>
 </html>

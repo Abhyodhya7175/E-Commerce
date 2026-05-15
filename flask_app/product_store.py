@@ -19,6 +19,18 @@ DEFAULT_PRODUCTS = [
     {'id': 10, 'name': 'Sunglasses UV400', 'category': 'Fashion', 'mrp': 1099, 'discountPrice': 799, 'desc': 'Polarized lenses, lightweight frame.', 'icon': '🕶️', 'active': True},
     {'id': 11, 'name': 'Stainless Water Bottle', 'category': 'Sports', 'mrp': 999, 'discountPrice': 699, 'desc': '1L, keeps cold 24h, leak-proof cap.', 'icon': '🍶', 'active': True},
     {'id': 12, 'name': 'Design Thinking Handbook', 'category': 'Books', 'mrp': 999, 'discountPrice': 699, 'desc': 'Innovation methods used by top firms.', 'icon': '📖', 'active': True},
+    {'id': 13, 'name': 'Ultra HD 4K Webcam', 'category': 'Electronics', 'mrp': 3999, 'discountPrice': 2999, 'desc': '1080p resolution, built-in mic, auto focus.', 'icon': '📹', 'active': True},
+    {'id': 14, 'name': 'Cotton Jersey T-Shirt', 'category': 'Fashion', 'mrp': 899, 'discountPrice': 599, 'desc': 'Soft, breathable, trendy designs.', 'icon': '👕', 'active': True},
+    {'id': 15, 'name': 'Professional Camera Tripod', 'category': 'Electronics', 'mrp': 1999, 'discountPrice': 1499, 'desc': 'Aluminum alloy, compact, quick-release head.', 'icon': '📷', 'active': True},
+    {'id': 16, 'name': 'Organic Green Tea Set', 'category': 'Home', 'mrp': 799, 'discountPrice': 549, 'desc': '100% natural, premium loose leaf tea.', 'icon': '🍵', 'active': True},
+    {'id': 17, 'name': 'Denim Jacket Classic', 'category': 'Fashion', 'mrp': 2499, 'discountPrice': 1799, 'desc': 'Premium denim, timeless style.', 'icon': '🧥', 'active': True},
+    {'id': 18, 'name': 'Resistance Bands Set', 'category': 'Sports', 'mrp': 1299, 'discountPrice': 899, 'desc': '5-band set, portable fitness equipment.', 'icon': '💪', 'active': True},
+    {'id': 19, 'name': 'Python Programming Guide', 'category': 'Books', 'mrp': 1299, 'discountPrice': 899, 'desc': 'Complete guide for beginners to advanced.', 'icon': '🐍', 'active': True},
+    {'id': 20, 'name': 'Wireless Mouse Pro', 'category': 'Electronics', 'mrp': 1599, 'discountPrice': 999, 'desc': 'Ergonomic design, 2.4GHz, 12-month battery.', 'icon': '🖱️', 'active': True},
+    {'id': 21, 'name': 'Wall Clock Modern', 'category': 'Home', 'mrp': 1499, 'discountPrice': 999, 'desc': 'Minimalist design, silent mechanism.', 'icon': '⏰', 'active': True},
+    {'id': 22, 'name': 'Running Shorts Mesh', 'category': 'Sports', 'mrp': 899, 'discountPrice': 599, 'desc': 'Breathable mesh, quick-dry technology.', 'icon': '🩳', 'active': True},
+    {'id': 23, 'name': 'Web Development Bootcamp', 'category': 'Books', 'mrp': 1599, 'discountPrice': 1099, 'desc': 'HTML, CSS, JavaScript, React mastery.', 'icon': '💻', 'active': True},
+    {'id': 24, 'name': 'USB-C Charging Hub', 'category': 'Electronics', 'mrp': 2299, 'discountPrice': 1699, 'desc': '7-in-1 hub, fast charging, compact.', 'icon': '🔌', 'active': True},
 ]
 
 

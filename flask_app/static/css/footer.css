@@ -1,0 +1,221 @@
+/* ──────────────────────────────────── */
+/* FOOTER STYLING */
+/* ──────────────────────────────────── */
+
+:root {
+  --footer-bg: #1a1a2e;
+  --footer-text: #eeeaf5;
+  --footer-muted: #8080aa;
+  --footer-gold: #c9a84c;
+  --footer-border: #2a2a42;
+}
+
+[data-theme="light"] {
+  --footer-bg: #1a1a2e;
+  --footer-text: #eeeaf5;
+  --footer-muted: #8080aa;
+  --footer-gold: #c9a84c;
+  --footer-border: #2a2a42;
+}
+
+[data-theme="dark"] {
+  --footer-bg: #0f0f1a;
+  --footer-text: #eeeaf5;
+  --footer-muted: #8080aa;
+  --footer-gold: #d4aa5a;
+  --footer-border: #1a1a2e;
+}
+
+.footer {
+  background: var(--footer-bg);
+  color: var(--footer-text);
+  padding: 4rem 2rem 2rem;
+  margin-top: 4rem;
+  border-top: 2px solid var(--footer-border);
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--footer-gold);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.footer-text {
+  font-size: 0.9rem;
+  color: var(--footer-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footer-links li a {
+  color: var(--footer-muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.footer-links li a:hover {
+  color: var(--footer-gold);
+  padding-left: 0.5rem;
+}
+
+.footer-links li a::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--footer-gold);
+  transition: width 0.3s ease;
+}
+
+.footer-links li a:hover::before {
+  width: 100%;
+}
+
+/* ──── Social Links ──── */
+.social-links {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: rgba(201, 168, 76, 0.1);
+  border: 1px solid var(--footer-gold);
+  border-radius: 50%;
+  color: var(--footer-gold);
+  text-decoration: none;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.social-link:hover {
+  background: var(--footer-gold);
+  color: var(--footer-bg);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(201, 168, 76, 0.2);
+}
+
+/* ──── Footer Bottom ──── */
+.footer-bottom {
+  border-top: 1px solid var(--footer-border);
+  padding-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-bottom p {
+  margin: 0;
+  color: var(--footer-muted);
+  font-size: 0.9rem;
+}
+
+.footer-badges {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: rgba(201, 168, 76, 0.1);
+  border: 1px solid var(--footer-gold);
+  border-radius: 0.25rem;
+  color: var(--footer-gold);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ──── Responsive ──── */
+@media (max-width: 768px) {
+  .footer {
+    padding: 3rem 1rem 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .footer-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer-bottom p,
+  .footer-badges {
+    width: 100%;
+  }
+
+  .footer-badges {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer {
+    padding: 2rem 1rem 1rem;
+  }
+
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .footer-title {
+    font-size: 0.9rem;
+  }
+
+  .footer-links li a {
+    font-size: 0.9rem;
+  }
+
+  .social-links {
+    justify-content: center;
+  }
+}
