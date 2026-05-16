@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, abort, request, jsonify, current_app, url_for
+from flask import Blueprint, render_template, abort, request, jsonify, current_app, url_for, redirect, flash
 from flask_login import login_required, current_user
 from ..extensions import db
 from ..models import User, Product, ProductImage, OfferBanner
@@ -83,6 +83,13 @@ def _normalize_banner_order():
     for index, banner in enumerate(banners):
         banner.display_order = index
 
+
+def _flask_response(result):
+    if isinstance(result, tuple):
+        return result[0], result[1]
+    return result, 200
+
+
 def admin_required(fn):
     from functools import wraps
 
@@ -124,6 +131,83 @@ def products_grid():
 def api_products():
     products = Product.query.order_by(Product.id.asc()).all()
     return jsonify(products=[product.to_dict() for product in products])
+
+
+@admin_bp.route('/banners')
+@login_required
+@admin_required
+def banners():
+    now = datetime.utcnow()
+    items = OfferBanner.query.order_by(
+        OfferBanner.display_order.asc(),
+        OfferBanner.id.asc(),
+    ).all()
+    return render_template(
+        'admin/banners.html',
+        banners=items,
+        banners_json=[banner.to_dict() for banner in items],
+        now=now,
+    )
+
+
+@admin_bp.route('/banners/create', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_banner():
+    if request.method == 'GET':
+        return redirect(url_for('admin.banners', action='create'))
+
+    response, status = _flask_response(api_save_banner())
+    if status == 200:
+        flash('Banner created successfully.', 'success')
+        return redirect(url_for('admin.banners'))
+    payload = response.get_json(silent=True) or {}
+    flash(payload.get('error', 'Could not create banner.'), 'error')
+    return redirect(url_for('admin.banners', action='create'))
+
+
+@admin_bp.route('/banners/<int:banner_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_banner(banner_id):
+    banner = db.session.get(OfferBanner, banner_id)
+    if not banner:
+        abort(404)
+
+    if request.method == 'GET':
+        return redirect(url_for('admin.banners', edit=banner_id))
+
+    response, status = _flask_response(api_save_banner(route_banner_id=banner_id))
+    if status == 200:
+        flash('Banner updated successfully.', 'success')
+        return redirect(url_for('admin.banners'))
+    payload = response.get_json(silent=True) or {}
+    flash(payload.get('error', 'Could not update banner.'), 'error')
+    return redirect(url_for('admin.banners', edit=banner_id))
+
+
+@admin_bp.route('/banners/<int:banner_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_banner(banner_id):
+    response, status = _flask_response(api_delete_banner(banner_id))
+    if status == 200:
+        flash('Banner deleted.', 'success')
+    else:
+        payload = response.get_json(silent=True) or {}
+        flash(payload.get('error', 'Could not delete banner.'), 'error')
+    return redirect(url_for('admin.banners'))
+
+
+@admin_bp.route('/banners/<int:banner_id>/toggle', methods=['POST'])
+@login_required
+@admin_required
+def toggle_banner(banner_id):
+    response, status = _flask_response(api_toggle_banner(banner_id))
+    if status != 200:
+        payload = response.get_json(silent=True) or {}
+        flash(payload.get('error', 'Could not update banner status.'), 'error')
+    return redirect(url_for('admin.banners'))
 
 
 @admin_bp.route('/api/banners')

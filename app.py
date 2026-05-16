@@ -29,12 +29,15 @@ def home():
     wishlisted_products = [p.to_dict() for p in Product.query.filter_by(active=True).offset(2).limit(4).all()]
     carousel_products = [p.to_dict() for p in Product.query.filter_by(active=True).order_by(Product.created_at.desc()).limit(8).all()]
     flash_deals = Product.query.filter_by(active=True).offset(6).limit(4).all()
-    now = datetime.utcnow()
-    offer_banners = OfferBanner.query.filter(
-        OfferBanner.is_active.is_(True),
-        db.or_(OfferBanner.start_date.is_(None), OfferBanner.start_date <= now),
-        db.or_(OfferBanner.end_date.is_(None), OfferBanner.end_date >= now),
-    ).order_by(OfferBanner.display_order.asc(), OfferBanner.id.asc()).all()
+    today = datetime.utcnow().date()
+    offer_banners = [
+        banner for banner in OfferBanner.query.filter_by(is_active=True).order_by(
+            OfferBanner.display_order.asc(),
+            OfferBanner.id.asc(),
+        ).all()
+        if (not banner.start_date or banner.start_date.date() <= today)
+        and (not banner.end_date or banner.end_date.date() >= today)
+    ]
 
     # Add optional premium badges for UI richness
     for idx, d in enumerate(new_arrivals + trending_products + personalized_products + wishlisted_products + carousel_products):

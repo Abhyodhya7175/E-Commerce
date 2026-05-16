@@ -435,9 +435,82 @@
     .fb-val { font-size: .9rem; font-weight: 700; margin-top: 1px; }
     .fb-stars { color: #f59e0b; font-size: .66rem; }
 
-    /* ════════ OFFER BANNER ════════ */
+    /* ════════ OFFER BANNER (carousel when multiple) ════════ */
+    .offer-banner-stage {
+      position: relative;
+      width: 100%;
+    }
+    .offer-banner-carousel {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      overflow: hidden;
+    }
+    .offer-banner-track {
+      display: flex;
+      transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+      will-change: transform;
+    }
+    .offer-banner-slide {
+      flex: 0 0 100%;
+      width: 100%;
+      min-width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .offer-carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 30;
+      pointer-events: auto;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.95);
+      color: #1a2a4e;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 18px rgba(26, 26, 46, 0.15);
+      font-size: 1.75rem;
+      line-height: 1;
+      font-weight: 700;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .offer-carousel-btn:hover {
+      background: var(--gold-lt);
+      border-color: var(--gold);
+      color: var(--gold-dk);
+    }
+    .offer-carousel-prev { left: 12px; }
+    .offer-carousel-next { right: 12px; }
+    .offer-carousel-dots {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      padding: 0 4px;
+    }
+    .offer-carousel-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      border: none;
+      padding: 0;
+      background: var(--border);
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .offer-carousel-dot.is-active {
+      background: var(--gold);
+      transform: scale(1.2);
+    }
     .offer-banner-wrapper {
-      padding:0;
+      padding: 0;
       display: flex;
       flex-direction: column;
       gap: 1rem;
@@ -452,18 +525,23 @@
     }
     .offer-label i { font-size: 1.1rem; }
 
+    
+
     .offer-main {
-      display: grid;
-      grid-template-columns: minmax(240px, 0.8fr) minmax(280px, 1.3fr);
-      align-items: center;
-      gap: 1.4rem;
-      padding: clamp(1rem, 2vw, 1.8rem);
-      border-radius: 18px;
-      min-height: 240px;
-      overflow: hidden;
-      border: 1px solid rgba(232,227,216,0.8);
-      box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: minmax(240px, 0.8fr) minmax(280px, 1.3fr);
+    align-items: center;
+    gap: 1.4rem;
+    padding: 1rem;
+    border-radius: 18px;
+    height: 380px;          /* fixed equal height */
+    overflow: hidden;
+    border: 1px solid rgba(232,227,216,0.8);
+    box-shadow: var(--shadow);
     }
+
+
+
     .offer-main.image-only {
       grid-template-columns: 1fr;
       padding: 0.6rem;
@@ -529,17 +607,18 @@
 
     /* Image Section */
     .offer-image {
-      width: 100%;
-      min-height: clamp(180px, 30vw, 420px);
-      overflow: hidden;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.38);
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.38);
     }
+
     .offer-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
     }
     .offer-main.image-only .offer-img {
       object-fit: contain;
@@ -941,6 +1020,9 @@
       .pcard-name { font-size: 0.95rem; }
       .pcard-price .current-price { font-size: 1rem; }
       .offer-banner-wrapper { padding: 2rem 1.5rem; }
+      .offer-carousel-btn { width: 34px; height: 34px; font-size: 0.85rem; }
+      .offer-carousel-prev { left: 4px; }
+      .offer-carousel-next { right: 4px; }
       .offer-main { grid-template-columns: 1fr; gap: 1.2rem; }
       .offer-content { order: 2; }
       .offer-image { order: 1; }
@@ -978,6 +1060,7 @@
       .pcard-price { gap: 0.4rem; }
       .pcard-btn-add { font-size: 0.75rem; padding: 0.6rem 0.8rem; }
       .offer-banner-wrapper { padding: 1.5rem 1rem; }
+      .offer-carousel-btn { width: 30px; height: 30px; }
       .offer-label { font-size: 0.7rem; }
       .offer-left { gap: 1rem; }
       .offer-percent { font-size: 2.5rem; }
@@ -1005,6 +1088,7 @@
       .pcard-price .original-price { font-size: 0.75rem; }
       .pcard-stock .stock-badge { font-size: 0.65rem; padding: 0.25rem 0.6rem; }
       .offer-banner-wrapper { padding: 1rem; }
+      .offer-carousel-dots { margin-top: 10px; }
       .offer-label { font-size: 0.65rem; }
       .offer-left { flex-direction: column; gap: 0.8rem; }
       .offer-percent { font-size: 2rem; }
@@ -1277,10 +1361,15 @@
 
   <div class="hero-inner">
 
-    <!-- ── OFFER BANNER ── -->
+    <!-- ── OFFER BANNER (carousel if multiple) ── -->
     {% if offer_banners %}
-    <div class="offer-banner-wrapper" aria-label="Current offers">
+    {% set offer_count = offer_banners|length %}
+    <div class="offer-banner-wrapper">
+    <div class="offer-banner-stage" id="offer-banner-stage" data-offer-count="{{ offer_count }}">
+    <div class="offer-banner-carousel" id="offer-banner-carousel" aria-label="Current offers">
+      <div class="offer-banner-track" id="offer-banner-track">
       {% for banner in offer_banners %}
+      <div class="offer-banner-slide">
       <article class="offer-main{% if not banner.title and not banner.subtitle and not banner.button_text %} image-only{% endif %}" style="background: {{ banner.background_color or '#f5f5f5' }};">
         {% if banner.title or banner.subtitle or banner.button_text %}
         <div class="offer-content">
@@ -1303,10 +1392,25 @@
           {% endif %}
         </div>
       </article>
+      </div>
       {% endfor %}
+      </div>
+    </div>
+      {% if offer_count > 1 %}
+      <button type="button" class="offer-carousel-btn offer-carousel-prev" id="offer-carousel-prev" aria-label="Previous offer">&#8249;</button>
+      <button type="button" class="offer-carousel-btn offer-carousel-next" id="offer-carousel-next" aria-label="Next offer">&#8250;</button>
+      <div class="offer-carousel-dots" role="tablist" aria-label="Choose offer">
+        {% for banner in offer_banners %}
+        <button type="button" class="offer-carousel-dot{% if loop.first %} is-active{% endif %}" role="tab"
+                aria-label="Offer {{ loop.index }} of {{ offer_count }}"
+                aria-selected="{{ 'true' if loop.first else 'false' }}"
+                data-offer-index="{{ loop.index0 }}"></button>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
     </div>
     {% endif %}
-      
 
     <!-- Right: Visual -->
     <!--div class="hero-visual">
@@ -1843,6 +1947,13 @@
     }
   }
 
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  if (heroSearchInput && heroSearchForm && heroSearchSuggestions) {
   // Display suggestions when input is focused
   heroSearchInput.addEventListener('focus', () => {
     if (heroSearchInput.value.length === 0 && productSuggestions.length > 0) {
@@ -1895,13 +2006,6 @@
     heroSearchSuggestions.classList.add('show');
   }
 
-  // Escape HTML to prevent XSS
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
   // Save search to history on form submit
   heroSearchForm.addEventListener('submit', async (e) => {
     const query = heroSearchInput.value.trim();
@@ -1929,6 +2033,7 @@
       console.error('Error saving search:', error);
     }
   });
+  }
 
   // Load suggestions on page load
   loadProductSuggestions();
@@ -2073,6 +2178,72 @@
     const delay = parseFloat(card.dataset.delay);
     card.style.animationDelay = `${delay}s`;
   });
+  // Homepage offer banners carousel (multiple slides)
+  (function initOfferBannerCarousel() {
+    const stage = document.getElementById('offer-banner-stage');
+    const carousel = document.getElementById('offer-banner-carousel');
+    const track = document.getElementById('offer-banner-track');
+    const prev = document.getElementById('offer-carousel-prev');
+    const next = document.getElementById('offer-carousel-next');
+    if (!stage || !carousel || !track) return;
+
+    const n = parseInt(stage.dataset.offerCount, 10) || 0;
+    const slides = Array.from(track.querySelectorAll('.offer-banner-slide'));
+    if (n < 2 || slides.length < 2) return;
+
+    const dots = stage.querySelectorAll('.offer-carousel-dot');
+    let index = 0;
+
+    function layoutSlides() {
+      const w = carousel.clientWidth;
+      slides.forEach((slide) => {
+        slide.style.flex = '0 0 ' + w + 'px';
+        slide.style.width = w + 'px';
+        slide.style.minWidth = w + 'px';
+      });
+    }
+
+    function go(i) {
+      index = ((i % n) + n) % n;
+      const slide = slides[index];
+      const offset = slide ? slide.offsetLeft : 0;
+      track.style.transform = 'translate3d(-' + offset + 'px, 0, 0)';
+      dots.forEach((dot, j) => {
+        const on = j === index;
+        dot.classList.toggle('is-active', on);
+        dot.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    }
+
+    function onPrev(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      go(index - 1);
+    }
+    function onNext(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      go(index + 1);
+    }
+
+    if (prev) prev.addEventListener('click', onPrev);
+    if (next) next.addEventListener('click', onNext);
+    dots.forEach((dot) => {
+      dot.addEventListener('click', (e) => {
+        e.preventDefault();
+        go(parseInt(dot.getAttribute('data-offer-index'), 10));
+      });
+    });
+
+    window.addEventListener('resize', () => {
+      layoutSlides();
+      go(index);
+    });
+
+    layoutSlides();
+    go(0);
+  })();
+
 </script>
 
 {{ footer() }}

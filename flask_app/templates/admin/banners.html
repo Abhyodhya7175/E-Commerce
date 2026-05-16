@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offer Banners — UrbanCart Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_banners.css') }}">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #4a4a6a;
+    --cream: #faf8f3;
+    --gold: #c9a84c;
+    --border: #e8e3d8;
+    --danger: #c0392b;
+    --success: #1d6a3d;
+    --success-bg: #e6f4ec;
+    --sidebar-w: 220px;
+  }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    display: flex;
+    min-height: 100vh;
+  }
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    z-index: 50;
+  }
+  .sidebar-logo {
+    padding: 1.4rem 1.4rem 1rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .sidebar-logo span { color: var(--gold); }
+  .sidebar-logo small {
+    display: block;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .sidebar-nav { flex: 1; padding: 0.8rem 0.6rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 9px;
+    font-size: 0.83rem;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+  .nav-item.active { background: rgba(201,168,76,0.15); color: var(--gold); font-weight: 500; }
+  .sidebar-footer { padding: 0.8rem; border-top: 1px solid rgba(255,255,255,0.08); }
+  .logout-sidebar {
+    display: block;
+    text-align: center;
+    padding: 0.5rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.75rem;
+    text-decoration: none;
+  }
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .topbar h2 { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; }
+  .content { flex: 1; padding: 1.8rem 2rem; }
+  .btn-sm {
+    padding: 0.4rem 0.9rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    border: 1.5px solid var(--border);
+    background: none;
+    color: var(--ink);
+  }
+  .btn-sm.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn-sm.danger { color: var(--danger); border-color: #f5c6c2; }
+  .badge { font-size: 0.68rem; font-weight: 500; padding: 2px 9px; border-radius: 20px; }
+  .badge-inactive { background: #f1ede5; color: #6a6050; }
+  @media (max-width: 768px) {
+    .sidebar { width: 56px; }
+    .sidebar-logo small, .nav-item span { display: none; }
+    .main { margin-left: 56px; }
+    .content { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    Urban<span>Cart</span>
+    <small>Admin Panel</small>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="{{ url_for('home') }}" class="nav-item"><span>🏠</span><span>Home</span></a>
+    <a href="{{ url_for('admin.dashboard') }}" class="nav-item"><span>📊</span><span>Dashboard</span></a>
+    <a href="{{ url_for('admin.banners') }}" class="nav-item active"><span>🎁</span><span>Banners</span></a>
+  </nav>
+  <div class="sidebar-footer">
+    <a class="logout-sidebar" href="{{ url_for('auth.logout') }}">Sign out</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <h2>Offer Banners</h2>
+    <button type="button" class="btn-sm primary" id="btn-create-banner">+ New Banner</button>
+  </div>
+
+  <div class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    <div id="banner-toast" class="flash flash-success" hidden></div>
+
+    <div class="banner-page-header">
+      <div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;">Homepage offers</h3>
+        <p>Drag rows to reorder. Only active banners within their date range appear on the homepage.</p>
+      </div>
+    </div>
+
+    <div id="banner-list" class="banner-list"></div>
+  </div>
+</div>
+
+<div class="banner-modal-backdrop" id="banner-modal">
+  <div class="banner-modal" role="dialog" aria-labelledby="banner-modal-title">
+    <div class="banner-modal-head">
+      <h3 id="banner-modal-title">Create Banner</h3>
+      <button type="button" class="btn-sm" id="btn-close-modal">Close</button>
+    </div>
+    <form id="banner-form">
+      <input type="hidden" name="id" id="banner-id">
+      <div class="banner-modal-body">
+        <div class="banner-form-grid">
+          <div class="form-field full">
+            <label for="banner-title">Title *</label>
+            <input type="text" id="banner-title" name="title" required maxlength="200">
+          </div>
+          <div class="form-field full">
+            <label for="banner-subtitle">Subtitle</label>
+            <textarea id="banner-subtitle" name="subtitle" maxlength="500"></textarea>
+          </div>
+          <div class="form-field">
+            <label for="banner-button-text">Button text</label>
+            <input type="text" id="banner-button-text" name="buttonText" maxlength="100">
+          </div>
+          <div class="form-field">
+            <label for="banner-button-link">Button link</label>
+            <input type="text" id="banner-button-link" name="buttonLink" placeholder="https:// or /shop">
+          </div>
+          <div class="form-field">
+            <label for="banner-bg">Background color</label>
+            <input type="color" id="banner-bg" name="backgroundColor" value="#f5f5f5">
+          </div>
+          <div class="form-field checkbox-row">
+            <input type="checkbox" id="banner-active" name="active" checked>
+            <label for="banner-active">Active on homepage</label>
+          </div>
+          <div class="form-field">
+            <label for="banner-start">Start date</label>
+            <input type="datetime-local" id="banner-start" name="startDate">
+          </div>
+          <div class="form-field">
+            <label for="banner-end">End date</label>
+            <input type="datetime-local" id="banner-end" name="endDate">
+          </div>
+          <div class="form-field full">
+            <label>Banner image *</label>
+            <div class="upload-zone" id="upload-zone">
+              <strong>Drop image here</strong>
+              <p>or click to browse · PNG, JPG, WEBP, GIF</p>
+              <input type="file" id="banner-image" name="image" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+            </div>
+            <div class="upload-preview" id="upload-preview">
+              <img id="preview-img" alt="Banner preview">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="banner-modal-foot">
+        <button type="button" class="btn-sm" id="btn-cancel-modal">Cancel</button>
+        <button type="submit" class="btn-sm primary">Save Banner</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  window.__BANNERS_INITIAL__ = {{ banners_json | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/admin_banners.js') }}"></script>
+<script>
+  document.getElementById('btn-cancel-modal')?.addEventListener('click', () => {
+    document.getElementById('btn-close-modal')?.click();
+  });
+</script>
+</body>
+</html>

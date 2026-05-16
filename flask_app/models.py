@@ -176,6 +176,26 @@ class OfferBanner(db.Model):
     end_date = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def is_visible(self, now=None):
+        now = now or datetime.utcnow()
+        if not self.is_active:
+            return False
+        if self.start_date and self.start_date > now:
+            return False
+        if self.end_date and self.end_date < now:
+            return False
+        return True
+
+    def schedule_status(self, now=None):
+        now = now or datetime.utcnow()
+        if not self.is_active:
+            return 'inactive'
+        if self.start_date and self.start_date > now:
+            return 'scheduled'
+        if self.end_date and self.end_date < now:
+            return 'expired'
+        return 'live'
+
     def to_dict(self):
         return {
             'id': self.id,
