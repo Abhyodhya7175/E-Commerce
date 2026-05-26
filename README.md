@@ -87,9 +87,10 @@ tests/ or root tests     # pytest tests like test_login.py
 - If you need a clean start, drop the database, run `python init_db.py`, then run the seed scripts.
 
 ## Contributing
-- Add feature branches, include tests, and open pull requests against `main`.
 
-## Next steps I can help with
-- Update README further for CI, Docker, or GitHub Actions.
-- Create a CONTRIBUTING.md or a small dev script to automate seeding and testing.
+## Terms & License
+
+- Terms and conditions: [TERMS_AND_CONDITIONS.md](TERMS_AND_CONDITIONS.md)
+- License: [LICENSE](LICENSE)
+
 
