@@ -1,20 +1,23 @@
 {# Reusable product card macro (Jinja) #}
-{% macro product_card(product, badge_text=None, badge_class=None, rating_text=None, delay=None, wish_emoji='🤍', extra_badge_html=None, show_quick_add=True, quick_add_text='+ Add to Cart', href=None) %}
-  <div class="pcard slide-up"
+{% macro product_card(product, badge_text=None, badge_class=None, delay=None, wish_emoji='🤍', extra_badge_html=None, show_quick_add=True, quick_add_text='+ Add to Cart', href=None) %}
+  <div class="pcard slide-up enhanced-card"
        {% if delay is not none %}data-delay="{{ delay }}"{% endif %}>
     <div class="pimg">
       {% if badge_text %}
         <span class="plabel {{ badge_class or '' }}">{{ badge_text }}</span>
+      {% endif %}
+      {% if product.discount_percent and product.mrp %}
+        <span class="plabel l-sale">{{ product.discountPercent or ((product.mrp - product.discount_price) / product.mrp * 100) | int }}% OFF</span>
       {% endif %}
       {% if extra_badge_html %}
         {{ extra_badge_html | safe }}
       {% endif %}
       <span class="pwish">{{ wish_emoji }}</span>
 
-      {% if product.image_url %}
-        <img src="{{ product.image_url }}" class="img-main-p" alt="{{ product.name }}">
+      {% if product.imageUrl or product.image_url %}
+        <img src="{{ product.imageUrl or product.image_url }}" class="img-main-p" alt="{{ product.name }}">
       {% else %}
-        <span class="pemoji">{{ product.icon }}</span>
+        <span class="pemoji">{{ product.icon or '📦' }}</span>
       {% endif %}
 
       {% if show_quick_add %}
@@ -23,6 +26,7 @@
     </div>
 
     <div class="pbody">
+      <!-- Product Name -->
       <div class="pname">
         {% if href %}
           <a href="{{ href }}" style="color:inherit;text-decoration:none;">{{ product.name }}</a>
@@ -30,12 +34,88 @@
           {{ product.name }}
         {% endif %}
       </div>
-      <div class="pmeta">
-        <span class="pprice">₹{{ product.discount_price }}</span>
-        {% if rating_text %}
-          <span class="prating"><i class="fas fa-star"></i> {{ rating_text }}</span>
+
+      <!-- Category & Brand -->
+      <div class="pmetasub" style="font-size: 0.75rem; color: #8080aa; margin-bottom: 0.5rem;">
+        {% if product.category %}<span>{{ product.category }}</span>{% endif %}
+        {% if product.brand %}<span> • {{ product.brand }}</span>{% endif %}
+      </div>
+
+      <!-- SKU -->
+      {% if product.sku %}
+        <div class="psku" style="font-size: 0.7rem; color: #5a5a7a; margin-bottom: 0.4rem;">
+          <strong>SKU:</strong> {{ product.sku }}
+        </div>
+      {% endif %}
+
+      <!-- Short Description -->
+      {% if product.shortDesc %}
+        <div class="pshortdesc" style="font-size: 0.78rem; color: #5a5a7a; margin-bottom: 0.6rem; line-height: 1.3;">
+          {{ product.shortDesc[:80] }}{% if product.shortDesc|length > 80 %}...{% endif %}
+        </div>
+      {% endif %}
+
+      <!-- Stock Status Badge 
+      {% if product.stockStatus %}
+        <div style="margin-bottom: 0.5rem;">
+          {% if product.stockStatus == 'In Stock' %}
+            <span style="display: inline-block; background: #e6f4ec; color: #1d6a3d; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">✓ {{ product.stockStatus }}</span>
+          {% elif product.stockStatus == 'Low Stock' %}
+            <span style="display: inline-block; background: #fff3cd; color: #856404; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">⚠ {{ product.stockStatus }}</span>
+          {% else %}
+            <span style="display: inline-block; background: #f8d7da; color: #721c24; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">✕ {{ product.stockStatus }}</span>
+          {% endif %}
+        </div>
+      {% endif %}-->
+
+      <!-- Price Info -->
+      <div class="pmeta" style="margin-bottom: 0.6rem;">
+        <div>
+          <div style="font-size: 0.7rem; color: #5a5a7a; text-decoration: line-through;">₹{{ product.mrp | int }}</div>
+          <span class="pprice" style="font-size: 1.1rem;">₹{{ product.discountPrice | int }}</span>
+        </div>
+        {% if product.reviewCount %}
+          <span class="prating"><i class="fas fa-star"></i> {{ product.rating }} ({{ product.reviewCount }})</span>
         {% endif %}
       </div>
+
+      <!-- Highlights -->
+      {% if product.highlights %}
+        <div class="phighlights" style="font-size: 0.75rem; color: #8080aa; margin-bottom: 0.5rem;">
+          <strong>✓</strong>
+          {% for highlight in (product.highlights.split(',') if product.highlights is string else [product.highlights]) %}
+            <span>{{ highlight|trim }}</span>{% if not loop.last %}<span> • </span>{% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <!-- Specifications (compact) -->
+      {% if product.specifications %}
+        <div class="pspecs" style="font-size: 0.7rem; color: #5a5a7a; margin-bottom: 0.5rem; max-height: 50px; overflow: hidden;">
+          <strong>Specs:</strong>
+          {% if product.specifications is string and '{' in product.specifications %}
+            {% set specs_dict = product.specifications | tojson %}
+            {{ product.specifications[:50] }}...
+          {% else %}
+            {{ product.specifications[:50] }}...
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <!-- Long Description (hidden, expandable) -->
+      {% if product.longDesc %}
+        <details style="font-size: 0.75rem; color: #5a5a7a; margin-top: 0.5rem; cursor: pointer;">
+          <summary style="user-select: none; font-weight: 500;">More Details</summary>
+          <div style="padding-top: 0.5rem; line-height: 1.4;">{{ product.longDesc[:150] }}{% if product.longDesc|length > 150 %}...{% endif %}</div>
+        </details>
+      {% endif %}
+
+      <!-- GST Info (if needed) -->
+      {% if product.gstPercentage %}
+        <div style="font-size: 0.7rem; color: #8080aa; margin-top: 0.4rem;">
+          GST: {{ product.gstPercentage }}% ({{ product.gstType | capitalize }})
+        </div>
+      {% endif %}
     </div>
   </div>
 {% endmacro %}

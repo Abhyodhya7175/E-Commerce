@@ -545,25 +545,21 @@
     <a href="{{ url_for('home') }}" class="nav-item" >
       <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
     </a>
-    <div class="nav-item active" onclick="showSection('dashboard', this)">
+    <a href="{{ url_for('admin.dashboard') }}" class="nav-item active">
       <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
-    </div>
-    <div class="nav-item" onclick="showSection('products', this)">
-      <span class="nav-icon">📦</span><span class="nav-label">Products</span>
-    </div>
-
-    <a href="{{ url_for('admin.banners') }}" class="nav-item">
-    <span class="nav-icon">🎁</span>
-    <span class="nav-label">Banners</span>
     </a>
-
-
-    <div class="nav-item" onclick="showSection('orders', this)">
-      <span class="nav-icon">🧾</span><span class="nav-label">Orders</span>
-    </div>
-    <div class="nav-item" onclick="showSection('users', this)">
+    <a href="{{ url_for('admin.products') }}" class="nav-item">
+      <span class="nav-icon">📦</span><span class="nav-label">Products</span>
+    </a>
+    <a href="{{ url_for('admin.orders') }}" class="nav-item">
+      <span class="nav-icon">🛒</span><span class="nav-label">Orders</span>
+    </a>
+    <a href="{{ url_for('admin.users') }}" class="nav-item">
       <span class="nav-icon">👥</span><span class="nav-label">Users</span>
-    </div>
+    </a>
+    <a href="{{ url_for('admin.banners') }}" class="nav-item">
+      <span class="nav-icon">🎁</span><span class="nav-label">Banners</span>
+    </a>
   </nav>
   <div class="sidebar-footer">
     <div class="admin-badge">

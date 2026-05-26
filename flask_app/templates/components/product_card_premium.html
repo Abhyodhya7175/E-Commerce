@@ -29,15 +29,45 @@
 
     <div class="uc-body">
       <h3 class="uc-title">{{ p.name }}</h3>
+      <div class="uc-meta">
+        {% if p.category %}<span>{{ p.category }}</span>{% endif %}
+        {% if p.brand %}<span>{{ p.brand }}</span>{% endif %}
+      </div>
       <div class="uc-sku">SKU: {{ p.sku }}</div>
 
+      {% if p.shortDesc or p.desc %}
+        <p class="uc-desc">{{ (p.shortDesc or p.desc)[:96] }}{% if (p.shortDesc or p.desc)|length > 96 %}...{% endif %}</p>
+      {% endif %}
+
+      <div class="uc-details">
+        {% if p.stockQuantity is not none %}
+          <span>{{ p.stockQuantity }} units</span>
+        {% endif %}
+        {% if p.freeShipping %}
+          <span>Free shipping</span>
+        {% elif p.shippingCharges %}
+          <span>Ship: â‚¹{{ p.shippingCharges | int }}</span>
+        {% endif %}
+        {% if p.productStatus and p.productStatus != 'Published' %}
+          <span>{{ p.productStatus }}</span>
+        {% endif %}
+      </div>
+
       <div class="uc-row uc-rating">
+        {% if p.reviewCount %}
         <div class="uc-stars" aria-label="Rating {{ p.rating }} out of 5">
-          {% for _ in range(5) %}
+          {% set rounded_rating = (p.rating or 0) | round(0, 'floor') | int %}
+          {% for i in range(rounded_rating) %}
             <span class="uc-star" aria-hidden="true">★</span>
           {% endfor %}
+          {% for i in range(5 - rounded_rating) %}
+            <span class="uc-star uc-star-empty" aria-hidden="true">☆</span>
+          {% endfor %}
         </div>
-        <div class="uc-reviews">({{ p.reviewCount }})</div>
+        <div class="uc-reviews">{{ p.rating }} ({{ p.reviewCount }})</div>
+        {% else %}
+        <div class="uc-reviews">No reviews</div>
+        {% endif %}
       </div>
 
       <div class="uc-row uc-price">
@@ -46,10 +76,7 @@
       </div>
 
       <div class="uc-row uc-bottom">
-        <span class="uc-stock {{ 'uc-stock-out' if (p.stockStatus or '')|lower != 'in stock' else '' }}">
-          {{ p.stockStatus or 'In Stock' }}
-        </span>
-        <button class="uc-cart" type="button" data-cart-id="{{ p.id }}">Add to Cart</button>
+        <button class="uc-cart" type="button" data-cart-id="{{ p.id }}" {% if (p.stockStatus or '')|lower == 'out of stock' %}disabled{% endif %}>Add to Cart</button>
       </div>
     </div>
   </article>

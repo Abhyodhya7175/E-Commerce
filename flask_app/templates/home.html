@@ -1501,13 +1501,17 @@
                 
                 <!-- Rating -->
                 <div class="pcard-rating">
-                  <div class="stars">
-                    {% set rating = product.rating|int %}
-                    {% for i in range(5) %}
-                      <i class="fas fa-star" class="{% if i < rating %}star-filled{% else %}star-empty{% endif %}"></i>
-                    {% endfor %}
-                  </div>
-                  <span class="rating-text">({{ product.reviewCount }})</span>
+                  {% if product.reviewCount %}
+                    <div class="stars">
+                      {% set rating = product.rating|int %}
+                      {% for i in range(5) %}
+                        <i class="fas fa-star {% if i < rating %}star-filled{% else %}star-empty{% endif %}"></i>
+                      {% endfor %}
+                    </div>
+                    <span class="rating-text">{{ product.rating }} ({{ product.reviewCount }})</span>
+                  {% else %}
+                    <span class="rating-text">No reviews</span>
+                  {% endif %}
                 </div>
                 
                 <!-- Pricing -->

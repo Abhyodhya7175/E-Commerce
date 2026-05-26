@@ -39,8 +39,9 @@
               <div class="card-content">
                 <h3 class="product-name">{{ product.name }}</h3>
                 
-                {# Rating #}
+                {# Rating from Review rows via product.to_dict() #}
                 <div class="rating-section">
+                  {% if product.reviewCount %}
                   <div class="stars">
                     {% for i in range(5) %}
                       {% if i < product.rating %}
@@ -52,6 +53,9 @@
                   </div>
                   <span class="rating-value">{{ product.rating }}</span>
                   <span class="review-count">({{ product.reviewCount }})</span>
+                  {% else %}
+                    <span class="review-count">No reviews</span>
+                  {% endif %}
                 </div>
 
                 {# Price Section #}

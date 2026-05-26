@@ -199,7 +199,6 @@
     {% for p in products %}
       {{ product_card(
         p,
-        rating_text=('Stock: ' ~ (p.stock if p.stock is not none else '—')),
         show_quick_add=false,
         href=url_for('customer.product_detail', id=p.id)
       ) }}

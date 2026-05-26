@@ -58,7 +58,11 @@
       <!-- RIGHT: DETAILS -->
       <div class="pd-panel">
         <h1 class="pd-title">{{ product.name }}</h1>
-        <div class="pd-sku">SKU: <strong>{{ product.sku }}</strong></div>
+        <div class="pd-sku">
+          SKU: <strong>{{ product.sku }}</strong>
+          {% if product.category %}<span> · {{ product.category }}</span>{% endif %}
+          {% if product.brand %}<span> · {{ product.brand }}</span>{% endif %}
+        </div>
 
         <div class="pd-rating">
           <div class="pd-stars" aria-label="Rating {{ product.rating }} out of 5">
@@ -71,13 +75,31 @@
 
         <div class="pd-pricebox">
           <div class="pd-now">₹{{ (product.discountPrice or 0) | int }}</div>
-          <div class="pd-was">₹{{ (product.mrp or 0) | int }}</div>
+          {% if product.mrp and product.mrp > product.discountPrice %}
+            <div class="pd-was">₹{{ (product.mrp or 0) | int }}</div>
+          {% endif %}
           {% if product.discountPercent %}
             <div class="pd-save">You save {{ product.discountPercent }}%</div>
           {% endif %}
-          <span class="pd-stock {{ 'pd-stock-out' if (product.stockStatus or '')|lower != 'in stock' else '' }}">
+          <span class="pd-stock {{ 'pd-stock-low' if (product.stockStatus or '')|lower == 'low stock' else '' }} {{ 'pd-stock-out' if (product.stockStatus or '')|lower == 'out of stock' else '' }}">
             {{ product.stockStatus or 'In Stock' }}
           </span>
+        </div>
+
+        <div class="pd-summary">
+          {% if product.shortDesc %}
+            <p>{{ product.shortDesc }}</p>
+          {% endif %}
+          <div class="pd-summary-grid">
+            {% if product.freeShipping %}
+              <div><span>Shipping</span><strong>Free</strong></div>
+            {% elif product.shippingCharges %}
+              <div><span>Shipping</span><strong>₹{{ product.shippingCharges | int }}</strong></div>
+            {% endif %}
+            {% if product.gstPercentage %}
+              <div><span>GST</span><strong>{{ product.gstPercentage }}% {{ product.gstType }}</strong></div>
+            {% endif %}
+          </div>
         </div>
 
         <div class="pd-card">
@@ -91,14 +113,6 @@
           </div>
         </div>
 
-        <div class="pd-card">
-          <div class="pd-label">Options</div>
-          <div class="pd-options" role="list">
-            
-            <label class="pd-opt"><input type="checkbox" name="gift"> Gift Wrap</label>
-          </div>
-        </div>
-
         <div class="pd-qty">
           <div class="pd-label">Quantity</div>
           <div class="pd-qtyrow">
@@ -109,8 +123,8 @@
         </div>
 
         <div class="pd-actions">
-          <button class="pd-btn pd-btn-primary" type="button" id="pd-add">Add to Cart</button>
-          <button class="pd-btn pd-btn-dark" type="button" id="pd-buy">Buy Now</button>
+          <button class="pd-btn pd-btn-primary" type="button" id="pd-add" {% if (product.stockStatus or '')|lower == 'out of stock' %}disabled{% endif %}>Add to Cart</button>
+          <button class="pd-btn pd-btn-dark" type="button" id="pd-buy" {% if (product.stockStatus or '')|lower == 'out of stock' %}disabled{% endif %}>Buy Now</button>
           <button class="pd-btn pd-btn-ghost" type="button" id="pd-wish">Wishlist</button>
         </div>
 
@@ -128,25 +142,52 @@
       <div class="pd-tabs">
         <div class="pd-section">
           <h2>Product Description</h2>
-          <p>{{ product.desc or 'Premium quality product crafted for modern lifestyles.' }}</p>
+          {% set detail_text = product.longDesc or product.desc %}
+          {% if detail_text %}
+            {% for paragraph in detail_text.split('\n') %}
+              {% if paragraph.strip() %}
+                <p>{{ paragraph }}</p>
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <p class="pd-empty">No description has been added for this product.</p>
+          {% endif %}
         </div>
 
+        {% if product.highlightItems %}
         <div class="pd-section">
           <h2>Highlights</h2>
           <ul class="pd-list">
-            <li>Premium build with clean finishing</li>
-            <li>Designed for everyday performance</li>
-            <li>Great gifting option with add-ons</li>
+            {% for item in product.highlightItems %}
+              <li>{{ item }}</li>
+            {% endfor %}
           </ul>
         </div>
+        {% endif %}
 
         <div class="pd-section">
           <h2>Specifications</h2>
           <div class="pd-specs">
             <div class="pd-spec"><span>Category</span><strong>{{ product.category }}</strong></div>
+            {% if product.brand %}<div class="pd-spec"><span>Brand</span><strong>{{ product.brand }}</strong></div>{% endif %}
             <div class="pd-spec"><span>SKU</span><strong>{{ product.sku }}</strong></div>
             <div class="pd-spec"><span>Status</span><strong>{{ product.stockStatus }}</strong></div>
-            <div class="pd-spec"><span>Discount</span><strong>{{ product.discountPercent }}%</strong></div>
+            
+            {% if product.discountPercent %}<div class="pd-spec"><span>Discount</span><strong>{{ product.discountPercent }}%</strong></div>{% endif %}
+            {% if product.weight %}<div class="pd-spec"><span>Weight</span><strong>{{ product.weight }} kg</strong></div>{% endif %}
+            {% if product.length and product.width and product.height %}
+              <div class="pd-spec"><span>Dimensions</span><strong>{{ product.length }} × {{ product.width }} × {{ product.height }} cm</strong></div>
+            {% endif %}
+            {% if product.freeShipping %}
+              <div class="pd-spec"><span>Shipping</span><strong>Free</strong></div>
+            {% elif product.shippingCharges %}
+              <div class="pd-spec"><span>Shipping</span><strong>₹{{ product.shippingCharges | int }}</strong></div>
+            {% endif %}
+            {% for spec in product.specificationItems %}
+              {% if spec.label|lower not in ['brand'] %}
+              <div class="pd-spec"><span>{{ spec.label }}</span><strong>{{ spec.value }}</strong></div>
+              {% endif %}
+            {% endfor %}
           </div>
         </div>
 
@@ -159,7 +200,7 @@
               <div class="pd-reviews">{{ product.reviewCount }} reviews</div>
             </div>
             <div class="pd-review-hint">
-              Verified reviews help shoppers choose with confidence.
+              {{ product.reviewCount }} verified review{% if product.reviewCount != 1 %}s{% endif %} for this product.
             </div>
           </div>
 

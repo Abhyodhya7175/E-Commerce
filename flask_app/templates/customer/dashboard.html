@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UrbanCart — Shop</title>
+<title>UrbanCart &mdash; Shop</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/product_card_premium.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
@@ -670,7 +670,7 @@
   </div>
   <div class="nav-right">
     <button class="cart-btn" onclick="openCart()">
-      🛒 Cart <span class="cart-badge" id="cart-count">0</span>
+      &#128722; Cart <span class="cart-badge" id="cart-count">0</span>
     </button>
     <span class="user-info">Hi, <strong id="user-name">{{ user.name.split(' ')[0] if user else 'Customer' }}</strong></span>
     <a href="{{ url_for('auth.logout') }}" class="logout-btn" style="text-decoration:none;display:block;">Sign out</a>
@@ -686,7 +686,7 @@
 <!-- TOOLBAR -->
 <div class="toolbar" id="shop-toolbar">
   <div class="search-wrap">
-    <span class="search-icon">🔍</span>
+    <span class="search-icon">&#128269;</span>
     <input type="text" id="search-input" placeholder="Search products..." oninput="filterProducts()" />
   </div>
   <select class="filter-select" id="cat-filter" onchange="filterProducts()">
@@ -699,9 +699,9 @@
   </select>
   <select class="filter-select" id="sort-filter" onchange="filterProducts()">
     <option value="default">Sort: Default</option>
-    <option value="price-asc">Price: Low → High</option>
-    <option value="price-desc">Price: High → Low</option>
-    <option value="name">Name A–Z</option>
+    <option value="price-asc">Price: Low &rarr; High</option>
+    <option value="price-desc">Price: High &rarr; Low</option>
+    <option value="name">Name A-Z</option>
   </select>
   <span class="results-count" id="results-count">12 products</span>
 </div>
@@ -734,7 +734,7 @@
       </div>
       <div style="border-top:1px solid var(--border);padding-top:1rem;">
         <div style="font-size:0.8rem;color:var(--ink-light);margin-bottom:0.3rem;">Role</div>
-        <div style="font-size:0.85rem;font-weight:500;display:inline-flex;align-items:center;gap:5px;background:var(--gold-light);color:var(--gold-dark);padding:3px 10px;border-radius:20px;">👤 Customer</div>
+        <div style="font-size:0.85rem;font-weight:500;display:inline-flex;align-items:center;gap:5px;background:var(--gold-light);color:var(--gold-dark);padding:3px 10px;border-radius:20px;">&#128100; Customer</div>
       </div>
     </div>
   </div>
@@ -746,15 +746,15 @@
 <div class="cart-drawer" id="cart-drawer">
   <div class="cart-header">
     <h3>Your Cart</h3>
-    <button class="close-btn" onclick="closeCart()">✕</button>
+    <button class="close-btn" onclick="closeCart()">&#10005;</button>
   </div>
   <div class="cart-items" id="cart-items-list"></div>
   <div class="cart-footer">
     <div class="cart-total">
       <span>Total</span>
-      <span id="cart-total-amt">₹0.00</span>
+      <span id="cart-total-amt">&#8377;0.00</span>
     </div>
-    <button class="checkout-btn" onclick="placeOrder()">Place Order →</button>
+    <button class="checkout-btn" onclick="placeOrder()">Place Order &rarr;</button>
   </div>
 </div>
 
@@ -799,7 +799,14 @@
   }
 
   function isOutOfStock(product) {
-    return !product?.active || (Object.prototype.hasOwnProperty.call(product || {}, 'stock') && Number(product.stock) <= 0);
+    if (!product?.active) return true;
+    if (Object.prototype.hasOwnProperty.call(product || {}, 'stockQuantity')) {
+      return Number(product.stockQuantity) <= 0;
+    }
+    if (Object.prototype.hasOwnProperty.call(product || {}, 'stock')) {
+      return Number(product.stock) <= 0;
+    }
+    return (product?.stockStatus || '').toLowerCase() === 'out of stock';
   }
 
   function changeProductImage(event, button) {
@@ -842,17 +849,33 @@
       const sku = p.sku || `UC-${String(p.id || 0).padStart(5, '0')}`;
 
       const stockStatus = p.stockStatus || (outOfStock ? 'Out of Stock' : 'In Stock');
-      const rating = p.rating || 4.6;
-      const reviewCount = p.reviewCount || 128;
+      const rating = Number(p.rating || 0);
+      const reviewCount = Number(p.reviewCount || 0);
+      const description = p.shortDesc || p.desc || '';
+      const metaItems = [p.category, p.brand].filter(Boolean)
+        .map(item => `<span>${escapeAttr(item)}</span>`).join('');
+      const detailItems = [
+        typeof p.stockQuantity !== 'undefined' && p.stockQuantity !== null ? `${Number(p.stockQuantity).toLocaleString()} units` : '',
+        p.freeShipping ? 'Free shipping' : (p.shippingCharges ? `Ship: &#8377;${Number(p.shippingCharges).toLocaleString()}` : ''),
+        p.productStatus && p.productStatus !== 'Published' ? p.productStatus : ''
+      ].filter(Boolean).map(item => `<span>${escapeAttr(item)}</span>`).join('');
 
       const badgeDiscount = discountPercent ? `<span class="uc-badge uc-badge-discount">${discountPercent}% OFF</span>` : '';
       const badgeShip = p.freeShipping ? `<span class="uc-badge uc-badge-soft uc-badge-ship">Free Shipping</span>` : '';
       const badgeGift = p.freeGift ? `<span class="uc-badge uc-badge-soft uc-badge-gift">Free Gift</span>` : '';
 
-      const stockClass = outOfStock ? 'uc-stock-out' : '';
+      const stockClass = outOfStock ? 'uc-stock-out' : (stockStatus === 'Low Stock' ? 'uc-stock-low' : '');
       const stockText = stockStatus || (outOfStock ? 'Out of Stock' : 'In Stock');
 
-      const stars = Array.from({ length: 5 }).map(() => `<span class="uc-star" aria-hidden="true">★</span>`).join('');
+
+      const roundedRating = Math.floor(rating);
+      const reviewStars = reviewCount > 0
+        ? Array.from({ length: 5 }).map((_, index) => {
+            const isFilled = index < roundedRating;
+            const className = isFilled ? 'uc-star' : 'uc-star uc-star-empty';
+            return `<span class="${className}" aria-hidden="true">${isFilled ? '&#9733;' : '&#9734;'}</span>`;
+          }).join('')
+        : '';
 
       const wasPrice = (p.mrp ?? 0);
       const nowPrice = (p.discountPrice ?? 0);
@@ -865,34 +888,39 @@
             ${badgeGift}
 
             <button class="uc-wish" type="button" aria-label="Add to wishlist" data-wishlist-id="${p.id}">
-              <span aria-hidden="true">♡</span>
+              <span aria-hidden="true">&#9825;</span>
             </button>
 
             <div class="uc-imgwrap">
               ${primary
                 ? `<img src="${escapeAttr(primary)}" alt="${escapeAttr(p.name)}" loading="lazy">`
-                : `<div class="uc-fallback" aria-hidden="true">${escapeAttr(p.icon || '📦')}</div>`
+                : `<div class="uc-fallback" aria-hidden="true">${escapeAttr(p.icon || '&#128230;')}</div>`
               }
             </div>
           </div>
 
           <div class="uc-body">
             <h3 class="uc-title">${escapeAttr(p.name)}</h3>
+            <div class="uc-meta">${metaItems}</div>
             <div class="uc-sku">SKU: ${escapeAttr(sku)}</div>
+            ${description ? `<p class="uc-desc">${escapeAttr(description.slice(0, 96))}${description.length > 96 ? '...' : ''}</p>` : ''}
+            <div class="uc-details">${detailItems}</div>
 
             <div class="uc-row uc-rating">
-              <div class="uc-stars" aria-label="Rating ${rating} out of 5">${stars}</div>
-              <div class="uc-reviews">(${reviewCount})</div>
+              ${reviewCount > 0
+                ? `<div class="uc-stars" aria-label="Rating ${rating} out of 5">${reviewStars}</div><div class="uc-reviews">${rating} (${reviewCount})</div>`
+                : '<div class="uc-reviews">No reviews</div>'
+              }
             </div>
 
             <div class="uc-row uc-price">
-              <div class="uc-now">₹${Number(nowPrice).toLocaleString()}</div>
-              <div class="uc-was">₹${Number(wasPrice).toLocaleString()}</div>
+              <div class="uc-now">&#8377;${Number(nowPrice).toLocaleString()}</div>
+              <div class="uc-was">&#8377;${Number(wasPrice).toLocaleString()}</div>
             </div>
 
             <div class="uc-row uc-bottom">
               <span class="uc-stock ${stockClass}">${escapeAttr(stockText)}</span>
-              <button class="uc-cart" type="button" data-cart-id="${p.id}">Add to Cart</button>
+              <button class="uc-cart" type="button" data-cart-id="${p.id}" ${outOfStock ? 'disabled' : ''}>Add to Cart</button>
             </div>
           </div>
         </article>
@@ -912,10 +940,18 @@
     const cat  = document.getElementById('cat-filter').value;
     const sort = document.getElementById('sort-filter').value;
 
-    filteredProducts = PRODUCTS.filter(p =>
-      (p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q)) &&
-      (!cat || p.category === cat)
-    );
+    filteredProducts = PRODUCTS.filter(p => {
+      const searchable = [
+        p.name,
+        p.desc,
+        p.shortDesc,
+        p.category,
+        p.brand,
+        p.sku
+      ].filter(Boolean).join(' ').toLowerCase();
+
+      return searchable.includes(q) && (!cat || p.category === cat);
+    });
 
     if (sort === 'price-asc')  filteredProducts.sort((a,b) => a.discountPrice - b.discountPrice);
     if (sort === 'price-desc') filteredProducts.sort((a,b) => b.discountPrice - a.discountPrice);
@@ -956,16 +992,16 @@
 
     const list = document.getElementById('cart-items-list');
     if (cart.length === 0) {
-      list.innerHTML = `<div class="cart-empty"><div class="empty-icon">🛒</div><p>Your cart is empty</p></div>`;
+      list.innerHTML = `<div class="cart-empty"><div class="empty-icon">&#128722;</div><p>Your cart is empty</p></div>`;
     } else {
       list.innerHTML = cart.map(item => `
         <div class="cart-item">
-          <div class="ci-icon">${item.imageUrls && item.imageUrls.length ? `<img src="${item.imageUrls[0]}" alt="${item.name}">` : (item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.name}">` : (item.icon || '📦'))}</div>
+          <div class="ci-icon">${item.imageUrls && item.imageUrls.length ? `<img src="${item.imageUrls[0]}" alt="${item.name}">` : (item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.name}">` : (item.icon || '&#128230;'))}</div>
           <div class="ci-info">
             <div class="ci-name">${item.name}</div>
-            <div class="ci-price">₹${item.discountPrice.toLocaleString()} each</div>
+            <div class="ci-price">&#8377;${item.discountPrice.toLocaleString()} each</div>
             <div class="ci-controls">
-              <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
+              <button class="qty-btn" onclick="changeQty(${item.id}, -1)">&minus;</button>
               <span class="qty-num">${item.qty}</span>
               <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
               <button class="ci-remove" onclick="removeFromCart(${item.id})">Remove</button>
@@ -1016,7 +1052,7 @@
     cart = [];
     updateCartUI();
     closeCart();
-    showToast('🎉 Order placed successfully!');
+    showToast('Order placed successfully!');
     renderOrders();
   }
 
@@ -1029,8 +1065,8 @@
     list.innerHTML = myOrders.map(o => `
       <div class="order-card">
         <div class="order-info">
-          <h4>${o.id} — ${o.items}</h4>
-          <p>${o.date} · ${o.total}</p>
+          <h4>${o.id} &mdash; ${o.items}</h4>
+          <p>${o.date} &middot; ${o.total}</p>
         </div>
         <span class="order-status status-${o.status}">${o.status.charAt(0).toUpperCase() + o.status.slice(1)}</span>
       </div>`).join('');

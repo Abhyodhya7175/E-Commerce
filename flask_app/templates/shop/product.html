@@ -3,16 +3,38 @@
 {% block title %}{{ product.name }} - My Shop{% endblock %}
 
 {% block content %}
-<div class="row">
+{% set product_data = product.to_dict() if product.to_dict is defined else product %}
+<div class="row g-4">
   <div class="col-md-6">
-    <img src="{{ product.image_url }}" class="img-fluid" alt="{{ product.name }}">
+    {% if product_data.imageUrl %}
+      <img src="{{ product_data.imageUrl }}" class="img-fluid rounded" alt="{{ product_data.name }}">
+    {% else %}
+      <div class="border rounded d-flex align-items-center justify-content-center" style="min-height: 320px; font-size: 4rem;">
+        {{ product_data.icon or '📦' }}
+      </div>
+    {% endif %}
   </div>
   <div class="col-md-6">
-    <h1>{{ product.name }}</h1>
-    <p class="lead">${{ '%.2f'|format(product.price) }}</p>
-    <p>{{ product.description }}</p>
-    <p>Stock: {{ product.stock }}</p>
-    <button class="btn btn-primary">Add to cart</button>
+    <h1>{{ product_data.name }}</h1>
+    <p class="text-muted">
+      SKU: <strong>{{ product_data.sku }}</strong>
+      {% if product_data.category %} · {{ product_data.category }}{% endif %}
+      {% if product_data.brand %} · {{ product_data.brand }}{% endif %}
+    </p>
+    <p class="lead">
+      ₹{{ (product_data.discountPrice or 0) | int }}
+      {% if product_data.mrp and product_data.mrp > product_data.discountPrice %}
+        <span class="text-muted text-decoration-line-through fs-6">₹{{ product_data.mrp | int }}</span>
+      {% endif %}
+    </p>
+    {% if product_data.longDesc or product_data.desc %}
+      <p>{{ product_data.longDesc or product_data.desc }}</p>
+    {% endif %}
+    <p>Status: <strong>{{ product_data.stockStatus }}</strong></p>
+    {% if product_data.stockQuantity is not none %}
+      <p>Stock: <strong>{{ product_data.stockQuantity }} units</strong></p>
+    {% endif %}
+    <button class="btn btn-primary" {% if (product_data.stockStatus or '')|lower == 'out of stock' %}disabled{% endif %}>Add to cart</button>
   </div>
 </div>
 {% endblock %}

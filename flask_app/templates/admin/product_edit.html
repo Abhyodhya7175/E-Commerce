@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Product — UrbanCart Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #4a4a6a;
+    --cream: #faf8f3;
+    --gold: #c9a84c;
+    --border: #e8e3d8;
+    --danger: #c0392b;
+    --success: #1d6a3d;
+    --success-bg: #e6f4ec;
+    --sidebar-w: 220px;
+  }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    display: flex;
+    min-height: 100vh;
+  }
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    z-index: 50;
+  }
+  .sidebar-logo {
+    padding: 1.4rem 1.4rem 1rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .sidebar-logo span { color: var(--gold); }
+  .sidebar-logo small {
+    display: block;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .sidebar-nav { flex: 1; padding: 0.8rem 0.6rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 9px;
+    font-size: 0.83rem;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+  .nav-item.active { background: rgba(201,168,76,0.15); color: var(--gold); font-weight: 500; }
+  .sidebar-footer { padding: 0.8rem; border-top: 1px solid rgba(255,255,255,0.08); }
+  .logout-sidebar {
+    display: block;
+    text-align: center;
+    padding: 0.5rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.75rem;
+    text-decoration: none;
+  }
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .topbar h2 { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; }
+  .topbar-actions { display: flex; gap: 0.8rem; }
+  .content { flex: 1; padding: 1.8rem 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+    background: #fff;
+    border-radius: 8px 8px 0 0;
+  }
+  .tab-button {
+    padding: 1rem 1.2rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ink-light);
+    border-bottom: 2px solid transparent;
+    position: relative;
+    bottom: -1px;
+  }
+  .tab-button:hover { color: var(--ink); }
+  .tab-button.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+  .tab-content {
+    display: none;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  .tab-content.active { display: block; }
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  .form-group.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+  }
+  .form-group.grid.three {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .form-group label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 0.7rem 0.85rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--ink);
+    background: var(--cream);
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+  .form-group textarea { min-height: 100px; resize: vertical; }
+  .char-count {
+    font-size: 0.7rem;
+    color: var(--ink-light);
+    margin-top: 0.3rem;
+  }
+  .calc-box {
+    background: var(--success-bg);
+    border: 1px solid rgba(29,106,61,0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+  .calc-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.6rem 0;
+    font-size: 0.85rem;
+  }
+  .calc-item .label { color: var(--ink-light); }
+  .calc-item .value { font-weight: 600; color: var(--success); }
+  .image-upload-wrapper {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    background: var(--cream);
+    transition: all 0.3s;
+  }
+  .image-upload-wrapper:hover { border-color: var(--gold); background: rgba(201,168,76,0.05); }
+  .image-upload-wrapper input[type="file"] { display: none; }
+  .image-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .image-preview {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--cream);
+    aspect-ratio: 1;
+  }
+  .image-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .image-remove {
+    position: absolute;
+    top: 4px; right: 4px;
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 24px; height: 24px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .image-remove:hover { background: #a02819; }
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0.5rem 0;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--success));
+    border-radius: 4px;
+  }
+  .toggle-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 1rem;
+  }
+  .toggle {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background: var(--border);
+    border-radius: 13px;
+    cursor: pointer;
+  }
+  .toggle input { display: none; }
+  .toggle-slider {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 22px; height: 22px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+  .toggle input:checked ~ .toggle-slider { left: 26px; background: var(--success); }
+  .toggle input:checked { background: var(--success); }
+  .gst-type-toggle {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 0.5rem;
+  }
+  .gst-type-toggle input[type="radio"] { display: none; }
+  .radio-label {
+    padding: 0.6rem 1.2rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--cream);
+  }
+  .gst-type-toggle input[type="radio"]:checked + .radio-label {
+    background: var(--gold);
+    color: #fff;
+    border-color: var(--gold);
+  }
+  .pricing-summary-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    box-shadow: 0 4px 12px rgba(201,168,76,0.1);
+  }
+  .pricing-header {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .pricing-item {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.9rem;
+    text-align: center;
+    transition: all 0.3s;
+  }
+  .pricing-item:hover {
+    border-color: var(--gold);
+    box-shadow: 0 2px 8px rgba(201,168,76,0.1);
+  }
+  .pricing-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--ink-light);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 0.5rem;
+  }
+  .pricing-value {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--success);
+  }
+  .pricing-value.final {
+    color: var(--gold);
+    font-size: 1.3rem;
+  }
+  .pricing-value.profit {
+    color: var(--success);
+  }
+  .pricing-warnings {
+    border-top: 1px solid var(--border);
+    padding-top: 0.8rem;
+    margin-top: 0.8rem;
+  }
+  .warning-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--danger);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  .warning-item:last-child { margin-bottom: 0; }
+  .sticky-action-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    padding: 1.2rem 2rem;
+    padding-left: calc(var(--sidebar-w) + 2rem);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.8rem;
+    z-index: 100;
+  }
+  .btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: none;
+    color: var(--ink);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn.danger { color: var(--danger); border-color: #f5c6c2; }
+  .btn:hover { background: rgba(201,168,76,0.1); }
+  .main { padding-bottom: 80px; }
+  .toast {
+    position: fixed;
+    bottom: 100px; right: 2rem;
+    background: var(--ink);
+    color: #fff;
+    padding: 0.7rem 1.2rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 768px) {
+    .sidebar { width: 56px; }
+    .sidebar-logo small, .nav-item span { display: none; }
+    .main { margin-left: 56px; }
+    .sticky-action-bar { padding-left: calc(56px + 1rem); padding-right: 1rem; }
+    .content { padding: 1rem; }
+    .form-group.grid { grid-template-columns: 1fr; }
+    .tabs { flex-wrap: wrap; }
+    .tab-button { padding: 0.7rem 0.9rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    Urban<span>Cart</span>
+    <small>Admin Panel</small>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="{{ url_for('home') }}" class="nav-item"><span>🏠</span><span>Home</span></a>
+    <a href="{{ url_for('admin.dashboard') }}" class="nav-item"><span>📊</span><span>Dashboard</span></a>
+    <a href="{{ url_for('admin.products') }}" class="nav-item active"><span>📦</span><span>Products</span></a>
+    <a href="{{ url_for('admin.orders') }}" class="nav-item"><span>🛒</span><span>Orders</span></a>
+    <a href="{{ url_for('admin.users') }}" class="nav-item"><span>👥</span><span>Users</span></a>
+    <a href="{{ url_for('admin.banners') }}" class="nav-item"><span>🎁</span><span>Banners</span></a>
+  </nav>
+  <div class="sidebar-footer">
+    <a class="logout-sidebar" href="{{ url_for('auth.logout') }}">Sign out</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <h2 id="page-title">New Product</h2>
+    <div class="topbar-actions">
+      <button class="btn" onclick="window.location.href='{{ url_for('admin.products') }}'">← Back</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <form id="product-form">
+      <input type="hidden" id="product-id" name="id" value="">
+
+      <div class="tabs">
+        <button type="button" class="tab-button active" onclick="switchTab('basic')">📝 Basic</button>
+        <button type="button" class="tab-button" onclick="switchTab('pricing')">💰 Pricing</button>
+        <button type="button" class="tab-button" onclick="switchTab('inventory')">📦 Inventory</button>
+        <button type="button" class="tab-button" onclick="switchTab('media')">🖼️ Media</button>
+        <button type="button" class="tab-button" onclick="switchTab('seo')">🔍 SEO</button>
+        <button type="button" class="tab-button" onclick="switchTab('classification')">🏷️ Classification</button>
+        <button type="button" class="tab-button" onclick="switchTab('shipping')">🚚 Shipping</button>
+        <button type="button" class="tab-button" onclick="switchTab('status')">⚙️ Status</button>
+      </div>
+
+      <!-- TAB: BASIC -->
+      <div id="tab-basic" class="tab-content active">
+        <div class="form-group">
+          <label>Product Name *</label>
+          <input type="text" id="product-name" name="name" required maxlength="150">
+        </div>
+        <div class="form-group grid">
+          <div>
+            <label>Product Slug</label>
+            <input type="text" id="product-slug" name="slug">
+            <button type="button" onclick="generateSlug()" class="btn" style="margin-top: 0.5rem; width: auto;">Auto-generate</button>
+          </div>
+          <div>
+            <label>Category *</label>
+            <select id="category-select" name="category" required></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Short Description (500 chars)</label>
+          <textarea id="short-desc" name="shortDescription" maxlength="500" placeholder="Brief description for listings"></textarea>
+          <div class="char-count"><span id="short-count">0</span>/500</div>
+        </div>
+        <div class="form-group">
+          <label>Long Description</label>
+          <textarea id="long-desc" name="longDescription" placeholder="Detailed product description"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Highlights (comma-separated)</label>
+          <textarea id="highlights" name="highlights" placeholder="e.g., Premium Quality, Durable, Eco-friendly" style="min-height: 80px;"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Specifications (JSON or key:value)</label>
+          <textarea id="specifications" name="specifications" placeholder='{"color": "black", "size": "large"}' style="min-height: 100px; font-family: monospace;"></textarea>
+        </div>
+      </div>
+
+      <!-- TAB: PRICING -->
+      <div id="tab-pricing" class="tab-content">
+        <div class="form-group grid">
+          <div>
+            <label>Original Price (MRP) ₹ *</label>
+            <input type="number" id="mrp" name="mrp" required step="0.01" min="0">
+          </div>
+          <div>
+            <label>Discounted Price ₹ *</label>
+            <input type="number" id="discount-price" name="discountPrice" required step="0.01" min="0">
+          </div>
+        </div>
+
+        <div class="form-group grid">
+          <div>
+            <label>GST Type *</label>
+            <div class="gst-type-toggle">
+              <input type="radio" id="gst-inclusive" name="gstType" value="inclusive" checked>
+              <label for="gst-inclusive" class="radio-label">Inclusive</label>
+              <input type="radio" id="gst-exclusive" name="gstType" value="exclusive">
+              <label for="gst-exclusive" class="radio-label">Exclusive</label>
+            </div>
+          </div>
+          <div>
+            <label>GST Percentage %</label>
+            <input type="number" id="gst-percentage" name="gstPercentage" value="18" step="0.1" min="0" max="100">
+          </div>
+        </div>
+
+        <div class="form-group grid">
+          <div>
+            <label>Cost Price ₹</label>
+            <input type="number" id="cost-price" name="costPrice" step="0.01" min="0">
+          </div>
+        </div>
+
+        <!-- Professional Pricing Summary Card -->
+        <div class="pricing-summary-card">
+          <div class="pricing-header">💰 Pricing Summary</div>
+
+          <div class="pricing-grid">
+            <div class="pricing-item">
+              <span class="pricing-label">Discount</span>
+              <span class="pricing-value" id="calc-discount">0%</span>
+            </div>
+            <div class="pricing-item">
+              <span class="pricing-label">Base Price</span>
+              <span class="pricing-value" id="calc-base">₹0</span>
+            </div>
+            <div class="pricing-item">
+              <span class="pricing-label">GST Amount</span>
+              <span class="pricing-value" id="calc-gst">₹0</span>
+            </div>
+            <div class="pricing-item">
+              <span class="pricing-label">Final Price</span>
+              <span class="pricing-value final" id="calc-final">₹0</span>
+            </div>
+            <div class="pricing-item">
+              <span class="pricing-label">Profit Margin</span>
+              <span class="pricing-value" id="calc-profit">0%</span>
+            </div>
+            <div class="pricing-item">
+              <span class="pricing-label">Profit Amount</span>
+              <span class="pricing-value profit" id="calc-profit-amount">₹0</span>
+            </div>
+          </div>
+
+          <div class="pricing-warnings" id="pricing-warnings"></div>
+        </div>
+      </div>
+
+      <!-- TAB: INVENTORY -->
+      <div id="tab-inventory" class="tab-content">
+        <div class="form-group grid">
+          <div>
+            <label>SKU Code *</label>
+            <input type="text" id="sku-code" name="sku" required>
+          </div>
+          <div>
+            <label>Barcode</label>
+            <input type="text" id="barcode" name="barcode">
+          </div>
+        </div>
+        <div class="form-group grid">
+          <div>
+            <label>Stock Quantity *</label>
+            <input type="number" id="stock-qty" name="stockQuantity" value="0" required min="0">
+          </div>
+          <div>
+            <label>Minimum Stock Alert</label>
+            <input type="number" id="min-stock" name="minStockAlert" value="5" min="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Stock Status</label>
+          <input type="text" id="stock-status" readonly style="background: #f0f0f0;">
+        </div>
+        <div class="form-group">
+          <label>Warehouse Location</label>
+          <input type="text" id="warehouse-location" name="warehouseLocation">
+        </div>
+        <div style="margin-top: 1.5rem;">
+          <label>Inventory Level</label>
+          <div class="progress-bar">
+            <div class="progress-fill" id="stock-progress" style="width: 0%;"></div>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--ink-light);">
+            <span id="stock-level-text">0%</span> of max
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: MEDIA -->
+      <div id="tab-media" class="tab-content">
+        <div class="form-group">
+          <label>Product Images</label>
+          <div class="image-upload-wrapper" id="image-upload-wrapper">
+            <div>📸 Click or drag images here (PNG, JPG, WebP, GIF)</div>
+            <input type="file" id="product-images" name="images" multiple accept="image/*">
+          </div>
+          <div class="image-preview-grid" id="images-preview"></div>
+        </div>
+      </div>
+
+      <!-- TAB: SEO -->
+      <div id="tab-seo" class="tab-content">
+        <div class="form-group">
+          <label>Meta Title (60 chars)</label>
+          <input type="text" id="meta-title" name="metaTitle" maxlength="200">
+          <div class="char-count"><span id="title-count">0</span>/60</div>
+        </div>
+        <div class="form-group">
+          <label>Meta Description (160 chars)</label>
+          <textarea id="meta-desc" name="metaDescription" maxlength="500" style="min-height: 80px;"></textarea>
+          <div class="char-count"><span id="desc-count">0</span>/160</div>
+        </div>
+        <div class="form-group">
+          <label>Keywords (comma-separated)</label>
+          <input type="text" id="meta-keywords" name="metaKeywords" placeholder="keyword1, keyword2, keyword3">
+        </div>
+        <div class="form-group">
+          <label>Canonical URL</label>
+          <input type="url" id="canonical-url" name="canonicalUrl">
+        </div>
+        <div class="form-group">
+          <label>Open Graph Image URL</label>
+          <input type="url" id="og-image" name="ogImage">
+        </div>
+        <div class="calc-box" style="background: #e3f2fd;">
+          <div style="font-weight: 600; margin-bottom: 0.8rem;">SEO Preview</div>
+          <div style="font-size: 0.85rem; color: #1a73e8;">
+            <div id="seo-title" style="font-weight: 600; margin-bottom: 0.3rem;">Your Page Title</div>
+            <div id="seo-url" style="color: #006621; margin-bottom: 0.3rem;">https://example.com/product-slug</div>
+            <div id="seo-desc" style="color: #545454;">Your meta description will appear here</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: CLASSIFICATION -->
+      <div id="tab-classification" class="tab-content">
+        <div class="form-group grid">
+          <div>
+            <label>Brand</label>
+            <select id="brand-select" name="brand"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Tags (comma-separated)</label>
+          <input type="text" id="tags" name="tags" placeholder="tag1, tag2, tag3">
+        </div>
+      </div>
+
+      <!-- TAB: SHIPPING -->
+      <div id="tab-shipping" class="tab-content">
+        <div class="form-group grid three">
+          <div>
+            <label>Weight (kg)</label>
+            <input type="number" id="weight" name="weight" step="0.1" min="0">
+          </div>
+          <div>
+            <label>Length (cm)</label>
+            <input type="number" id="length" name="length" step="0.1" min="0">
+          </div>
+          <div>
+            <label>Width (cm)</label>
+            <input type="number" id="width" name="width" step="0.1" min="0">
+          </div>
+        </div>
+        <div class="form-group grid">
+          <div>
+            <label>Height (cm)</label>
+            <input type="number" id="height" name="height" step="0.1" min="0">
+          </div>
+        </div>
+        <div class="form-group grid">
+          <div>
+            <label>Shipping Charges ₹</label>
+            <input type="number" id="shipping-charges" name="shippingCharges" value="0" step="0.01" min="0">
+          </div>
+          <div>
+            <label>Free Shipping</label>
+            <div class="toggle-group">
+              <label class="toggle">
+                <input type="checkbox" id="free-shipping" name="freeShipping">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: STATUS -->
+      <div id="tab-status" class="tab-content">
+        <div class="form-group">
+          <label>Product Status *</label>
+          <select id="product-status" name="productStatus" required>
+            <option value="Draft">Draft</option>
+            <option value="Published">Published</option>
+            <option value="Hidden">Hidden</option>
+            <option value="Out of Stock">Out of Stock</option>
+          </select>
+        </div>
+        <div style="margin-top: 2rem;">
+          <label style="display: block; margin-bottom: 1rem; font-weight: 600;">Product Badges</label>
+          <div class="toggle-group" style="margin-bottom: 1rem;">
+            <label class="toggle">
+              <input type="checkbox" id="featured" name="featured">
+              <span class="toggle-slider"></span>
+            </label>
+            <span>Featured Product</span>
+          </div>
+          <div class="toggle-group" style="margin-bottom: 1rem;">
+            <label class="toggle">
+              <input type="checkbox" id="trending" name="trending">
+              <span class="toggle-slider"></span>
+            </label>
+            <span>Trending Product</span>
+          </div>
+          <div class="toggle-group" style="margin-bottom: 1rem;">
+            <label class="toggle">
+              <input type="checkbox" id="best-seller" name="bestSeller">
+              <span class="toggle-slider"></span>
+            </label>
+            <span>Best Seller</span>
+          </div>
+          <div class="toggle-group">
+            <label class="toggle">
+              <input type="checkbox" id="new-arrival" name="newArrival">
+              <span class="toggle-slider"></span>
+            </label>
+            <span>New Arrival</span>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="sticky-action-bar">
+  <button class="btn" onclick="window.location.href='{{ url_for('admin.products') }}'">Cancel</button>
+  <button class="btn primary" id="btn-save" onclick="saveProduct()">Save Product</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const routeProductId = '{{ product_id or "" }}';
+  const productId = routeProductId || new URLSearchParams(window.location.search).get('id') || '';
+  let selectedFiles = [];
+  let existingImages = [];
+
+  async function loadData() {
+    try {
+      const [catsRes, brandsRes] = await Promise.all([
+        fetch('{{ url_for("admin.api_categories") }}'),
+        fetch('{{ url_for("admin.api_brands") }}')
+      ]);
+      const cats = await catsRes.json();
+      const brands = await brandsRes.json();
+
+      const catSelect = document.getElementById('category-select');
+      cats.categories.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.name;
+        opt.textContent = c.name;
+        catSelect.appendChild(opt);
+      });
+
+      const brandSelect = document.getElementById('brand-select');
+      const blankOpt = document.createElement('option');
+      blankOpt.value = '';
+      blankOpt.textContent = 'Select Brand';
+      brandSelect.appendChild(blankOpt);
+      brands.brands.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.name;
+        opt.textContent = b.name;
+        brandSelect.appendChild(opt);
+      });
+
+      if (productId) {
+        const prodRes = await fetch(`/admin/api/products/${productId}`);
+        const prodData = await prodRes.json();
+        if (prodData.success) {
+          loadProductData(prodData.product);
+        }
+      }
+    } catch (error) {
+      showToast('Error loading data: ' + error.message);
+    }
+  }
+
+  function loadProductData(product) {
+    document.getElementById('page-title').textContent = 'Edit Product: ' + product.name;
+    document.getElementById('product-id').value = product.id;
+    document.getElementById('product-name').value = product.name;
+    document.getElementById('product-slug').value = product.slug;
+    document.getElementById('category-select').value = product.category;
+    document.getElementById('brand-select').value = product.brand;
+    document.getElementById('short-desc').value = product.shortDesc;
+    document.getElementById('long-desc').value = product.longDesc;
+    document.getElementById('highlights').value = product.highlights;
+    document.getElementById('specifications').value = product.specifications;
+    document.getElementById('mrp').value = product.mrp;
+    document.getElementById('discount-price').value = product.discountPrice;
+    document.getElementById('cost-price').value = product.costPrice || '';
+    document.getElementById('gst-percentage').value = product.gstPercentage || 18;
+
+    const gstType = product.gstType || 'inclusive';
+    if (gstType === 'inclusive') {
+      document.getElementById('gst-inclusive').checked = true;
+    } else {
+      document.getElementById('gst-exclusive').checked = true;
+    }
+
+    document.getElementById('sku-code').value = product.sku;
+    document.getElementById('stock-qty').value = product.stockQuantity;
+    document.getElementById('min-stock').value = product.minStockAlert;
+    document.getElementById('weight').value = product.weight || '';
+    document.getElementById('length').value = product.length || '';
+    document.getElementById('width').value = product.width || '';
+    document.getElementById('height').value = product.height || '';
+    document.getElementById('shipping-charges').value = product.shippingCharges || 0;
+    document.getElementById('free-shipping').checked = product.freeShipping || false;
+    document.getElementById('meta-title').value = product.metaTitle;
+    document.getElementById('meta-desc').value = product.metaDescription;
+    document.getElementById('meta-keywords').value = product.metaKeywords;
+    document.getElementById('canonical-url').value = product.canonicalUrl;
+    document.getElementById('og-image').value = product.ogImage;
+    document.getElementById('product-status').value = product.productStatus;
+    document.getElementById('featured').checked = product.featured || false;
+    document.getElementById('trending').checked = product.trending || false;
+    document.getElementById('best-seller').checked = product.bestSeller || false;
+    document.getElementById('new-arrival').checked = product.newArrival || false;
+
+    existingImages = product.imageUrls || [];
+    renderImagePreviews();
+    updateCalculations();
+    updateStockStatus();
+    document.getElementById('btn-delete').style.display = 'block';
+  }
+
+  function switchTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function generateSlug() {
+    const name = document.getElementById('product-name').value;
+    const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    document.getElementById('product-slug').value = slug;
+  }
+
+  function updateCalculations() {
+    const mrp = parseFloat(document.getElementById('mrp').value) || 0;
+    const discount = parseFloat(document.getElementById('discount-price').value) || 0;
+    const cost = parseFloat(document.getElementById('cost-price').value) || 0;
+    const gst = parseFloat(document.getElementById('gst-percentage').value) || 0;
+    const gstType = document.querySelector('input[name="gstType"]:checked').value || 'inclusive';
+
+    let basePrice, gstAmount, finalPrice;
+
+    if (gstType === 'inclusive') {
+      basePrice = gst > 0 ? discount / (1 + gst / 100) : discount;
+      gstAmount = discount - basePrice;
+      finalPrice = discount;
+    } else {
+      basePrice = discount;
+      gstAmount = (discount * gst) / 100;
+      finalPrice = discount + gstAmount;
+    }
+
+    basePrice = Math.round(basePrice * 100) / 100;
+    gstAmount = Math.round(gstAmount * 100) / 100;
+    finalPrice = Math.round(finalPrice * 100) / 100;
+
+    const discountPct = mrp > 0 ? Math.round(((mrp - discount) / mrp) * 100) : 0;
+    const profitPct = cost > 0 ? Math.round(((discount - cost) / cost) * 100) : 0;
+    const profitAmount = Math.round((discount - cost) * 100) / 100;
+
+    document.getElementById('calc-discount').textContent = discountPct + '%';
+    document.getElementById('calc-base').textContent = '₹' + basePrice.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+    document.getElementById('calc-gst').textContent = '₹' + gstAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+    document.getElementById('calc-final').textContent = '₹' + finalPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+    document.getElementById('calc-profit').textContent = profitPct + '%';
+    document.getElementById('calc-profit-amount').textContent = '₹' + profitAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+
+    validatePricing(mrp, discount, cost, gst);
+  }
+
+  function validatePricing(mrp, discount, cost, gst) {
+    const warnings = document.getElementById('pricing-warnings');
+    const warningsList = [];
+
+    if (discount > mrp && mrp > 0) {
+      warningsList.push('⚠️ Selling Price cannot exceed MRP');
+    }
+    if (discount < 0 || mrp < 0 || cost < 0) {
+      warningsList.push('⚠️ Prices cannot be negative');
+    }
+    if (gst > 100) {
+      warningsList.push('⚠️ GST cannot exceed 100%');
+    }
+    if (discount < cost && cost > 0 && discount > 0) {
+      warningsList.push('⚠️ Selling Price is below Cost Price - Loss!');
+    }
+
+    warnings.innerHTML = warningsList.length > 0
+      ? warningsList.map(w => `<div class="warning-item">${w}</div>`).join('')
+      : '';
+  }
+
+  function updateStockStatus() {
+    const qty = parseInt(document.getElementById('stock-qty').value) || 0;
+    const min = parseInt(document.getElementById('min-stock').value) || 5;
+    let status = 'In Stock';
+    if (qty <= 0) status = 'Out of Stock';
+    else if (qty <= min) status = 'Low Stock';
+    document.getElementById('stock-status').value = status;
+    const progress = Math.min(100, (qty / (min * 5)) * 100);
+    document.getElementById('stock-progress').style.width = progress + '%';
+    document.getElementById('stock-level-text').textContent = Math.round(progress) + '%';
+  }
+
+  function renderImagePreviews() {
+    const preview = document.getElementById('images-preview');
+    const html = existingImages.map((url, idx) => `
+      <div class="image-preview">
+        <img src="${url}" alt="Product image ${idx + 1}">
+        <button type="button" class="image-remove" onclick="removeExistingImage(${idx})">✕</button>
+      </div>
+    `).join('') + selectedFiles.map((file, idx) => {
+      const url = URL.createObjectURL(file);
+      return `
+        <div class="image-preview">
+          <img src="${url}" alt="New image ${idx + 1}">
+          <button type="button" class="image-remove" onclick="removeNewImage(${idx})">✕</button>
+        </div>
+      `;
+    }).join('');
+    preview.innerHTML = html;
+  }
+
+  function removeExistingImage(idx) {
+    existingImages.splice(idx, 1);
+    renderImagePreviews();
+  }
+
+  function removeNewImage(idx) {
+    selectedFiles.splice(idx, 1);
+    updateFileInput();
+    renderImagePreviews();
+  }
+
+  function updateFileInput() {
+    const dataTransfer = new DataTransfer();
+    selectedFiles.forEach(file => dataTransfer.items.add(file));
+    document.getElementById('product-images').files = dataTransfer.files;
+  }
+
+  async function saveProduct() {
+    const formData = new FormData(document.getElementById('product-form'));
+    formData.append('manageExistingImages', 'true');
+    existingImages.forEach(url => formData.append('existingImages', url));
+    selectedFiles.forEach(file => formData.append('images', file));
+
+    const btnSave = document.getElementById('btn-save');
+    btnSave.disabled = true;
+    btnSave.textContent = 'Saving...';
+
+    try {
+      const response = await fetch('{{ url_for("admin.api_save_product_advanced") }}', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Error saving product');
+
+      showToast('Product saved successfully!');
+      setTimeout(() => window.location.href = '{{ url_for("admin.products") }}', 1000);
+    } catch (error) {
+      showToast('Error: ' + error.message);
+      btnSave.disabled = false;
+      btnSave.textContent = 'Save Product';
+    }
+  }
+
+  function deleteProduct() {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    fetch(`/admin/api/products/delete/${productId}`, { method: 'POST' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          showToast('Product deleted');
+          setTimeout(() => window.location.href = '{{ url_for("admin.products") }}', 1000);
+        } else showToast('Error: ' + data.error);
+      });
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+    document.getElementById('product-name').addEventListener('input', generateSlug);
+    document.getElementById('mrp').addEventListener('change', updateCalculations);
+    document.getElementById('mrp').addEventListener('input', updateCalculations);
+    document.getElementById('discount-price').addEventListener('change', updateCalculations);
+    document.getElementById('discount-price').addEventListener('input', updateCalculations);
+    document.getElementById('cost-price').addEventListener('change', updateCalculations);
+    document.getElementById('cost-price').addEventListener('input', updateCalculations);
+    document.getElementById('gst-percentage').addEventListener('change', updateCalculations);
+    document.getElementById('gst-percentage').addEventListener('input', updateCalculations);
+    document.getElementById('gst-inclusive').addEventListener('change', updateCalculations);
+    document.getElementById('gst-exclusive').addEventListener('change', updateCalculations);
+    document.getElementById('stock-qty').addEventListener('change', updateStockStatus);
+    document.getElementById('min-stock').addEventListener('change', updateStockStatus);
+    document.getElementById('short-desc').addEventListener('input', (e) => document.getElementById('short-count').textContent = e.target.value.length);
+    document.getElementById('meta-title').addEventListener('input', (e) => {
+      document.getElementById('title-count').textContent = e.target.value.length;
+      document.getElementById('seo-title').textContent = e.target.value || 'Your Page Title';
+    });
+    document.getElementById('meta-desc').addEventListener('input', (e) => {
+      document.getElementById('desc-count').textContent = e.target.value.length;
+      document.getElementById('seo-desc').textContent = e.target.value || 'Your meta description will appear here';
+    });
+
+  document.getElementById('image-upload-wrapper').addEventListener('click', () => {
+    document.getElementById('product-images').click();
+  });
+
+  document.getElementById('image-upload-wrapper').addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.target.style.borderColor = 'var(--gold)';
+  });
+
+  document.getElementById('image-upload-wrapper').addEventListener('dragleave', (e) => {
+    e.target.style.borderColor = 'var(--border)';
+  });
+
+  document.getElementById('image-upload-wrapper').addEventListener('drop', (e) => {
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    for (let file of files) {
+      if (file.type.startsWith('image/')) {
+        selectedFiles.push(file);
+      }
+    }
+    updateFileInput();
+    renderImagePreviews();
+  });
+
+  document.getElementById('product-images').addEventListener('change', (e) => {
+    selectedFiles = Array.from(e.target.files);
+    renderImagePreviews();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      saveProduct();
+    }
+  });
+
+  loadData();
+</script>
+
+</body>
+</html>

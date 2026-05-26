@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, url_for, jsonify, abort,request
+from flask import Blueprint, render_template, url_for, jsonify, abort, request, make_response
 from flask_login import login_required, current_user
 from ..models import Product,Review
 from ..extensions import db
@@ -18,21 +18,29 @@ def products_page():
     products = Product.query.filter_by(active=True).order_by(Product.id.desc()).limit(24).all()
     enriched = [p.to_dict() for p in products]
     for idx, d in enumerate(enriched):
-        d["freeShipping"] = idx % 3 == 0
         d["freeGift"] = idx % 4 == 0
-    return render_template(
+    response = make_response(render_template(
         'product/grid_page.html',
         title='Shop Products',
         eyebrow='Customer',
         products=enriched,
-    )
+    ))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 
 @customer_bp.route('/api/products')
 @login_required
 def api_products():
-    products = Product.query.order_by(Product.id.asc()).all()
-    return jsonify(products=[product.to_dict() for product in products])
+    products = Product.query.filter_by(active=True).order_by(Product.created_at.desc()).all()
+    payload = [product.to_dict() for product in products]
+    response = make_response(jsonify(products=payload))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 
 @customer_bp.route('/product/<int:id>')
@@ -41,7 +49,15 @@ def product_detail(id):
     product = Product.query.get(id)
     if not product:
         abort(404)
-    return render_template('shop/product.html', product=product)
+    product_data = product.to_dict()
+    images = product_data.get("imageUrls") or ([product_data.get("imageUrl")] if product_data.get("imageUrl") else [])
+    images = [url for url in images if url]
+    reviews = Review.query.filter_by(product_id=product.id).order_by(Review.created_at.desc()).all()
+    response = make_response(render_template('product/detail.html', product=product_data, images=images, reviews=reviews))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 
 @customer_bp.route('/cart')

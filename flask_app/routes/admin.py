@@ -1,12 +1,13 @@
 from flask import Blueprint, render_template, abort, request, jsonify, current_app, url_for, redirect, flash
 from flask_login import login_required, current_user
 from ..extensions import db
-from ..models import User, Product, ProductImage, OfferBanner
+from ..models import User, Product, ProductImage, OfferBanner, ProductCategory, ProductBrand
 from werkzeug.utils import secure_filename
 from sqlalchemy.exc import SQLAlchemyError
 from uuid import uuid4
 from datetime import datetime
 import os
+from sqlalchemy import or_, and_
 
 admin_bp = Blueprint('admin', __name__, template_folder='../templates')
 
@@ -111,11 +112,34 @@ def dashboard():
 @admin_bp.route('/products')
 @login_required
 @admin_required
+def products():
+    return render_template('admin/products.html')
+
+
+@admin_bp.route('/products/new')
+@login_required
+@admin_required
+def new_product():
+    return render_template('admin/product_edit.html', product_id=None)
+
+
+@admin_bp.route('/products/<int:product_id>/edit')
+@login_required
+@admin_required
+def edit_product(product_id):
+    product = Product.query.get(product_id)
+    if not product:
+        abort(404)
+    return render_template('admin/product_edit.html', product_id=product_id)
+
+
+@admin_bp.route('/products-grid')
+@login_required
+@admin_required
 def products_grid():
     products = Product.query.order_by(Product.id.desc()).limit(24).all()
     enriched = [p.to_dict() for p in products]
     for idx, d in enumerate(enriched):
-        d["freeShipping"] = idx % 3 == 0
         d["freeGift"] = idx % 4 == 0
     return render_template(
         'product/grid_page.html',
@@ -123,6 +147,23 @@ def products_grid():
         eyebrow='Admin',
         products=enriched,
     )
+
+
+
+@admin_bp.route('/orders')
+@login_required
+@admin_required
+def orders():
+    return render_template('admin/orders.html')
+
+
+@admin_bp.route('/users')
+@login_required
+@admin_required
+def users():
+    users_list = User.query.all()
+    return render_template('admin/users.html', users=users_list)
+
 
 
 @admin_bp.route('/api/products')
@@ -545,3 +586,380 @@ def api_delete_product_image():
     db.session.commit()
 
     return jsonify(success=True, product=product.to_dict())
+
+
+@admin_bp.route('/api/products/list', methods=['GET'])
+@login_required
+@admin_required
+def api_product_list():
+    try:
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 20))
+        search = request.args.get('search', '').strip()
+        category = request.args.get('category', '').strip()
+        brand = request.args.get('brand', '').strip()
+        stock_status = request.args.get('stock_status', '').strip()
+        product_status = request.args.get('product_status', '').strip()
+        price_min = request.args.get('price_min', type=float)
+        price_max = request.args.get('price_max', type=float)
+        sort_by = request.args.get('sort', 'latest').strip()
+    except (ValueError, TypeError):
+        return jsonify(error='Invalid filter parameters'), 400
+
+    query = Product.query
+
+    if search:
+        query = query.filter(or_(
+            Product.name.ilike(f'%{search}%'),
+            Product.sku.ilike(f'%{search}%'),
+            Product.brand.ilike(f'%{search}%')
+        ))
+
+    if category:
+        query = query.filter(Product.category.ilike(f'%{category}%'))
+
+    if brand:
+        query = query.filter(Product.brand.ilike(f'%{brand}%'))
+
+    if product_status:
+        query = query.filter(Product.product_status == product_status)
+
+    if price_min is not None:
+        query = query.filter(Product.selling_price >= price_min)
+    if price_max is not None:
+        query = query.filter(Product.selling_price <= price_max)
+
+    if stock_status == 'In Stock':
+        query = query.filter(Product.stock_quantity > Product.min_stock_alert)
+    elif stock_status == 'Low Stock':
+        query = query.filter(and_(Product.stock_quantity > 0, Product.stock_quantity <= Product.min_stock_alert))
+    elif stock_status == 'Out of Stock':
+        query = query.filter(Product.stock_quantity <= 0)
+
+    total = query.count()
+
+    if sort_by == 'price_asc':
+        query = query.order_by(Product.selling_price.asc())
+    elif sort_by == 'price_desc':
+        query = query.order_by(Product.selling_price.desc())
+    elif sort_by == 'popularity':
+        query = query.order_by(Product.review_count.desc())
+    else:
+        query = query.order_by(Product.created_at.desc())
+
+    paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    return jsonify(
+        products=[p.to_dict() for p in paginated.items],
+        total=total,
+        page=page,
+        per_page=per_page,
+        total_pages=paginated.pages
+    )
+
+
+@admin_bp.route('/api/products/<int:product_id>', methods=['GET'])
+@login_required
+@admin_required
+def api_get_product(product_id):
+    product = Product.query.get(product_id)
+    if not product:
+        return jsonify(error='Product not found'), 404
+    return jsonify(success=True, product=product.to_dict())
+
+
+@admin_bp.route('/api/products/bulk-action', methods=['POST'])
+@login_required
+@admin_required
+def api_bulk_action():
+    data = request.get_json() or {}
+    action = data.get('action', '').strip()
+    product_ids = data.get('product_ids', [])
+
+    if not action or not product_ids:
+        return jsonify(error='Action and product IDs are required'), 400
+
+    try:
+        product_ids = [int(pid) for pid in product_ids]
+    except (TypeError, ValueError):
+        return jsonify(error='Invalid product IDs'), 400
+
+    products = Product.query.filter(Product.id.in_(product_ids)).all()
+    if not products:
+        return jsonify(error='No products found'), 404
+
+    try:
+        if action == 'delete':
+            for product in products:
+                all_images = []
+                if product.image_url:
+                    all_images.append(product.image_url)
+                for img in product.images:
+                    all_images.append(img.image_url)
+                for url in set(all_images):
+                    if url and '/static/' in url:
+                        _delete_static_file(url)
+                db.session.delete(product)
+            db.session.commit()
+            return jsonify(success=True, message=f'Deleted {len(products)} products')
+
+        elif action == 'update_status':
+            new_status = data.get('status', '').strip()
+            if new_status not in ['Draft', 'Published', 'Hidden', 'Out of Stock']:
+                return jsonify(error='Invalid status'), 400
+            for product in products:
+                product.product_status = new_status
+                product.active = new_status in ['Published', 'Out of Stock']
+            db.session.commit()
+            return jsonify(success=True, message=f'Updated {len(products)} products')
+
+        elif action == 'update_featured':
+            featured = data.get('featured', False)
+            for product in products:
+                product.featured_product = featured
+            db.session.commit()
+            return jsonify(success=True, message=f'Updated {len(products)} products')
+
+        else:
+            return jsonify(error='Unknown action'), 400
+
+    except SQLAlchemyError as error:
+        db.session.rollback()
+        current_app.logger.exception('Bulk action error')
+        return jsonify(error=f'Database error: {error.__class__.__name__}'), 500
+
+
+@admin_bp.route('/api/categories', methods=['GET'])
+@login_required
+@admin_required
+def api_categories():
+    categories = ProductCategory.query.order_by(ProductCategory.name.asc()).all()
+    return jsonify(categories=[c.to_dict() for c in categories])
+
+
+@admin_bp.route('/api/categories', methods=['POST'])
+@login_required
+@admin_required
+def api_create_category():
+    data = request.get_json() or {}
+    name = data.get('name', '').strip()
+    description = data.get('description', '').strip()
+
+    if not name:
+        return jsonify(error='Category name is required'), 400
+
+    from ..models import _slugify
+    slug = _slugify(name)
+
+    if ProductCategory.query.filter_by(slug=slug).first():
+        return jsonify(error='Category already exists'), 400
+
+    try:
+        category = ProductCategory(name=name, slug=slug, description=description)
+        db.session.add(category)
+        db.session.commit()
+        return jsonify(success=True, category=category.to_dict()), 201
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify(error='Failed to create category'), 500
+
+
+@admin_bp.route('/api/brands', methods=['GET'])
+@login_required
+@admin_required
+def api_brands():
+    brands = ProductBrand.query.order_by(ProductBrand.name.asc()).all()
+    return jsonify(brands=[b.to_dict() for b in brands])
+
+
+@admin_bp.route('/api/brands', methods=['POST'])
+@login_required
+@admin_required
+def api_create_brand():
+    data = request.get_json() or {}
+    name = data.get('name', '').strip()
+    logo_url = data.get('logo_url', '').strip()
+
+    if not name:
+        return jsonify(error='Brand name is required'), 400
+
+    from ..models import _slugify
+    slug = _slugify(name)
+
+    if ProductBrand.query.filter_by(slug=slug).first():
+        return jsonify(error='Brand already exists'), 400
+
+    try:
+        brand = ProductBrand(name=name, slug=slug, logo_url=logo_url or None)
+        db.session.add(brand)
+        db.session.commit()
+        return jsonify(success=True, brand=brand.to_dict()), 201
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify(error='Failed to create brand'), 500
+
+
+@admin_bp.route('/api/products/save-advanced', methods=['POST'])
+@login_required
+@admin_required
+def api_save_product_advanced():
+    try:
+        data = request.form if request.form else (request.get_json() or {})
+        product_id = int(data.get('id') or 0)
+        name = str(data.get('name', '')).strip()
+        category = str(data.get('category', '')).strip()
+        brand = str(data.get('brand', '')).strip()
+        sku = str(data.get('sku', '')).strip()
+        slug = str(data.get('slug', '')).strip()
+        short_desc = str(data.get('shortDescription', '')).strip()
+        long_desc = str(data.get('longDescription', '')).strip()
+        highlights = str(data.get('highlights', '')).strip()
+        specifications = str(data.get('specifications', '')).strip()
+        mrp = float(data.get('mrp', 0))
+        discount_price = float(data.get('discountPrice', 0))
+        cost_price = float(data.get('costPrice', 0)) if data.get('costPrice') else None
+        gst_percentage = float(data.get('gstPercentage', 18))
+        gst_type = str(data.get('gstType', 'inclusive')).strip().lower()
+        if gst_type not in ['inclusive', 'exclusive']:
+            gst_type = 'inclusive'
+        stock_quantity = int(data.get('stockQuantity', 0))
+        min_stock_alert = int(data.get('minStockAlert', 5))
+        product_weight = float(data.get('weight', 0)) if data.get('weight') else None
+        product_length = float(data.get('length', 0)) if data.get('length') else None
+        product_width = float(data.get('width', 0)) if data.get('width') else None
+        product_height = float(data.get('height', 0)) if data.get('height') else None
+        shipping_charges = float(data.get('shippingCharges', 0))
+        free_shipping = str(data.get('freeShipping', 'false')).lower() in ['1', 'true', 'yes', 'on']
+        product_status = str(data.get('productStatus', 'Draft')).strip()
+        meta_title = str(data.get('metaTitle', '')).strip()
+        meta_description = str(data.get('metaDescription', '')).strip()
+        meta_keywords = str(data.get('metaKeywords', '')).strip()
+        canonical_url = str(data.get('canonicalUrl', '')).strip()
+        featured_product = str(data.get('featured', 'false')).lower() in ['1', 'true', 'yes', 'on']
+        trending_product = str(data.get('trending', 'false')).lower() in ['1', 'true', 'yes', 'on']
+        best_seller = str(data.get('bestSeller', 'false')).lower() in ['1', 'true', 'yes', 'on']
+        new_arrival = str(data.get('newArrival', 'false')).lower() in ['1', 'true', 'yes', 'on']
+        manage_existing_images = _form_bool(data.get('manageExistingImages'), False)
+        if hasattr(data, 'getlist'):
+            existing_image_urls = [str(url).strip() for url in data.getlist('existingImages') if str(url).strip()]
+        else:
+            raw_existing_images = data.get('existingImages') or []
+            if isinstance(raw_existing_images, str):
+                raw_existing_images = [raw_existing_images]
+            existing_image_urls = [str(url).strip() for url in raw_existing_images if str(url).strip()]
+    except (TypeError, ValueError):
+        return jsonify(error='Invalid product data'), 400
+
+    if not name or not category:
+        return jsonify(error='Name and category are required'), 400
+    if mrp <= 0 or discount_price <= 0:
+        return jsonify(error='MRP and discounted price must be greater than 0'), 400
+    if discount_price > mrp:
+        return jsonify(error='Discounted price cannot be greater than MRP'), 400
+    if product_status not in ['Draft', 'Published', 'Hidden', 'Out of Stock']:
+        return jsonify(error='Invalid product status'), 400
+
+    product = Product.query.get(product_id) if product_id else Product()
+    if product_id and not product:
+        return jsonify(error='Product not found'), 404
+
+    if not slug:
+        from ..models import _slugify
+        slug = _slugify(name)
+
+    existing_slug = Product.query.filter(Product.slug == slug, Product.id != product_id).first()
+    if existing_slug:
+        return jsonify(error='Product slug already exists'), 400
+
+    if sku:
+        existing_sku = Product.query.filter(Product.sku == sku, Product.id != product_id).first()
+        if existing_sku:
+            return jsonify(error='SKU already exists'), 400
+
+    uploaded_files = []
+    if request.files:
+        uploaded_files = request.files.getlist('images') or (request.files.getlist('image') if 'image' in request.files else [])
+
+    saved_image_urls = []
+    for f in uploaded_files:
+        if not f:
+            continue
+        url, err = _save_product_image(f)
+        if err:
+            return jsonify(error=err), 400
+        if url:
+            saved_image_urls.append(url)
+
+    product.name = name
+    product.category = category
+    product.brand = brand or None
+    product.sku = sku or None
+    product.slug = slug
+    product.mrp = mrp
+    product.discount_price = discount_price
+    product.selling_price = discount_price
+    product.cost_price = cost_price
+    product.gst_percentage = gst_percentage
+    product.gst_type = gst_type
+    product.description = short_desc or long_desc
+    product.short_description = short_desc
+    product.long_description = long_desc
+    product.highlights = highlights
+    product.specifications = specifications
+    product.stock_quantity = stock_quantity
+    product.min_stock_alert = min_stock_alert
+    product.product_weight = product_weight
+    product.product_length = product_length
+    product.product_width = product_width
+    product.product_height = product_height
+    product.shipping_charges = shipping_charges
+    product.free_shipping = free_shipping
+    product.product_status = product_status
+    product.active = product_status in ['Published', 'Out of Stock']
+    product.meta_title = meta_title
+    product.meta_description = meta_description
+    product.meta_keywords = meta_keywords
+    product.canonical_url = canonical_url
+    product.featured_product = featured_product
+    product.trending_product = trending_product
+    product.best_seller = best_seller
+    product.new_arrival = new_arrival
+
+    is_new = not product_id or not product.id
+
+    try:
+        if is_new:
+            db.session.add(product)
+            db.session.flush()
+        elif manage_existing_images:
+            keep_images = set(existing_image_urls)
+            for image in list(product.images):
+                if image.image_url not in keep_images:
+                    _delete_static_file(image.image_url)
+                    db.session.delete(image)
+            if product.image_url and product.image_url not in keep_images:
+                _delete_static_file(product.image_url)
+                product.image_url = None
+
+        if saved_image_urls:
+            max_idx = db.session.query(db.func.max(ProductImage.order_index)).filter_by(product_id=product.id).scalar()
+            base_index = (max_idx or 0) + 1
+            for idx, img_url in enumerate(saved_image_urls):
+                pi = ProductImage(product_id=product.id, image_url=img_url, order_index=base_index + idx)
+                db.session.add(pi)
+
+            if not product.image_url:
+                product.image_url = saved_image_urls[0]
+
+        db.session.flush()
+        primary_image = ProductImage.query.filter_by(product_id=product.id).order_by(ProductImage.order_index.asc()).first()
+        if primary_image:
+            product.image_url = primary_image.image_url
+
+        db.session.commit()
+        return jsonify(success=True, product=product.to_dict())
+
+    except SQLAlchemyError as error:
+        db.session.rollback()
+        current_app.logger.exception('Could not save product')
+        return jsonify(error=f'Database error: {error.__class__.__name__}'), 500
