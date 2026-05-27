@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from ..extensions import db
 from ..models import User
 from flask_login import login_user, logout_user, login_required, current_user
+from ..shop_state import merge_guest_state_into_user
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -36,6 +37,7 @@ def login():
                 flash('Selected role does not match this account.', 'danger')
                 return redirect(url_for('auth.login'))
             login_user(user)
+            merge_guest_state_into_user(user.id)
             # redirect based on role
             if user.role == 'admin':
                 return redirect(url_for('admin.dashboard'))

@@ -1,28 +1,243 @@
 {% extends 'shop/base.html' %}
 
-{% block title %}Your Cart - My Shop{% endblock %}
+{% block title %}UrbanCart-Your Cart {% endblock %}
 
 {% block content %}
-<h2>Your Cart</h2>
-{% if cart_items %}
-<table class="table">
-  <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th></th></tr></thead>
-  <tbody>
-  {% for item in cart_items %}
-    <tr>
-      <td>{{ item.name }}</td>
-      <td>{{ item.quantity }}</td>
-      <td>${{ '%.2f'|format(item.price) }}</td>
-      <td><button class="btn btn-sm btn-danger">Remove</button></td>
-    </tr>
-  {% endfor %}
-  </tbody>
-</table>
-<div class="d-flex justify-content-end">
-  <h4 class="me-3">Total: ${{ '%.2f'|format(total) }}</h4>
-  <a href="{{ url_for('customer.checkout') }}" class="btn btn-success">Checkout</a>
+{% set summary = cart_payload.summary %}
+<section class="uc-cart-hero">
+  <div class="uc-toolbar">
+    <div class="uc-heading">
+     
+      <h1>Your cart</h1>
+      
+    </div>
+    <div class="uc-pill"><i class="fa-solid fa-bag-shopping"></i> <span data-cart-line-count>{{ summary.count }}</span> items</div>
+  </div>
+</section>
+
+<div class="uc-grid-2">
+  <section class="uc-cart-list-wrap">
+    <div class="uc-cart-trustbar">
+      <span><i class="fa-solid fa-shield-halved"></i> Secure payments</span>
+      <span><i class="fa-solid fa-truck-fast"></i> Fast delivery</span>
+      <span><i class="fa-solid fa-rotate-left"></i> Easy returns</span>
+    </div>
+    <div id="uc-cart-list" class="uc-cart-list">
+      {% if cart_payload['items'] %}
+        {% for item in cart_payload['items'] %}
+          {% set stock_label = (item.stockStatus or 'In Stock')|lower %}
+          {% set has_discount = item.mrp and item.mrp > item.discountPrice %}
+          <article class="uc-cart-line" data-cart-line="{{ item.id }}">
+            <div class="uc-cart-media">
+              {% if item.imageUrl %}
+                <img src="{{ item.imageUrl }}" alt="{{ item.name }}">
+              {% else %}
+                <div class="uc-fallback" aria-hidden="true">{{ item.icon or '📦' }}</div>
+              {% endif %}
+              <div class="uc-media-badges">
+                {% if item.freeShipping %}
+                  <span class="uc-mini-pill success">Free shipping</span>
+                {% endif %}
+                <span class="uc-mini-pill">GST {{ item.gstPercentage or 0 }}% {{ item.gstType or '' }}</span>
+              </div>
+            </div>
+            <div class="uc-cart-content">
+              <div class="uc-title-block">
+                <div>
+                  <h3 class="uc-product-title">{{ item.name }}</h3>
+                  <div class="uc-product-meta">
+                    {% if item.brand %}<span>{{ item.brand }}</span>{% endif %}
+                    {% if item.category %}<span>{{ item.category }}</span>{% endif %}
+                    <span class="uc-stock {{ 'out' if 'out' in stock_label else 'low' if 'low' in stock_label else '' }}">{{ item.stockStatus }}</span>
+                  </div>
+                </div>
+                <div class="uc-delivery-chip"><i class="fa-solid fa-truck-fast"></i> Delivery by Tomorrow</div>
+              </div>
+
+              <div class="uc-detail-grid">
+                <div class="uc-price-panel">
+                  <div class="uc-price-row">
+                    <div class="uc-price-now">₹{{ '%.0f'|format(item.discountPrice or 0) }}</div>
+                    {% if has_discount %}
+                      <div class="uc-price-was">₹{{ '%.0f'|format(item.mrp) }}</div>
+                    {% endif %}
+                    <div class="uc-pill">Save {{ item.discountPercent or 0 }}%</div>
+                  </div>
+                  <div class="uc-savings-row">
+                    <span>You saved ₹{{ '%.0f'|format(item.discountTotal or 0) }}</span>
+                    {% if item.freeShipping %}
+                      <span>Free shipping applied</span>
+                    {% else %}
+                      <span>Shipping ₹{{ '%.0f'|format(item.shippingCharges or 0) }}</span>
+                    {% endif %}
+                    <span>GST included</span>
+                  </div>
+                </div>
+
+                <div class="uc-delivery-stack">
+                  <span><i class="fa-solid fa-shield-halved"></i> Secure checkout</span>
+                  <span><i class="fa-solid fa-rotate-left"></i> Easy returns</span>
+                </div>
+              </div>
+
+              <div class="uc-line-actions">
+                <div class="uc-qty" data-cart-qty-group="{{ item.id }}">
+                  <button type="button" class="uc-qty-btn" data-cart-action="decrease" data-cart-step="-1" data-cart-id="{{ item.id }}" aria-label="Decrease quantity">
+                    <i class="fa-solid fa-minus"></i>
+                  </button>
+                  <input type="number" min="1" max="{{ item.stockQuantity or 99 }}" value="{{ item.quantity }}" data-cart-qty-input="{{ item.id }}">
+                  <button type="button" class="uc-qty-btn" data-cart-action="increase" data-cart-step="1" data-cart-id="{{ item.id }}" aria-label="Increase quantity">
+                    <i class="fa-solid fa-plus"></i>
+                  </button>
+                </div>
+                <button type="button" class="uc-action-link subtle" data-cart-remove="{{ item.id }}">
+                  <i class="fa-regular fa-trash-can"></i> Remove
+                </button>
+                <button type="button" class="uc-action-link ghost" data-save-later="{{ item.id }}">
+                  <i class="fa-regular fa-bookmark"></i> Save for later
+                </button>
+              </div>
+
+              <div class="uc-line-footer">
+                <div class="uc-line-delivery"><i class="fa-solid fa-truck-fast"></i> Estimated delivery in 2-4 days</div>
+                <div class="uc-line-total">
+                  <span>Line total</span>
+                  <strong>₹{{ '%.0f'|format(item.lineTotal or 0) }}</strong>
+                </div>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      {% else %}
+        <div class="uc-empty-state">
+          <div class="uc-empty-illustration">🛒</div>
+          <h2>Your cart is empty</h2>
+          <p>Explore fresh arrivals, premium essentials, and top-rated picks to start building your cart.</p>
+          <a class="uc-btn uc-btn-primary" href="{{ url_for('customer.shop_home') }}">Continue shopping</a>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <aside class="uc-summary-card">
+    <div class="uc-summary-header">
+      <div>
+        <div class="eyebrow">Order summary</div>
+        <h2 class="h4 mb-0 fw-bold">Checkout at a glance</h2>
+      </div>
+      <span class="uc-pill"><i class="fa-solid fa-lock"></i> Secure</span>
+    </div>
+
+    {% if cart_payload['items'] %}
+      <div class="uc-progress-card">
+        {% set free_shipping_target = 500 %}
+        {% set remaining_for_free = free_shipping_target - (summary.subtotal or 0) %}
+        {% set progress = 100 if remaining_for_free <= 0 else ((summary.subtotal or 0) / free_shipping_target * 100) %}
+        {% set progress_pct = progress if progress <= 100 else 100 %}
+        <div class="uc-progress-head">
+          <strong>Free shipping progress</strong>
+          <span>₹{{ free_shipping_target | int }} target</span>
+        </div>
+        <div class="uc-progress-track" data-progress="{{ progress_pct }}">
+          <span class="uc-progress-fill"></span>
+        </div>
+        <div class="uc-progress-note">
+          {% if remaining_for_free > 0 %}
+            You are ₹{{ remaining_for_free | int }} away from FREE delivery.
+          {% else %}
+            You unlocked FREE delivery.
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="uc-pin-card" id="uc-pin-card" data-order-total="{{ summary.total or 0 }}">
+        <div class="uc-pin-label">Check delivery</div>
+        <div class="uc-pin-row">
+          <input id="uc-pincode" inputmode="numeric" maxlength="6" placeholder="Enter pincode" />
+          <button type="button" class="uc-btn uc-btn-soft" id="uc-pincheck">Check</button>
+        </div>
+        <div class="uc-pinloader" id="uc-pinloader" hidden>
+          <span class="uc-spinner" aria-hidden="true"></span>
+          <span>Checking availability...</span>
+        </div>
+        <div class="uc-pinmsg" id="uc-pinmsg" aria-live="polite"></div>
+        <div class="uc-pinmeta" id="uc-pinmeta">
+          <span class="uc-pin-badge success" id="uc-cod-badge" hidden>COD Available</span>
+          <span class="uc-pin-badge info" id="uc-eta-badge" hidden></span>
+          <span class="uc-pin-badge info" id="uc-date-badge" hidden></span>
+          <span class="uc-pin-badge neutral" id="uc-free-ship" hidden>Free Shipping</span>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="uc-summary-grid">
+      <div class="uc-summary-row"><span>Subtotal</span><strong data-summary-value="subtotal">₹{{ '%.0f'|format(summary.subtotal or 0) }}</strong></div>
+      <div class="uc-summary-row"><span>Discount</span><strong data-summary-value="discount">-₹{{ '%.0f'|format(summary.discountTotal or 0) }}</strong></div>
+      <div class="uc-summary-row"><span>GST</span><strong data-summary-value="gst">₹{{ '%.0f'|format(summary.gstTotal or 0) }}</strong></div>
+      <div class="uc-summary-row"><span>Shipping</span><strong data-summary-value="shipping">₹{{ '%.0f'|format(summary.shippingTotal or 0) }}</strong></div>
+      <div class="uc-summary-row uc-total-row"><span>Final total</span><strong data-summary-value="total">₹{{ '%.0f'|format(summary.total or 0) }}</strong></div>
+    </div>
+
+    <div class="uc-savings-card">
+      <div>
+        <strong>Total savings</strong>
+        <p>₹{{ '%.0f'|format(summary.discountTotal or 0) }} on this order</p>
+      </div>
+      <span class="uc-mini-pill success">GST Included</span>
+    </div>
+
+    <div class="uc-coupon">
+      <input type="text" class="uc-input" placeholder="Apply coupon code" aria-label="Coupon code">
+      <button type="button" class="uc-btn uc-btn-soft">Apply</button>
+    </div>
+
+    <div class="mt-3 d-grid gap-2">
+      <a href="{{ url_for('customer.checkout') }}" class="uc-btn uc-btn-cta">Proceed to Checkout <i class="fa-solid fa-arrow-right"></i></a>
+      <a href="{{ url_for('customer.shop_home') }}" class="uc-btn uc-btn-outline">Continue shopping</a>
+    </div>
+
+    <div class="uc-summary-trust">
+      <div><i class="fa-solid fa-shield-halved"></i> Secure payments</div>
+      <div><i class="fa-solid fa-truck-fast"></i> Fast delivery</div>
+      <div><i class="fa-solid fa-credit-card"></i> All major cards</div>
+      <div><i class="fa-solid fa-rotate-left"></i> Easy returns</div>
+    </div>
+
+    <div class="mt-3 small text-muted lh-sm">
+      Prices are refreshed instantly when quantities change. Shipping and GST values are recalculated live.
+    </div>
+  </aside>
 </div>
-{% else %}
-  <p>Your cart is empty.</p>
+
+{% if cart_payload['items'] %}
+  <section class="uc-reco-section">
+    <div class="uc-section-head">
+      <div>
+        <span class="eyebrow">You may also like</span>
+        <h2>Recommended for you</h2>
+      </div>
+      <a class="uc-link" href="{{ url_for('customer.shop_home') }}">Explore more</a>
+    </div>
+    <div class="uc-reco-grid">
+      {% for item in recommended_products or [] %}
+        <article class="uc-reco-card">
+          <div class="uc-reco-media">
+            {% if item.imageUrl %}
+              <img src="{{ item.imageUrl }}" alt="{{ item.name }}">
+            {% else %}
+              <div class="uc-fallback">{{ item.icon or '📦' }}</div>
+            {% endif %}
+          </div>
+          <div class="uc-reco-body">
+            <h3>{{ item.name }}</h3>
+            <p>{{ item.brand or item.category }}</p>
+            <div class="uc-reco-price">₹{{ '%.0f'|format(item.discountPrice or 0) }}</div>
+            <a class="uc-btn uc-btn-soft" href="{{ url_for('public.product_public', slug=item.slug) }}">View details</a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
 {% endif %}
 {% endblock %}
+

@@ -1,5 +1,6 @@
 {# Reusable product card macro (Jinja) #}
 {% macro product_card(product, badge_text=None, badge_class=None, delay=None, wish_emoji='🤍', extra_badge_html=None, show_quick_add=True, quick_add_text='+ Add to Cart', href=None) %}
+  {% set is_wishlisted = product.id in wishlist_ids if wishlist_ids is defined else false %}
   <div class="pcard slide-up enhanced-card"
        {% if delay is not none %}data-delay="{{ delay }}"{% endif %}>
     <div class="pimg">
@@ -12,7 +13,9 @@
       {% if extra_badge_html %}
         {{ extra_badge_html | safe }}
       {% endif %}
-      <span class="pwish">{{ wish_emoji }}</span>
+      <button class="pwish pcard-wishlist {{ 'active' if is_wishlisted else '' }}" type="button" aria-label="{{ 'Remove from wishlist' if is_wishlisted else 'Add to wishlist' }}" aria-pressed="{{ 'true' if is_wishlisted else 'false' }}" data-wishlist-id="{{ product.id }}">
+        <span aria-hidden="true">{{ '❤️' if is_wishlisted else '♡' }}</span>
+      </button>
 
       {% if product.imageUrl or product.image_url %}
         <img src="{{ product.imageUrl or product.image_url }}" class="img-main-p" alt="{{ product.name }}">
@@ -21,7 +24,7 @@
       {% endif %}
 
       {% if show_quick_add %}
-        <button class="qadd" type="button">{{ quick_add_text }}</button>
+        <button class="qadd pcard-btn-add" type="button" data-cart-id="{{ product.id }}" data-stock="{{ product.stockQuantity or 0 }}">{{ quick_add_text }}</button>
       {% endif %}
     </div>
 

@@ -1,19 +1,19 @@
 from flask import Blueprint, render_template, url_for, jsonify, abort, request, make_response
-from flask_login import login_required, current_user
+from flask_login import current_user, login_required
 from ..models import Product,Review
 from ..extensions import db
+from ..shop_state import get_cart_payload, get_wishlist_payload
 
 customer_bp = Blueprint('customer', __name__)
 
 
 @customer_bp.route('/')
-@login_required
 def shop_home():
     """Customer dashboard with products, cart, and orders"""
-    return render_template('customer/dashboard.html', user=current_user)
+    user = current_user if current_user.is_authenticated else None
+    return render_template('customer/dashboard.html', user=user)
 
 @customer_bp.route('/products')
-@login_required
 def products_page():
     products = Product.query.filter_by(active=True).order_by(Product.id.desc()).limit(24).all()
     enriched = [p.to_dict() for p in products]
@@ -27,12 +27,10 @@ def products_page():
     ))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
     return response
 
 
 @customer_bp.route('/api/products')
-@login_required
 def api_products():
     products = Product.query.filter_by(active=True).order_by(Product.created_at.desc()).all()
     payload = [product.to_dict() for product in products]
@@ -44,7 +42,6 @@ def api_products():
 
 
 @customer_bp.route('/product/<int:id>')
-@login_required
 def product_detail(id):
     product = Product.query.get(id)
     if not product:
@@ -61,15 +58,18 @@ def product_detail(id):
 
 
 @customer_bp.route('/cart')
-@login_required
 def cart():
-    cart_items = []
-    total = 0
-    return render_template('shop/cart.html', cart_items=cart_items, total=total)
+    payload = get_cart_payload()
+    return render_template('shop/cart.html', cart_payload=payload)
+
+
+@customer_bp.route('/wishlist')
+def wishlist():
+    payload = get_wishlist_payload()
+    return render_template('shop/wishlist.html', wishlist_payload=payload)
 
 
 @customer_bp.route('/checkout')
-@login_required
 def checkout():
     return render_template('shop/checkout.html')
 

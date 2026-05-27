@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UrbanCart &mdash; Shop</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/product_card_premium.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/shop_commerce.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -196,6 +198,200 @@
     font-size: 0.8rem;
     color: var(--ink-light);
     white-space: nowrap;
+  }
+
+  .shop-layout {
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .filter-panel {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.1rem;
+    position: sticky;
+    top: 88px;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+  }
+
+  .filter-panel::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .filter-panel::-webkit-scrollbar-thumb {
+    background: rgba(26,26,46,0.18);
+    border-radius: 999px;
+  }
+
+  .filter-panel::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .filter-panel-header {
+    margin-bottom: 1rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .filter-hint {
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    color: var(--ink-light);
+    line-height: 1.45;
+  }
+
+  .filter-group {
+    padding-top: 0.95rem;
+    margin-top: 0.95rem;
+    border-top: 1px solid rgba(232,227,216,0.9);
+  }
+
+  .filter-group:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .filter-group-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.7rem;
+  }
+
+  .filter-label {
+    display: block;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--ink-light);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+  }
+
+  .filter-input,
+  .filter-select {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: 1.5px solid var(--border);
+    border-radius: 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    background: var(--cream);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .filter-input:focus,
+  .filter-select:focus {
+    border-color: var(--gold);
+  }
+
+  .filter-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .filter-options {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .filter-option {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.9rem;
+    color: var(--ink);
+    cursor: pointer;
+    line-height: 1.35;
+  }
+
+  .filter-option input {
+    accent-color: var(--gold-dark);
+    flex-shrink: 0;
+  }
+
+  .filter-subtitle {
+    font-size: 0.8rem;
+    color: var(--ink-light);
+    margin-bottom: 0.5rem;
+  }
+
+  .filter-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+    margin-top: 1rem;
+  }
+
+  .filter-action-btn {
+    border: none;
+    border-radius: 11px;
+    padding: 0.8rem 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.86rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.12s, background 0.15s, box-shadow 0.15s;
+  }
+
+  .filter-action-btn:active {
+    transform: scale(0.98);
+  }
+
+  .filter-action-primary {
+    background: var(--ink);
+    color: #fff;
+  }
+
+  .filter-action-primary:hover {
+    background: #2a2a4e;
+  }
+
+  .filter-action-secondary {
+    background: #f2efe7;
+    color: var(--ink);
+  }
+
+  .filter-action-secondary:hover {
+    background: #ebe6da;
+  }
+
+  .shop-results {
+    min-width: 0;
+  }
+
+  .results-bar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .results-count-inline {
+    font-size: 0.82rem;
+    color: var(--ink-light);
+  }
+
+  .attribute-empty {
+    font-size: 0.82rem;
+    color: var(--ink-light);
+    background: #faf7ef;
+    border: 1px dashed rgba(201,168,76,0.35);
+    border-radius: 10px;
+    padding: 0.8rem;
   }
 
   /* PRODUCT GRID */
@@ -654,7 +850,14 @@
   @media (max-width: 600px) {
     .cart-drawer { width: 100%; }
     .nav-center { display: none; }
-    .toolbar { flex-direction: column; align-items: stretch; }
+    .shop-layout { grid-template-columns: 1fr; }
+    .filter-panel {
+      position: static;
+      max-height: none;
+      overflow: visible;
+    }
+    .filter-row { grid-template-columns: 1fr; }
+    .filter-actions { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -683,36 +886,94 @@
   <p>Thousands of curated items, delivered straight to your door.</p>
 </div>
 
-<!-- TOOLBAR -->
-<div class="toolbar" id="shop-toolbar">
-  <div class="search-wrap">
-    <span class="search-icon">&#128269;</span>
-    <input type="text" id="search-input" placeholder="Search products..." oninput="filterProducts()" />
-  </div>
-  <select class="filter-select" id="cat-filter" onchange="filterProducts()">
-    <option value="">All Categories</option>
-    <option value="Electronics">Electronics</option>
-    <option value="Fashion">Fashion</option>
-    <option value="Home">Home & Living</option>
-    <option value="Sports">Sports</option>
-    <option value="Books">Books</option>
-  </select>
-  <select class="filter-select" id="sort-filter" onchange="filterProducts()">
-    <option value="default">Sort: Default</option>
-    <option value="price-asc">Price: Low &rarr; High</option>
-    <option value="price-desc">Price: High &rarr; Low</option>
-    <option value="name">Name A-Z</option>
-  </select>
-  <span class="results-count" id="results-count">12 products</span>
-</div>
-
 <!-- MAIN -->
 <div class="main">
 
   <!-- SHOP SECTION -->
   <div class="page-section active" id="section-shop">
-    <div class="section-title">All Products</div>
-    <div class="product-grid" id="product-grid"></div>
+    <div class="shop-layout">
+      <aside class="filter-panel" aria-label="Product filters">
+        
+
+        <div class="filter-group">
+          <label class="filter-label" for="search-input">Search</label>
+          <input type="text" class="filter-input" id="search-input" placeholder="Search products..." oninput="filterProducts()" />
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label" for="cat-filter">Category</label>
+          <select class="filter-select" id="cat-filter" onchange="filterProducts()">
+            <option value="">All Categories</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label" for="sort-filter">Sort By</label>
+          <select class="filter-select" id="sort-filter" onchange="filterProducts()">
+            <option value="default">Sort By</option>
+            <option value="price-asc">Price: Low &rarr; High</option>
+            <option value="price-desc">Price: High &rarr; Low</option>
+            <option value="name">Name A-Z</option>
+            <option value="rating-desc">Rating: High &rarr; Low</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-title">Price</div>
+          <div class="filter-row">
+            <input type="number" class="filter-input" id="min-price" placeholder="Min" min="0" step="1" oninput="filterProducts()" />
+            <input type="number" class="filter-input" id="max-price" placeholder="Max" min="0" step="1" oninput="filterProducts()" />
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-title">Ratings</div>
+          <div class="filter-options">
+            <label class="filter-option"><input type="checkbox" name="rating-filter" value="5" onchange="filterProducts()"> 5 Stars</label>
+            <label class="filter-option"><input type="checkbox" name="rating-filter" value="4" onchange="filterProducts()"> 4 Stars &amp; Above</label>
+            <label class="filter-option"><input type="checkbox" name="rating-filter" value="3" onchange="filterProducts()"> 3 Stars &amp; Above</label>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-title">Offer</div>
+          <div class="filter-options">
+            <label class="filter-option"><input type="checkbox" name="offer-filter" value="freeShipping" onchange="filterProducts()"> Free Shipping</label>
+            <label class="filter-option"><input type="checkbox" name="offer-filter" value="clearance" onchange="filterProducts()"> Clearance Sale</label>
+          </div>
+        </div>
+
+        <div class="filter-group" id="brand-filter-group-wrap">
+          <div class="filter-group-title">Brands</div>
+          <div class="filter-subtitle">Choose one or more brands</div>
+          <div class="filter-options" id="brand-filter-group"></div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-title">Stock</div>
+          <div class="filter-options">
+            <label class="filter-option"><input type="checkbox" name="stock-filter" value="in-stock" onchange="filterProducts()"> In Stock</label>
+            <label class="filter-option"><input type="checkbox" name="stock-filter" value="low-stock" onchange="filterProducts()"> Low Stock</label>
+            <label class="filter-option"><input type="checkbox" name="stock-filter" value="out-of-stock" onchange="filterProducts()"> Out of Stock</label>
+          </div>
+        </div>
+
+        <div id="attribute-filter-groups"></div>
+
+        <div class="filter-actions">
+          <button type="button" class="filter-action-btn filter-action-primary" onclick="filterProducts()">Apply Filters</button>
+          <button type="button" class="filter-action-btn filter-action-secondary" onclick="resetFilters()">Reset</button>
+        </div>
+      </aside>
+
+      <div class="shop-results">
+        <div class="results-bar">
+          <div class="section-title" style="margin-bottom:0;">All Products</div>
+          <span class="results-count results-count-inline" id="results-count">12 products</span>
+        </div>
+        <div class="product-grid" id="product-grid"></div>
+      </div>
+    </div>
   </div>
 
   <!-- ORDERS SECTION -->
@@ -781,6 +1042,14 @@
   }
 
   const PRODUCTS_API_URL = '{{ url_for("customer.api_products") }}';
+  const ATTRIBUTE_FILTERS = [
+    { label: 'Battery Required', type: 'boolean' },
+    { label: 'Battery Included', type: 'boolean' },
+    { label: 'Color', type: 'multi' },
+    { label: 'Gift Wrap', type: 'boolean' },
+    { label: 'Assembly Required', type: 'boolean' },
+    { label: 'Assembly Time (Min)', type: 'numeric' }
+  ];
   let PRODUCTS = [];
   let cart = [];
   let filteredProducts = [];
@@ -796,6 +1065,142 @@
       .replace(/"/g, '&quot;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
+  }
+
+  function normalizeFilterValue(value) {
+    return String(value ?? '').trim().toLowerCase();
+  }
+
+  function getCheckedValues(name) {
+    return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(input => input.value);
+  }
+
+  function getRadioValue(name) {
+    const selected = document.querySelector(`input[name="${name}"]:checked`);
+    return selected ? selected.value : 'any';
+  }
+
+  function getSpecValue(product, label) {
+    const specs = Array.isArray(product?.specificationItems) ? product.specificationItems : [];
+    const target = normalizeFilterValue(label);
+    const match = specs.find(item => normalizeFilterValue(item.label) === target);
+    return String(match?.value ?? '').trim();
+  }
+
+  function specMatchesBoolean(product, label, selectedValue) {
+    if (!selectedValue || selectedValue === 'any') return true;
+    const actual = normalizeFilterValue(getSpecValue(product, label));
+    if (!actual) return false;
+    if (selectedValue === 'yes') {
+      return /(yes|available|included|true|on|required)/i.test(actual);
+    }
+    if (selectedValue === 'no') {
+      return /(no|not available|unavailable|not included|false|off|optional)/i.test(actual);
+    }
+    return actual === normalizeFilterValue(selectedValue);
+  }
+
+  function specMatchesMulti(product, label, selectedValues) {
+    if (!selectedValues.length) return true;
+    const actual = normalizeFilterValue(getSpecValue(product, label));
+    return selectedValues.some(value => actual === normalizeFilterValue(value));
+  }
+
+  function specMatchesNumeric(product, label, selectedValue) {
+    if (!selectedValue || selectedValue === 'any') return true;
+    const actual = normalizeFilterValue(getSpecValue(product, label));
+    return actual === normalizeFilterValue(selectedValue) || actual.includes(normalizeFilterValue(selectedValue));
+  }
+
+  function buildFilterSidebar() {
+    const categorySelect = document.getElementById('cat-filter');
+    const brandGroup = document.getElementById('brand-filter-group');
+    const attributeGroups = document.getElementById('attribute-filter-groups');
+    if (!categorySelect || !brandGroup || !attributeGroups) return;
+
+    const categories = Array.from(new Set(PRODUCTS.map(product => product.category).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+    categorySelect.innerHTML = ['<option value="">All Categories</option>']
+      .concat(categories.map(category => `<option value="${escapeAttr(category)}">${escapeAttr(category)}</option>`))
+      .join('');
+
+    const brands = Array.from(new Set(PRODUCTS.map(product => product.brand).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+    brandGroup.innerHTML = brands.length
+      ? brands.map(brand => `
+          <label class="filter-option">
+            <input type="checkbox" name="brand-filter" value="${escapeAttr(brand)}" onchange="filterProducts()">
+            ${escapeAttr(brand)}
+          </label>
+        `).join('')
+      : '<div class="attribute-empty">No brand data available yet.</div>';
+
+    const specValues = ATTRIBUTE_FILTERS.map(attribute => {
+      const values = Array.from(new Set(PRODUCTS
+        .flatMap(product => Array.isArray(product.specificationItems) ? product.specificationItems : [])
+        .filter(item => normalizeFilterValue(item.label) === normalizeFilterValue(attribute.label))
+        .map(item => String(item.value ?? '').trim())
+        .filter(Boolean)))
+        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+      return { ...attribute, values };
+    });
+
+    attributeGroups.innerHTML = specValues.map(attribute => {
+      if (!attribute.values.length) return '';
+
+      if (attribute.type === 'boolean') {
+        const name = `spec-${normalizeFilterValue(attribute.label).replace(/[^a-z0-9]+/g, '-')}`;
+        return `
+          <div class="filter-group">
+            <div class="filter-group-title">${escapeAttr(attribute.label)}</div>
+            <div class="filter-options">
+              <label class="filter-option"><input type="radio" name="${name}" value="any" checked onchange="filterProducts()"> Any</label>
+              <label class="filter-option"><input type="radio" name="${name}" value="yes" onchange="filterProducts()"> Yes</label>
+              <label class="filter-option"><input type="radio" name="${name}" value="no" onchange="filterProducts()"> No</label>
+            </div>
+          </div>
+        `;
+      }
+
+      if (attribute.type === 'numeric') {
+        const name = `spec-${normalizeFilterValue(attribute.label).replace(/[^a-z0-9]+/g, '-')}`;
+        return `
+          <div class="filter-group">
+            <div class="filter-group-title">${escapeAttr(attribute.label)}</div>
+            <div class="filter-options">
+              <label class="filter-option"><input type="radio" name="${name}" value="any" checked onchange="filterProducts()"> Any</label>
+              ${attribute.values.map(value => `<label class="filter-option"><input type="radio" name="${name}" value="${escapeAttr(value)}" onchange="filterProducts()"> ${escapeAttr(value)}</label>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      const name = `spec-${normalizeFilterValue(attribute.label).replace(/[^a-z0-9]+/g, '-')}`;
+      return `
+        <div class="filter-group">
+          <div class="filter-group-title">${escapeAttr(attribute.label)}</div>
+          <div class="filter-options">
+            ${attribute.values.map(value => `<label class="filter-option"><input type="checkbox" name="${name}" value="${escapeAttr(value)}" onchange="filterProducts()"> ${escapeAttr(value)}</label>`).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function resetFilters() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('cat-filter').value = '';
+    document.getElementById('sort-filter').value = 'default';
+    document.getElementById('min-price').value = '';
+    document.getElementById('max-price').value = '';
+
+    document.querySelectorAll('input[type="checkbox"]').forEach(input => {
+      input.checked = false;
+    });
+
+    document.querySelectorAll('input[type="radio"]').forEach(input => {
+      if (input.value === 'any') input.checked = true;
+    });
+
+    filterProducts();
   }
 
   function isOutOfStock(product) {
@@ -828,8 +1233,9 @@
     const response = await fetch(PRODUCTS_API_URL);
     const data = await response.json();
     PRODUCTS = data.products || [];
+    buildFilterSidebar();
     filteredProducts = [...PRODUCTS];
-    renderProducts();
+    filterProducts();
   }
 
   function renderProducts() {
@@ -855,7 +1261,6 @@
       const metaItems = [p.category, p.brand].filter(Boolean)
         .map(item => `<span>${escapeAttr(item)}</span>`).join('');
       const detailItems = [
-        typeof p.stockQuantity !== 'undefined' && p.stockQuantity !== null ? `${Number(p.stockQuantity).toLocaleString()} units` : '',
         p.freeShipping ? 'Free shipping' : (p.shippingCharges ? `Ship: &#8377;${Number(p.shippingCharges).toLocaleString()}` : ''),
         p.productStatus && p.productStatus !== 'Published' ? p.productStatus : ''
       ].filter(Boolean).map(item => `<span>${escapeAttr(item)}</span>`).join('');
@@ -936,26 +1341,74 @@
   }
 
   function filterProducts() {
-    const q    = document.getElementById('search-input').value.toLowerCase();
-    const cat  = document.getElementById('cat-filter').value;
+    const q = normalizeFilterValue(document.getElementById('search-input').value);
+    const cat = document.getElementById('cat-filter').value;
     const sort = document.getElementById('sort-filter').value;
+    const minPrice = Number(document.getElementById('min-price').value || 0);
+    const maxPriceValue = document.getElementById('max-price').value;
+    const maxPrice = maxPriceValue ? Number(maxPriceValue) : null;
+    const selectedBrands = getCheckedValues('brand-filter').map(normalizeFilterValue);
+    const selectedRatings = getCheckedValues('rating-filter').map(Number).filter(Boolean);
+    const selectedOffers = getCheckedValues('offer-filter');
+    const selectedStock = getCheckedValues('stock-filter');
+    const batteryRequired = getRadioValue('spec-battery-required');
+    const batteryIncluded = getRadioValue('spec-battery-included');
+    const giftWrap = getRadioValue('spec-gift-wrap');
+    const assemblyRequired = getRadioValue('spec-assembly-required');
+    const assemblyTime = getRadioValue('spec-assembly-time');
+    const selectedColors = getCheckedValues('spec-color');
 
     filteredProducts = PRODUCTS.filter(p => {
+      const discountPercent = typeof p.discountPercent === 'number' ? p.discountPercent : calculateOfferPercent(p.mrp, p.discountPrice);
+      const rating = Number(p.rating || 0);
+      const stockStatus = normalizeFilterValue(p.stockStatus || (isOutOfStock(p) ? 'Out of Stock' : 'In Stock'));
       const searchable = [
         p.name,
         p.desc,
         p.shortDesc,
         p.category,
         p.brand,
-        p.sku
+        p.sku,
+        p.productStatus,
+        p.specifications
       ].filter(Boolean).join(' ').toLowerCase();
 
-      return searchable.includes(q) && (!cat || p.category === cat);
+      const withinSearch = searchable.includes(q);
+      const withinCategory = !cat || p.category === cat;
+      const withinPrice = Number(p.discountPrice || 0) >= minPrice && (maxPrice === null || Number(p.discountPrice || 0) <= maxPrice);
+      const withinBrands = !selectedBrands.length || selectedBrands.includes(normalizeFilterValue(p.brand));
+      const withinRatings = !selectedRatings.length || selectedRatings.some(threshold => rating >= threshold);
+      const withinOffers = !selectedOffers.length || selectedOffers.every(offer => {
+        if (offer === 'freeShipping') return Boolean(p.freeShipping);
+        if (offer === 'clearance') return Number(discountPercent) >= 35 || normalizeFilterValue(p.productStatus) === 'clearance';
+        return true;
+      });
+      const withinStock = !selectedStock.length || selectedStock.some(status => {
+        if (status === 'in-stock') return stockStatus === 'in stock';
+        if (status === 'low-stock') return stockStatus === 'low stock';
+        if (status === 'out-of-stock') return stockStatus === 'out of stock';
+        return true;
+      });
+
+      return withinSearch
+        && withinCategory
+        && withinPrice
+        && withinBrands
+        && withinRatings
+        && withinOffers
+        && withinStock
+        && specMatchesBoolean(p, 'Battery Required', batteryRequired)
+        && specMatchesBoolean(p, 'Battery Included', batteryIncluded)
+        && specMatchesBoolean(p, 'Gift Wrap', giftWrap)
+        && specMatchesBoolean(p, 'Assembly Required', assemblyRequired)
+        && specMatchesMulti(p, 'Color', selectedColors)
+        && specMatchesNumeric(p, 'Assembly Time (Min)', assemblyTime);
     });
 
     if (sort === 'price-asc')  filteredProducts.sort((a,b) => a.discountPrice - b.discountPrice);
     if (sort === 'price-desc') filteredProducts.sort((a,b) => b.discountPrice - a.discountPrice);
     if (sort === 'name')       filteredProducts.sort((a,b) => a.name.localeCompare(b.name));
+    if (sort === 'rating-desc') filteredProducts.sort((a,b) => Number(b.rating || 0) - Number(a.rating || 0));
 
     renderProducts();
   }
@@ -1078,9 +1531,7 @@
     document.getElementById('section-' + name).classList.add('active');
     el.classList.add('active');
     const hero = document.getElementById('hero-banner');
-    const toolbar = document.getElementById('shop-toolbar');
     hero.style.display    = name === 'shop' ? '' : 'none';
-    toolbar.style.display = name === 'shop' ? '' : 'none';
     if (name === 'orders') renderOrders();
   }
 
@@ -1099,6 +1550,8 @@
 
 {% from 'components/footer.html' import footer %}
 {{ footer() }}
+
+<script src="{{ url_for('static', filename='js/shop_commerce.js') }}"></script>
 
 </body>
 </html>

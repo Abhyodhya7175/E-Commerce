@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UrbanCart - Home</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,800;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/product_card_premium.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/shop_commerce.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/carousel.css') }}">
   {% from 'components/product_card_premium.html' import premium_product_card %}
   {% from 'components/product_carousel.html' import product_carousel %}
@@ -1322,13 +1324,13 @@
     </form>
 
     <div class="nav-icons">
-      <a href="#" class="icon-btn" title="Wishlist">
+      <a href="{{ url_for('commerce.wishlist_page') }}" class="icon-btn" title="Wishlist">
         <i class="fas fa-heart"></i>
-        <span class="dot">3</span>
+        <span class="dot" data-wishlist-count>{{ wishlist_count or 0 }}</span>
       </a>
-      <a href="{{ url_for('customer.cart') if current_user.is_authenticated else url_for('auth.login') }}" class="icon-btn" title="Cart">
+      <a href="{{ url_for('commerce.cart_page') }}" class="icon-btn" title="Cart">
         <i class="fas fa-shopping-bag"></i>
-        <span class="dot">2</span>
+        <span class="dot" data-cart-count>{{ cart_count or 0 }}</span>
       </a>
       {% if current_user.is_authenticated %}
       <a href="{{ url_for('customer.shop_home') }}" class="icon-btn" title="My Account">
@@ -1489,8 +1491,8 @@
                 {% endif %}
                 
                 <!-- Wishlist Button -->
-                <button class="pcard-wishlist" title="Add to Wishlist" data-product-id="{{ product.id }}">
-                  <i class="fas fa-heart"></i>
+                <button class="pcard-wishlist" title="Add to Wishlist" data-wishlist-id="{{ product.id }}" aria-pressed="{{ 'true' if product.id in wishlist_ids else 'false' }}">
+                  <span aria-hidden="true">{{ '❤️' if product.id in wishlist_ids else '♡' }}</span>
                 </button>
               </div>
 
@@ -1532,7 +1534,7 @@
 
               <!-- CTA Section -->
               <div class="pcard-cta">
-                <button class="pcard-btn-add" data-product-id="{{ product.id }}" data-product-name="{{ product.name }}">
+                <button class="pcard-btn-add" data-cart-id="{{ product.id }}" data-stock="{{ product.stockQuantity or 0 }}" data-product-name="{{ product.name }}">
                   <i class="fas fa-shopping-bag"></i> Quick Add
                 </button>
               </div>
@@ -1805,6 +1807,7 @@
 
 <script src="{{ url_for('static', filename='js/product_card_premium.js') }}"></script>
 <script src="{{ url_for('static', filename='js/carousel.js') }}"></script>
+<script src="{{ url_for('static', filename='js/shop_commerce.js') }}"></script>
 
 <script>
   // Sticky nav shadow on scroll
@@ -2140,42 +2143,7 @@
     e.target.reset();
   });
 
-  // ════════════════════════════════════════
-  // JUST LANDED PRODUCT CARDS - EVENT HANDLERS
-  // ════════════════════════════════════════
-  
-  // Wishlist toggle
-  document.querySelectorAll('.pcard-wishlist').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const productId = btn.dataset.productId;
-      btn.classList.toggle('active');
-      console.log('Wishlist toggled for product:', productId);
-      // TODO: Add wishlist API call here
-    });
-  });
-
-  // Quick add to cart
-  document.querySelectorAll('.pcard-btn-add').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const productId = btn.dataset.productId;
-      const productName = btn.dataset.productName;
-      console.log('Quick add to cart:', { productId, productName });
-      
-      // Show feedback
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-check"></i> Added!';
-      btn.style.background = '#10b981';
-      
-      setTimeout(() => {
-        btn.innerHTML = originalText;
-        btn.style.background = '';
-      }, 2000);
-      
-      // TODO: Add cart API call here
-    });
-  });
+  // Commerce actions are handled by static/js/shop_commerce.js.
 
   // Apply staggered animation delays to product cards
   document.querySelectorAll('.pcard[data-delay]').forEach((card) => {

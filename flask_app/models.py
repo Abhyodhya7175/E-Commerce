@@ -311,6 +311,54 @@ class SearchHistory(db.Model):
         }
 
 
+class PincodeServiceabilityCache(db.Model):
+    __tablename__ = 'pincode_serviceability_cache'
+
+    id = db.Column(db.Integer, primary_key=True)
+    pincode = db.Column(db.String(6), nullable=False, index=True)
+    pickup_pincode = db.Column(db.String(6), nullable=True)
+    weight = db.Column(db.Float, nullable=True)
+    serviceable = db.Column(db.Boolean, nullable=False, default=False)
+    cod = db.Column(db.Boolean, nullable=False, default=False)
+    eta = db.Column(db.String(50), nullable=True)
+    courier_name = db.Column(db.String(120), nullable=True)
+    checked_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+
+class CartItem(db.Model):
+    __tablename__ = 'cart_items'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id', ondelete='CASCADE'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    user = db.relationship('User', backref=db.backref('cart_items', lazy=True, cascade='all, delete-orphan'))
+    product = db.relationship('Product')
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'product_id', name='uq_cart_item_user_product'),
+    )
+
+
+class WishlistItem(db.Model):
+    __tablename__ = 'wishlist_items'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id', ondelete='CASCADE'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    user = db.relationship('User', backref=db.backref('wishlist_items', lazy=True, cascade='all, delete-orphan'))
+    product = db.relationship('Product')
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'product_id', name='uq_wishlist_item_user_product'),
+    )
+
+
 class Blog(db.Model):
     """Blog posts for content marketing"""
     id = db.Column(db.Integer, primary_key=True)

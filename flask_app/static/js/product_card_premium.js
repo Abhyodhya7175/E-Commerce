@@ -46,6 +46,7 @@ function ucInitProductCards(root = document) {
         const handler = window.ucToggleWishlist;
         if (typeof handler === 'function') {
           handler(id, btn);
+          return;
         }
 
         btn.classList.toggle('active');

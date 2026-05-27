@@ -3,8 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Product Cards — Demo</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/product_card_premium.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/shop_commerce.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
 </head>
 <body style="margin:0;background:#fbfaf7;">
@@ -27,6 +29,7 @@
   </div>
 
   <script src="{{ url_for('static', filename='js/product_card_premium.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/shop_commerce.js') }}"></script>
 
   {% from 'components/footer.html' import footer %}
   {{ footer() }}

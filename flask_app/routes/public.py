@@ -1,10 +1,61 @@
-from flask import Blueprint, render_template, abort, jsonify, request, make_response
+from datetime import datetime, timedelta
+import re
+
+from flask import Blueprint, render_template, abort, jsonify, request, make_response, current_app
 from flask_login import current_user
-from ..models import Product, _slugify, Review, SearchHistory
+from ..models import Product, _slugify, Review, SearchHistory, PincodeServiceabilityCache
 from ..extensions import db
+from ..services.shiprocket import check_serviceability
 
 
 public_bp = Blueprint("public", __name__)
+
+
+PINCODE_PATTERN = re.compile(r"^[1-9][0-9]{5}$")
+
+
+def _parse_bool(value, default=True) -> bool:
+    if value is None:
+        return default
+    return str(value).strip().lower() in {"1", "true", "yes", "y"}
+
+
+def _resolve_weight_kg(product: Product | None, weight_arg: float | None) -> float:
+    if weight_arg:
+        return max(float(weight_arg), 0.1)
+    if product and product.product_weight:
+        return max(float(product.product_weight), 0.1)
+    return max(float(current_app.config.get("DEFAULT_PRODUCT_WEIGHT_KG", 0.5)), 0.1)
+
+
+def _is_free_shipping(product: Product | None, order_value: float | None) -> bool:
+    threshold = float(current_app.config.get("FREE_SHIPPING_MIN", 0) or 0)
+    if product and product.free_shipping:
+        return True
+    if order_value is None:
+        return False
+    return threshold > 0 and order_value >= threshold
+
+
+def _get_cached_serviceability(pincode: str, weight_kg: float, pickup_pincode: str | None) -> PincodeServiceabilityCache | None:
+    ttl_seconds = int(current_app.config.get("SHIPROCKET_CACHE_TTL_SECONDS", 21600))
+    if ttl_seconds <= 0:
+        return None
+
+    query = PincodeServiceabilityCache.query.filter_by(pincode=pincode)
+    if pickup_pincode:
+        query = query.filter_by(pickup_pincode=pickup_pincode)
+
+    cached = query.order_by(PincodeServiceabilityCache.checked_at.desc()).first()
+    if not cached:
+        return None
+
+    if cached.checked_at and cached.checked_at < datetime.utcnow() - timedelta(seconds=ttl_seconds):
+        return None
+
+    if cached.weight is not None and abs(float(cached.weight) - float(weight_kg)) > 0.05:
+        return None
+    return cached
 
 
 @public_bp.route("/cards")
@@ -188,4 +239,75 @@ def get_search_history():
             'success': False,
             'error': str(e)
         }), 500
+
+
+@public_bp.route("/check-pincode/<pincode>")
+def check_pincode(pincode: str):
+    normalized = re.sub(r"\s+", "", pincode or "")
+    if not PINCODE_PATTERN.match(normalized):
+        return jsonify(error="Invalid Indian pincode."), 400
+
+    product_id = request.args.get("product_id", type=int)
+    weight_arg = request.args.get("weight", type=float)
+    pickup_arg = request.args.get("pickup_pincode")
+    order_value = request.args.get("order_value", type=float)
+    cod_requested = _parse_bool(request.args.get("cod"), default=True)
+
+    product = Product.query.get(product_id) if product_id else None
+    if product and order_value is None:
+        order_value = float(product.selling_price or product.discount_price or 0)
+
+    weight_kg = _resolve_weight_kg(product, weight_arg)
+    pickup_pincode = pickup_arg or current_app.config.get("SHIPROCKET_PICKUP_PINCODE")
+
+    cached = _get_cached_serviceability(normalized, weight_kg, pickup_pincode)
+    if cached:
+        return jsonify({
+            "available": bool(cached.serviceable),
+            "courier": cached.courier_name,
+            "eta": cached.eta,
+            "cod": bool(cached.cod),
+            "estimated_date": None,
+            "free_shipping": _is_free_shipping(product, order_value),
+            "pickup_pincode": pickup_pincode,
+            "source": "cache",
+        })
+
+    try:
+        result = check_serviceability(
+            normalized,
+            weight_kg,
+            pickup_pincode=pickup_pincode,
+            cod=cod_requested,
+        )
+    except RuntimeError:
+        return jsonify(error="Shiprocket service is temporarily unavailable."), 502
+
+    cache_entry = PincodeServiceabilityCache(
+        pincode=normalized,
+        pickup_pincode=pickup_pincode,
+        weight=round(weight_kg, 2),
+        serviceable=bool(result.get("available")),
+        cod=bool(result.get("cod")),
+        eta=result.get("eta_text"),
+        courier_name=result.get("courier"),
+        checked_at=datetime.utcnow(),
+    )
+    try:
+        db.session.add(cache_entry)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Failed to write pincode cache")
+
+    return jsonify({
+        "available": bool(result.get("available")),
+        "courier": result.get("courier"),
+        "eta": result.get("eta_text"),
+        "cod": bool(result.get("cod")),
+        "estimated_date": result.get("estimated_date"),
+        "free_shipping": _is_free_shipping(product, order_value),
+        "pickup_pincode": pickup_pincode,
+        "source": "live",
+    })
 

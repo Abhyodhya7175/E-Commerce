@@ -1,0 +1,70 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Your Wishlist - UrbanCart{% endblock %}
+
+{% block content %}
+<div class="uc-toolbar">
+  <div class="uc-heading">
+    <span class="eyebrow">Wishlist</span>
+    <h1>Products saved for later</h1>
+    <p>Keep a premium shortlist of products you love, move them to cart instantly, or remove them with a tap.</p>
+  </div>
+  <div class="uc-pill"><i class="fa-solid fa-heart text-danger"></i> <span data-wishlist-count-display>{{ wishlist_payload.count }}</span> saved</div>
+</div>
+
+<div id="uc-wishlist-grid" class="uc-wishlist-grid row g-4">
+  {% if wishlist_payload['items'] %}
+    {% for item in wishlist_payload['items'] %}
+      <div class="col-12 col-md-6 col-xl-4">
+        <article class="uc-wishlist-card" data-wishlist-card="{{ item.id }}">
+          <div class="uc-wishlist-media">
+            {% if item.imageUrl %}
+              <img src="{{ item.imageUrl }}" alt="{{ item.name }}">
+            {% else %}
+              <div class="uc-fallback" aria-hidden="true">{{ item.icon or '📦' }}</div>
+            {% endif %}
+          </div>
+          <div class="uc-wishlist-body">
+            <div>
+              <h3 class="uc-product-title">{{ item.name }}</h3>
+              <div class="uc-product-meta">
+                {% if item.brand %}<span>{{ item.brand }}</span>{% endif %}
+                {% if item.category %}<span>{{ item.category }}</span>{% endif %}
+              </div>
+            </div>
+            <div class="uc-price-row">
+              <div class="uc-price-now">₹{{ '%.0f'|format(item.discountPrice or 0) }}</div>
+              {% if item.mrp and item.mrp > item.discountPrice %}
+                <div class="uc-price-was">₹{{ '%.0f'|format(item.mrp) }}</div>
+              {% endif %}
+            </div>
+            <div class="uc-wishlist-rating">★ {{ '%.1f'|format(item.rating or 0) }} <span class="uc-product-meta">({{ item.reviewCount or 0 }} reviews)</span></div>
+            <div class="uc-product-meta">
+              <span class="uc-stock {{ 'out' if (item.stockStatus or '')|lower == 'out of stock' else 'low' if (item.stockStatus or '')|lower == 'low stock' else '' }}">{{ item.stockStatus or 'In Stock' }}</span>
+            </div>
+            <div class="uc-card-actions">
+              <button type="button" class="uc-btn uc-btn-primary" data-move-to-cart="{{ item.id }}">Move to cart</button>
+              <button type="button" class="uc-btn uc-btn-soft" data-wishlist-remove="{{ item.id }}">Remove</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="col-12">
+      <div class="uc-empty-state">
+        <div class="uc-empty-illustration">♡</div>
+        <h2>Your wishlist is empty</h2>
+        <p>Tap the heart on any product to save it for later. Wishlisted items stay synced across refreshes and logins.</p>
+        <a class="uc-btn uc-btn-primary" href="{{ url_for('customer.shop_home') }}">Explore products</a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.ucWishlistState = {{ wishlist_payload | tojson }};
+</script>
+{% endblock %}

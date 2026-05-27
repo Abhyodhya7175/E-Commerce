@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from werkzeug.exceptions import RequestEntityTooLarge
 from .config import Config
 from .extensions import db
+from .shop_state import get_commerce_state, get_csrf_token
 from sqlalchemy import text
 import os
 
@@ -82,6 +83,29 @@ def _ensure_product_schema():
     for column, definition in missing_columns.items():
         if column not in columns:
             db.session.execute(text(f'ALTER TABLE product ADD COLUMN {column} {definition}'))
+
+    db.session.commit()
+
+
+def _ensure_pincode_cache_schema():
+    inspector = db.inspect(db.engine)
+    if 'pincode_serviceability_cache' not in inspector.get_table_names():
+        return
+
+    columns = {column['name'] for column in inspector.get_columns('pincode_serviceability_cache')}
+    missing_columns = {
+        'pickup_pincode': 'VARCHAR(6) NULL',
+        'weight': 'FLOAT NULL',
+        'serviceable': 'BOOLEAN DEFAULT FALSE',
+        'cod': 'BOOLEAN DEFAULT FALSE',
+        'eta': 'VARCHAR(50) NULL',
+        'courier_name': 'VARCHAR(120) NULL',
+        'checked_at': 'DATETIME NULL',
+    }
+
+    for column, definition in missing_columns.items():
+        if column not in columns:
+            db.session.execute(text(f'ALTER TABLE pincode_serviceability_cache ADD COLUMN {column} {definition}'))
 
     db.session.commit()
 
@@ -191,6 +215,29 @@ def _deduplicate_products():
         db.session.commit()
 
 
+def _ensure_demo_users():
+    from .models import User
+
+    defaults = [
+        ("customer@demo.com", "Alex Johnson", "customer", "customer123"),
+        ("admin@demo.com", "Sara Admin", "admin", "admin123"),
+    ]
+
+    changed = False
+    for email, name, role, password in defaults:
+        user = User.query.filter_by(email=email).first()
+        if user:
+            continue
+
+        user = User(name=name, email=email, role=role)
+        user.set_password(password)
+        db.session.add(user)
+        changed = True
+
+    if changed:
+        db.session.commit()
+
+
 def create_app():
     # Explicitly configure static and template folders
     static_folder = os.path.join(os.path.dirname(__file__), 'static')
@@ -211,6 +258,7 @@ def create_app():
         db.create_all()
         _ensure_offer_banner_schema()
         _ensure_product_schema()
+        _ensure_pincode_cache_schema()
 
         from .models import Product, ProductCategory, ProductBrand
         from .product_store import DEFAULT_PRODUCTS
@@ -257,10 +305,22 @@ def create_app():
         db.session.commit()
 
         if Product.query.count() == 0:
+            from .models import _slugify
+
+            existing_slugs = {slug for (slug,) in db.session.query(Product.slug).all() if slug}
             for product in DEFAULT_PRODUCTS:
+                base_slug = _slugify(product['name'])
+                slug = base_slug
+                suffix = 2
+                while slug in existing_slugs:
+                    slug = f"{base_slug}-{suffix}"
+                    suffix += 1
+                existing_slugs.add(slug)
+
                 db.session.add(Product(
                     name=product['name'],
                     category=product['category'],
+                    slug=slug,
                     mrp=float(product['mrp']),
                     discount_price=float(product['discountPrice']),
                     description=product.get('desc', ''),
@@ -271,10 +331,22 @@ def create_app():
 
         _ensure_product_image_rows()
         _deduplicate_products()
+        _ensure_demo_users()
 
         from .extensions import login_manager
         # initialize login manager
         login_manager.init_app(app)
+        app.jinja_env.globals['csrf_token'] = get_csrf_token
+
+        @app.context_processor
+        def inject_commerce_state():
+            state = get_commerce_state()
+            return {
+                'cart_count': state['cart_count'],
+                'wishlist_count': state['wishlist_count'],
+                'wishlist_ids': state['wishlist_ids'],
+                'cart_quantities': state['cart_quantities'],
+            }
 
         @login_manager.user_loader
         def load_user(user_id):
@@ -285,6 +357,7 @@ def create_app():
         from .routes.auth import auth_bp
         from .routes.admin import admin_bp
         from .routes.customer import customer_bp
+        from .routes.commerce import commerce_bp
         from .routes.public import public_bp
         from .routes.blog import blog_bp
 
@@ -295,6 +368,7 @@ def create_app():
         app.register_blueprint(auth_bp)
         app.register_blueprint(admin_bp, url_prefix='/admin')
         app.register_blueprint(customer_bp, url_prefix='/shop')
+        app.register_blueprint(commerce_bp)
         app.register_blueprint(public_bp)
         app.register_blueprint(blog_bp)
 
