@@ -30,6 +30,9 @@
     font-family: 'DM Sans', sans-serif;
     background: var(--cream);
     color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
 
   /* NAV */
@@ -41,6 +44,13 @@
     justify-content: space-between;
     height: 62px;
     position: sticky; top: 0; z-index: 100;
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 1.3rem;
+    min-width: 0;
   }
 
   .nav-logo {
@@ -73,6 +83,7 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+    margin-left: auto;
   }
 
   .cart-btn {
@@ -395,7 +406,14 @@
   }
 
   /* PRODUCT GRID */
-  .main { padding: 2rem; }
+  .main {
+    flex: 1;
+    padding: 2rem;
+  }
+
+  .footer {
+    margin-top: auto;
+  }
 
   .section-title {
     font-family: 'Playfair Display', serif;
@@ -849,7 +867,31 @@
 
   @media (max-width: 600px) {
     .cart-drawer { width: 100%; }
-    .nav-center { display: none; }
+    nav {
+      padding: 0 1rem;
+      height: auto;
+      min-height: 62px;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .nav-left {
+      width: 100%;
+      justify-content: space-between;
+    }
+    .nav-center {
+      width: 100%;
+      order: 3;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+    .nav-right {
+      margin-left: 0;
+      width: 100%;
+      justify-content: flex-end;
+      order: 2;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
     .shop-layout { grid-template-columns: 1fr; }
     .filter-panel {
       position: static;
@@ -865,18 +907,24 @@
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo">Urban<span>Cart</span></div>
-  <div class="nav-center">
-    <span class="nav-link active" onclick="showSection('shop', this)">Shop</span>
-    <span class="nav-link" onclick="showSection('orders', this)">My Orders</span>
-    <span class="nav-link" onclick="showSection('account', this)">Account</span>
+  <div class="nav-left">
+    <div class="nav-logo">Urban<span>Cart</span></div>
+    <div class="nav-center">
+      <span class="nav-link active" onclick="showSection('shop', this)">Shop</span>
+      <span class="nav-link" onclick="showSection('orders', this)">My Orders</span>
+      <span class="nav-link" onclick="showSection('account', this)">Account</span>
+    </div>
   </div>
   <div class="nav-right">
     <button class="cart-btn" onclick="openCart()">
       &#128722; Cart <span class="cart-badge" id="cart-count">0</span>
     </button>
     <span class="user-info">Hi, <strong id="user-name">{{ user.name.split(' ')[0] if user else 'Customer' }}</strong></span>
-    <a href="{{ url_for('auth.logout') }}" class="logout-btn" style="text-decoration:none;display:block;">Sign out</a>
+    {% if user %}
+      <a href="{{ url_for('auth.logout') }}" class="logout-btn" style="text-decoration:none;display:block;">Sign out</a>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}" class="logout-btn" style="text-decoration:none;display:block;">Login</a>
+    {% endif %}
   </div>
 </nav>
 
@@ -893,8 +941,6 @@
   <div class="page-section active" id="section-shop">
     <div class="shop-layout">
       <aside class="filter-panel" aria-label="Product filters">
-        
-
         <div class="filter-group">
           <label class="filter-label" for="search-input">Search</label>
           <input type="text" class="filter-input" id="search-input" placeholder="Search products..." oninput="filterProducts()" />

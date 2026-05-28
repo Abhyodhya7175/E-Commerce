@@ -420,7 +420,7 @@
   }
 
   document.addEventListener('click', async (event) => {
-    const wishlistButton = event.target.closest('[data-wishlist-id], .pcard-wishlist, .uc-wish, #pd-wish');
+    const wishlistButton = event.target.closest('[data-wishlist-id], .pcard-wishlist, .uc-wish, .uc-wishlist-btn, #pd-wish');
     if (wishlistButton) {
       event.preventDefault();
       event.stopPropagation();

@@ -18,8 +18,8 @@ def home():
         # (Shop pages remain available via their own routes.)'''
 
     # Fetch data for various sections (always fresh from DB)
-    # Latest "Just Landed" products - newest 10 products ordered by created_at
-    just_landed = [p.to_dict() for p in Product.query.filter_by(active=True).order_by(Product.created_at.desc()).limit(10).all()]
+    # Latest "Just Landed" products - keep the default homepage shelf compact
+    just_landed = [p.to_dict() for p in Product.query.filter_by(active=True).order_by(Product.created_at.desc()).limit(5).all()]
 
     # New arrivals - newest 4 products
     new_arrivals = [p.to_dict() for p in Product.query.filter_by(active=True).order_by(Product.created_at.desc()).limit(4).all()]

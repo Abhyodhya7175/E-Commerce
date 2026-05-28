@@ -126,44 +126,325 @@
     .nav-search input::placeholder { color: var(--muted); }
     .nav-search input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-lt); }
 
-    /* Navbar search suggestions */
+    /* Navbar search dropdown */
     .nav-search-wrapper {
-      flex: 1; max-width: 310px;
-      position: relative; margin-left: auto;
+      flex: 1;
+      max-width: 440px;
+      position: relative;
+      margin-left: auto;
+      z-index: 40;
     }
-    
-    .nav-search-suggestions {
-      position: absolute; top: 100%; left: 0; right: 0;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 0 0 8px 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-      max-height: 250px; overflow-y: auto; z-index: 100;
+
+    .nav-search-shell {
+      position: relative;
+    }
+
+    .nav-search-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      min-height: 48px;
+      padding: 0 0.75rem 0 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.96);
+      box-shadow: 0 8px 24px rgba(26,26,46,0.08);
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    }
+
+    .nav-search-input-wrap:focus-within {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 4px var(--gold-lt), 0 16px 30px rgba(26,26,46,0.1);
+      transform: translateY(-1px);
+    }
+
+    .nav-search-input-wrap .nav-search-icon {
+      color: var(--gold-dk);
+      font-size: 0.92rem;
+      flex-shrink: 0;
+    }
+
+    .nav-search-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      outline: none;
+      min-width: 0;
+    }
+
+    .nav-search-input::placeholder { color: var(--muted); }
+
+    .nav-search-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      border: none;
+      border-radius: 999px;
+      background: var(--text);
+      color: #fff;
+      padding: 0.72rem 1.05rem;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      flex-shrink: 0;
+    }
+
+    .nav-search-btn:hover {
+      background: var(--gold-dk);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(201,168,76,0.22);
+    }
+
+    .nav-search-panel {
+      position: absolute;
+      top: calc(100% + 0.7rem);
+      left: 0;
+      right: 0;
+      background: rgba(255,255,255,0.98);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.15);
+      overflow: hidden;
+      max-height: 72vh;
+      overflow-y: auto;
       display: none;
     }
-    
-    .nav-search-suggestions.show {
+
+    .nav-search-panel.is-open {
       display: block;
     }
-    
-    .nav-search-item {
-      padding: 0.6rem 0.8rem; cursor: pointer;
-      border-bottom: 1px solid var(--border);
-      transition: background 0.2s;
-      font-size: 0.8rem; color: var(--text);
-      display: flex; align-items: center; gap: 0.4rem;
+
+    .nav-search-state {
+      padding: 1rem 1.1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
     }
-    
-    .nav-search-item:last-child {
-      border-bottom: none;
+
+    .nav-search-spinner {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--gold-lt);
+      border-top-color: var(--gold-dk);
+      animation: navSpin 0.8s linear infinite;
+      flex-shrink: 0;
     }
-    
-    .nav-search-item:hover {
+
+    @keyframes navSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    .nav-search-section {
+      padding: 0.85rem 0 0.2rem;
+    }
+
+    .nav-search-heading {
+      padding: 0 1rem 0.65rem;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .clear-searches-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .clear-searches-btn:hover {
+      color: var(--gold-dk);
+      transform: scale(1.1);
+    }
+
+    .nav-search-list {
+      display: grid;
+      gap: 0.7rem;
+      padding: 0 1rem 1rem;
+    }
+
+    .nav-search-result {
+      display: grid;
+      grid-template-columns: 64px minmax(0, 1fr);
+      gap: 0.85rem;
+      align-items: start;
+      padding: 0.82rem;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, #fff, #fffaf1);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .nav-search-result:hover {
+      transform: translateY(-2px);
+      border-color: var(--gold);
+      box-shadow: 0 14px 28px rgba(26,26,46,0.12);
+    }
+
+    .nav-search-thumb {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      overflow: hidden;
       background: var(--gold-lt);
+      flex-shrink: 0;
     }
-    
-    .nav-search-item i {
+
+    .nav-search-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .nav-search-body {
+      min-width: 0;
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .nav-search-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .nav-search-title {
+      margin: 0;
+      color: var(--text);
+      font-size: 0.95rem;
+      line-height: 1.25;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .nav-search-title mark {
+      background: rgba(201,168,76,0.18);
+      color: var(--gold-dk);
+      padding: 0 0.08rem;
+      border-radius: 4px;
+    }
+
+    .nav-search-icon {
       color: var(--gold);
-      font-size: 0.65rem;
+      flex-shrink: 0;
+    }
+
+    .nav-search-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem 0.7rem;
+      color: var(--muted);
+      font-size: 0.79rem;
+    }
+
+    .nav-search-price {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.45rem 0.6rem;
+    }
+
+    .nav-search-price .current {
+      color: var(--gold-dk);
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .nav-search-price .original {
+      color: var(--muted);
+      text-decoration: line-through;
+      font-size: 0.8rem;
+    }
+
+    .nav-search-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    .nav-search-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.15rem;
+    }
+
+    .nav-search-action {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 0.55rem 0.8rem;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s, background 0.2s, color 0.2s;
+    }
+
+    .nav-search-action:hover {
+      transform: translateY(-1px);
+      border-color: var(--gold);
+    }
+
+    .nav-search-action-primary {
+      background: var(--text);
+      color: #fff;
+      border-color: var(--text);
+    }
+
+    .nav-search-action-primary:hover {
+      background: var(--gold-dk);
+      border-color: var(--gold-dk);
+      color: #fff;
+    }
+
+    .nav-search-empty {
+      padding: 1rem 1.1rem 1.1rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .nav-search-result.compact .nav-search-actions,
+    .nav-search-result.compact .nav-search-meta {
+      display: none;
+    }
+
+    .nav-search-result.compact .nav-search-body {
+      gap: 0.3rem;
+    }
+
+    .nav-search-result.compact .nav-search-price {
+      gap: 0.4rem;
+    }
+
+    .nav-search-result.compact .nav-search-title {
+      font-size: 0.92rem;
     }
 
 
@@ -427,9 +708,10 @@
       padding: .75rem .95rem;
       display: flex; align-items: center; gap: .65rem;
       transition: background .4s, border-color .4s;
+      z-index: 3;
     }
-    .fbadge-a { top: 1.6rem; right: -1.7rem; animation: fa 4s ease-in-out infinite; }
-    .fbadge-b { bottom: 5.5rem; left: -1.9rem; animation: fb 4s 2s ease-in-out infinite; }
+    .fbadge-a { top: 1.6rem; right: -0.4rem; animation: fa 4s ease-in-out infinite; }
+    .fbadge-b { bottom: 5.5rem; left: -0.4rem; animation: fb 4s 2s ease-in-out infinite; }
     @keyframes fa { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
     @keyframes fb { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
     .fb-icon { font-size: 1.35rem; }
@@ -712,7 +994,7 @@
     .see-all:hover { color: var(--gold); border-color: var(--gold); }
 
     /* Premium cards grid */
-    .grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.4rem; }
+    .grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
 
     /* ════════ PREMIUM PRODUCT CARDS ════════ */
     .pcard {
@@ -857,11 +1139,11 @@
     .pimg {
       aspect-ratio: 1; background: var(--gold-lt);
       position: relative; overflow: hidden;
-      display: flex; align-items: center; justify-content: center;
+      display: none; align-items: center; justify-content: center;
       transition: background .4s;
     }
     .pimg img {
-      width: 100%; height: 100%; object-fit: cover; display: block;
+      width: 100%; height: 100%; object-fit: cover; display: none;
       transition: transform .5s ease, opacity .4s;
     }
     .img-hover-overlay {
@@ -923,7 +1205,7 @@
 
     /* ══════════ FLASH DEALS ══════════ */
     .flash-deals { background: linear-gradient(135deg, rgba(201,168,76,.08), rgba(239,68,68,.08)); padding: 80px 2rem 70px; }
-    .deal-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.4rem; }
+    .deal-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
     .deal-card {
       background: var(--card); border-radius: 18px; overflow: hidden;
       border: 2px solid var(--gold); cursor: pointer; position: relative;
@@ -981,7 +1263,7 @@
     .scratch-hint { font-size: .7rem; color: var(--muted); margin-top: .5rem; }
 
     /* ══════════ MOST WISHLISTED ══════════ */
-    .most-wishlisted { padding: 70px 2rem 80px; }
+    .most-wishlisted { padding: 40px 2rem 50px; }
     .wishlist-badge {
       position: absolute; top: .75rem; left: .75rem;
       background: linear-gradient(135deg, #ec4899, #f472b6);
@@ -1001,7 +1283,7 @@
     /* ── RESPONSIVE ── */
     @media (max-width: 1100px) {
       .nav-cats { display: none; }
-      .grid { grid-template-columns: repeat(3,1fr); gap: 1.2rem; }
+      .grid { grid-template-columns: repeat(3,1fr); gap: 0.9rem; }
       .deal-grid { grid-template-columns: repeat(2,1fr); }
       .nav-inner { padding: 0 1.25rem; }
       .pcard-img { aspect-ratio: 1; }
@@ -1014,10 +1296,10 @@
       .hero-visual { max-width: 480px; margin: 0 auto; }
       .fbadge { display: none; }
       .hero-stats { flex-wrap: wrap; gap: 1rem; }
-      .sec-container { padding: 70px 1.5rem 60px; }
-      .trending { padding: 70px 1.5rem 0; }
-      .flash-deals { padding: 70px 1.5rem 60px; }
-      .grid { grid-template-columns: repeat(2,1fr); gap: 1rem; }
+      .sec-container { padding: 40px 1.5rem 40px; }
+      .trending { padding: 40px 1.5rem 0; }
+      .flash-deals { padding: 40px 1.5rem 40px; }
+      .grid { grid-template-columns: repeat(2,1fr); gap: 0.8rem; }
       .pcard { border-radius: 12px; }
       .pcard-name { font-size: 0.95rem; }
       .pcard-price .current-price { font-size: 1rem; }
@@ -1041,7 +1323,19 @@
         flex-wrap: wrap;
         align-items: center;
       }
-      .nav-search { display: none; }
+      .nav-search-wrapper {
+        order: 3;
+        width: 100%;
+        max-width: none;
+        flex: 1 1 100%;
+      }
+      .nav-search-input-wrap {
+        width: 100%;
+      }
+      .nav-search-btn {
+        padding: 0.64rem 0.85rem;
+        font-size: 0.78rem;
+      }
       .nav-icons { margin-left: auto; }
       .nav-auth { margin-left: auto; }
       .hero { padding-top: 92px; }
@@ -1313,13 +1607,42 @@
       <li><a href="#">About</a></li>
     </ul>
 
-    <form class="nav-search-wrapper" id="nav-search-wrapper">
-      <div style="position: relative;">
-        <div style="display: flex; align-items: center;">
-          <i class="fas fa-search"></i>
-          <input type="text" name="q" id="nav-search-input" placeholder="Search products…" autocomplete="off" style="flex: 1; border: none; background: transparent; padding: 0.5rem 0.9rem 0.5rem 0;">
+    <form class="nav-search-wrapper" id="nav-search-wrapper" autocomplete="off">
+      <div class="nav-search-shell">
+        <div class="nav-search-input-wrap">
+          <i class="fas fa-search nav-search-icon" aria-hidden="true"></i>
+          <input type="text" name="q" id="nav-search-input" class="nav-search-input" placeholder="Search products, brands, categories..." autocomplete="off">
+          <button type="submit" class="nav-search-btn">Search</button>
         </div>
-        <div class="nav-search-suggestions" id="nav-search-suggestions"></div>
+
+        <div class="nav-search-panel" id="nav-search-panel" aria-label="Product search dropdown" aria-hidden="true">
+          <div class="nav-search-state" id="nav-search-loading" hidden>
+            <span class="nav-search-spinner" aria-hidden="true"></span>
+            Searching products...
+          </div>
+
+          <div class="nav-search-empty" id="nav-search-empty" hidden>No products found</div>
+
+          <section class="nav-search-section" id="nav-search-static-section">
+            <div class="nav-search-heading">Top Products</div>
+            <div class="nav-search-list" id="nav-search-static-list"></div>
+          </section>
+
+          <section class="nav-search-section" id="nav-search-recent-section">
+            <div class="nav-search-heading" style="display: flex; justify-content: space-between; align-items: center;">
+              Recent Searches
+              <button type="button" id="clear-recent-searches" class="clear-searches-btn" aria-label="Clear recent searches" title="Clear all recent searches">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            <div class="nav-search-list" id="nav-search-recent-list"></div>
+          </section>
+
+          <section class="nav-search-section" id="nav-search-live-section" hidden>
+            <div class="nav-search-heading">Search Results</div>
+            <div class="nav-search-list" id="nav-search-live-list"></div>
+          </section>
+        </div>
       </div>
     </form>
 
@@ -1718,7 +2041,7 @@
 <!-- TRUST BADGES -->
 <section class="trust-badges">
   <div class="trust-inner">
-    <div class="sec-header" style="margin-bottom: 3rem;">
+    <div class="sec-header" style="margin-bottom: 1.25rem;">
       <div>
         <div class="sec-eyebrow">✓ Why trust us</div>
         <h2 class="sec-title">Why UrbanCart?</h2>
@@ -1802,8 +2125,7 @@
   </div>
 </section>
 
-<!-- FOOTER -->
-{{ footer() }}
+<!-- Footer moved to the bottom of the document -->
 
 <script src="{{ url_for('static', filename='js/product_card_premium.js') }}"></script>
 <script src="{{ url_for('static', filename='js/carousel.js') }}"></script>
@@ -1933,208 +2255,428 @@
   document.head.appendChild(style);
 
   // ════════════════════════════════════════
-  // SEARCH BAR AUTOCOMPLETE & HISTORY
+  // MODERN AJAX SEARCH
   // ════════════════════════════════════════
-  
-  const heroSearchInput = document.getElementById('hero-search-input');
-  const heroSearchForm = document.getElementById('hero-search-form');
-  const heroSearchSuggestions = document.getElementById('hero-search-suggestions');
-  let productSuggestions = [];
 
-  // Load product suggestions on page load
-  async function loadProductSuggestions() {
-    try {
-      const response = await fetch('{{ url_for("public.product_suggestions") }}');
-      const data = await response.json();
-      if (data.success) {
-        productSuggestions = data.suggestions;
-      }
-    } catch (error) {
-      console.error('Error loading suggestions:', error);
-    }
-  }
+  const navSearchInput = document.getElementById('nav-search-input');
+  const navSearchWrapper = document.getElementById('nav-search-wrapper');
+  const navSearchPanel = document.getElementById('nav-search-panel');
+  const navSearchLoading = document.getElementById('nav-search-loading');
+  const navSearchEmpty = document.getElementById('nav-search-empty');
+  const navSearchStaticSection = document.getElementById('nav-search-static-section');
+  const navSearchRecentSection = document.getElementById('nav-search-recent-section');
+  const navSearchLiveSection = document.getElementById('nav-search-live-section');
+  const navSearchStaticList = document.getElementById('nav-search-static-list');
+  const navSearchRecentList = document.getElementById('nav-search-recent-list');
+  const navSearchLiveList = document.getElementById('nav-search-live-list');
+  const SEARCH_STORAGE_KEY = 'ucRecentSearches';
+  const MAX_SEARCH_RESULTS = 5;
+  const SEARCH_ENDPOINT = '{{ url_for("public.search_products") }}';
+  const searchState = {
+    staticProducts: [],
+    liveProducts: [],
+    recentProducts: [],
+    activeQuery: '',
+    debounceTimer: null,
+    abortController: null,
+  };
 
   function escapeHtml(text) {
     const div = document.createElement('div');
-    div.textContent = text;
+    div.textContent = String(text ?? '');
     return div.innerHTML;
   }
 
-  if (heroSearchInput && heroSearchForm && heroSearchSuggestions) {
-  // Display suggestions when input is focused
-  heroSearchInput.addEventListener('focus', () => {
-    if (heroSearchInput.value.length === 0 && productSuggestions.length > 0) {
-      showSuggestions(productSuggestions);
-    }
-  });
-
-  // Filter and show suggestions as user types
-  heroSearchInput.addEventListener('input', () => {
-    const query = heroSearchInput.value.toLowerCase().trim();
-    
-    if (query.length === 0) {
-      showSuggestions(productSuggestions);
-      return;
-    }
-    
-    const filtered = productSuggestions.filter(suggestion =>
-      suggestion.toLowerCase().includes(query)
-    );
-    
-    if (filtered.length > 0) {
-      showSuggestions(filtered);
-    } else {
-      heroSearchSuggestions.classList.remove('show');
-    }
-  });
-
-  // Hide suggestions when input loses focus
-  heroSearchInput.addEventListener('blur', () => {
-    setTimeout(() => {
-      heroSearchSuggestions.classList.remove('show');
-    }, 200);
-  });
-
-  // Display suggestions dropdown
-  function showSuggestions(suggestions) {
-    heroSearchSuggestions.innerHTML = '';
-    
-    suggestions.forEach((suggestion) => {
-      const item = document.createElement('div');
-      item.className = 'suggestion-item';
-      item.innerHTML = `<i class="fas fa-search"></i> ${escapeHtml(suggestion)}`;
-      item.addEventListener('click', () => {
-        heroSearchInput.value = suggestion;
-        heroSearchForm.submit();
-      });
-      heroSearchSuggestions.appendChild(item);
-    });
-    
-    heroSearchSuggestions.classList.add('show');
+  function escapeAttr(text) {
+    return escapeHtml(text).replace(/"/g, '&quot;');
   }
 
-  // Save search to history on form submit
-  heroSearchForm.addEventListener('submit', async (e) => {
-    const query = heroSearchInput.value.trim();
-    
-    if (!query) {
-      e.preventDefault();
-      return;
+  function formatPrice(value) {
+    return `₹${Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+  }
+
+  function openPanel() {
+    navSearchPanel.classList.add('is-open');
+    navSearchPanel.setAttribute('aria-hidden', 'false');
+  }
+
+  function closePanel() {
+    navSearchPanel.classList.remove('is-open');
+    navSearchPanel.setAttribute('aria-hidden', 'true');
+  }
+
+  function showLoadingState() {
+    openPanel();
+    navSearchLoading.hidden = false;
+    navSearchEmpty.hidden = true;
+    navSearchStaticSection.hidden = true;
+    navSearchRecentSection.hidden = true;
+    navSearchLiveSection.hidden = true;
+  }
+
+  function normalizeProduct(product) {
+    return {
+      id: product.id,
+      slug: product.slug,
+      url: product.url,
+      name: product.name,
+      category: product.category || '',
+      brand: product.brand || '',
+      mrp: Number(product.mrp || 0),
+      discountPrice: Number(product.discountPrice || 0),
+      discountPercent: Number(product.discountPercent || 0),
+      rating: Number(product.rating || 0),
+      reviewCount: Number(product.reviewCount || 0),
+      imageUrl: product.imageUrl || '',
+      stockQuantity: Number(product.stockQuantity || 0),
+    };
+  }
+
+  function getProductUrl(product) {
+    return product.url || `/product/${encodeURIComponent(product.slug || '')}`;
+  }
+
+  function buildThumbnail(product) {
+    const src = product.imageUrl || 'https://via.placeholder.com/160x160?text=Product';
+    const alt = product.name || 'Product';
+    return `
+      <div class="nav-search-thumb">
+        <img src="${escapeAttr(src)}" alt="${escapeAttr(alt)}" loading="lazy" onerror="this.src='https://via.placeholder.com/160x160?text=Product'">
+      </div>
+    `;
+  }
+
+  function highlightText(text, query) {
+    const value = String(text || '');
+    const safe = escapeHtml(value);
+    const needle = String(query || '').trim();
+    if (!needle) {
+      return safe;
     }
-    
-    // Save search history (non-blocking)
-    const category = heroSearchForm.querySelector('select[name="category"]').value;
-    
+
+    const index = value.toLowerCase().indexOf(needle.toLowerCase());
+    if (index < 0) {
+      return safe;
+    }
+
+    const before = escapeHtml(value.slice(0, index));
+    const match = escapeHtml(value.slice(index, index + needle.length));
+    const after = escapeHtml(value.slice(index + needle.length));
+    return `${before}<mark>${match}</mark>${after}`;
+  }
+
+  function getStoredRecentProducts() {
     try {
-      await fetch('{{ url_for("public.save_search") }}', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: query,
-          category: category || null
-        })
-      });
+      const raw = localStorage.getItem(SEARCH_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed.map(normalizeProduct).filter((product) => product.id && product.url) : [];
     } catch (error) {
-      console.error('Error saving search:', error);
+      return [];
     }
-  });
   }
 
-  // Load suggestions on page load
-  loadProductSuggestions();
+  function saveRecentProduct(product) {
+    if (!product || !product.id) return;
+    const normalized = normalizeProduct(product);
+    const next = [normalized, ...searchState.recentProducts.filter((item) => String(item.id) !== String(normalized.id))]
+      .slice(0, MAX_SEARCH_RESULTS);
+    searchState.recentProducts = next;
+    localStorage.setItem(SEARCH_STORAGE_KEY, JSON.stringify(next));
+    renderRecentProducts();
+  }
 
-  // ════════════════════════════════════════
-  // NAVBAR SEARCH AUTOCOMPLETE
-  // ════════════════════════════════════════
-  
-  const navSearchInput = document.getElementById('nav-search-input');
-  const navSearchWrapper = document.getElementById('nav-search-wrapper');
-  const navSearchSuggestions = document.getElementById('nav-search-suggestions');
+  function renderCompactProduct(product, query = '') {
+    const price = formatPrice(product.discountPrice || product.mrp);
+    const hasDiscount = product.discountPercent > 0 && product.mrp > product.discountPrice;
+    const subtitle = [product.category, product.brand].filter(Boolean).join(' • ');
+    return `
+      <article class="nav-search-result compact" data-product-id="${escapeAttr(product.id)}" data-product-url="${escapeAttr(getProductUrl(product))}">
+        ${buildThumbnail(product)}
+        <div class="nav-search-body">
+          <div class="nav-search-row">
+            <h3 class="nav-search-title">${highlightText(product.name, query)}</h3>
+            <span class="nav-search-icon" aria-hidden="true"><i class="fas fa-search"></i></span>
+          </div>
+          ${subtitle ? `<div class="nav-search-meta"><span>${escapeHtml(subtitle)}</span></div>` : ''}
+          <div class="nav-search-price">
+            <span class="current">${escapeHtml(price)}</span>
+            ${hasDiscount ? `<span class="original">${escapeHtml(formatPrice(product.mrp))}</span>` : ''}
+            ${hasDiscount ? `<span class="nav-search-badge">-${escapeHtml(product.discountPercent)}%</span>` : ''}
+          </div>
+        </div>
+      </article>
+    `;
+  }
 
-  navSearchInput.addEventListener('focus', () => {
-    if (navSearchInput.value.length === 0 && productSuggestions.length > 0) {
-      showNavSuggestions(productSuggestions);
-    }
-  });
+  function renderLiveProduct(product, query = '') {
+    const price = formatPrice(product.discountPrice || product.mrp);
+    const hasDiscount = product.discountPercent > 0 && product.mrp > product.discountPrice;
+    const ratingText = Number(product.rating || 0).toFixed(1);
+    const subtitle = [product.category, product.brand].filter(Boolean).join(' • ');
+    return `
+      <article class="nav-search-result" data-product-id="${escapeAttr(product.id)}" data-product-url="${escapeAttr(getProductUrl(product))}">
+        ${buildThumbnail(product)}
+        <div class="nav-search-body">
+          <div class="nav-search-row">
+            <h3 class="nav-search-title">${highlightText(product.name, query)}</h3>
+            <span class="nav-search-icon" aria-hidden="true"><i class="fas fa-search"></i></span>
+          </div>
+          ${subtitle ? `<div class="nav-search-meta"><span>${escapeHtml(subtitle)}</span><span>★ ${escapeHtml(ratingText)} (${escapeHtml(product.reviewCount)})</span></div>` : ''}
+          <div class="nav-search-price">
+            <span class="current">${escapeHtml(price)}</span>
+            ${hasDiscount ? `<span class="original">${escapeHtml(formatPrice(product.mrp))}</span>` : ''}
+            ${hasDiscount ? `<span class="nav-search-badge">-${escapeHtml(product.discountPercent)}%</span>` : ''}
+          </div>
+          <div class="nav-search-actions">
+            <button type="button" class="nav-search-action" data-cart-id="${escapeAttr(product.id)}" data-stock="${escapeAttr(product.stockQuantity)}">Add to Cart</button>
+            <button type="button" class="nav-search-action" data-wishlist-id="${escapeAttr(product.id)}">Wishlist</button>
+            <button type="button" class="nav-search-action nav-search-action-primary" data-search-open="${escapeAttr(getProductUrl(product))}">View Details</button>
+          </div>
+        </div>
+      </article>
+    `;
+  }
 
-  navSearchInput.addEventListener('input', () => {
-    const query = navSearchInput.value.toLowerCase().trim();
-    
-    if (query.length === 0) {
-      showNavSuggestions(productSuggestions);
+  function renderStaticProducts() {
+    navSearchStaticList.innerHTML = searchState.staticProducts.map((product) => renderCompactProduct(product)).join('');
+    navSearchStaticSection.hidden = false;
+  }
+
+  function renderRecentProducts() {
+    searchState.recentProducts = getStoredRecentProducts();
+    if (!searchState.recentProducts.length) {
+      navSearchRecentSection.hidden = true;
+      navSearchRecentList.innerHTML = '';
       return;
     }
-    
-    const filtered = productSuggestions.filter(suggestion =>
-      suggestion.toLowerCase().includes(query)
-    );
-    
-    if (filtered.length > 0) {
-      showNavSuggestions(filtered);
-    } else {
-      navSearchSuggestions.classList.remove('show');
-    }
-  });
 
-  navSearchInput.addEventListener('blur', () => {
-    setTimeout(() => {
-      navSearchSuggestions.classList.remove('show');
-    }, 200);
-  });
-
-  function showNavSuggestions(suggestions) {
-    navSearchSuggestions.innerHTML = '';
-    
-    suggestions.forEach((suggestion) => {
-      const item = document.createElement('div');
-      item.className = 'nav-search-item';
-      item.innerHTML = `<i class="fas fa-search"></i> ${escapeHtml(suggestion)}`;
-      item.addEventListener('click', () => {
-        navSearchInput.value = suggestion;
-        // Navigate to shop with search query
-        window.location.href = '{{ url_for("customer.shop_home") }}?q=' + encodeURIComponent(suggestion);
-      });
-      navSearchSuggestions.appendChild(item);
-    });
-    
-    navSearchSuggestions.classList.add('show');
+    navSearchRecentList.innerHTML = searchState.recentProducts.map((product) => renderCompactProduct(product)).join('');
+    navSearchRecentSection.hidden = false;
   }
 
-  // Handle navbar search form submission
-  navSearchWrapper.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const query = navSearchInput.value.trim();
-    
-    if (!query) return;
-    
-    // Save search history (non-blocking)
-    try {
-      await fetch('{{ url_for("public.save_search") }}', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: query,
-          category: null
-        })
-      });
-    } catch (error) {
-      console.error('Error saving search:', error);
-    }
-    
-    // Navigate to shop
-    window.location.href = '{{ url_for("customer.shop_home") }}?q=' + encodeURIComponent(query);
-  });
+  function renderLiveResults(products, query) {
+    navSearchLiveList.innerHTML = products.length
+      ? products.map((product) => renderLiveProduct(product, query)).join('')
+      : '';
+    navSearchLiveSection.hidden = products.length === 0;
+    navSearchEmpty.hidden = products.length !== 0;
+    navSearchStaticSection.hidden = true;
+    navSearchRecentSection.hidden = true;
+    navSearchLoading.hidden = true;
+    openPanel();
+  }
 
-  // Allow Enter key to submit navbar search
-  navSearchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      navSearchWrapper.dispatchEvent(new Event('submit'));
+  function renderDefaultDropdown() {
+    navSearchLoading.hidden = true;
+    navSearchEmpty.hidden = true;
+    navSearchLiveSection.hidden = true;
+    renderStaticProducts();
+    renderRecentProducts();
+    openPanel();
+  }
+
+  function clearSearchRequest() {
+    if (searchState.abortController) {
+      searchState.abortController.abort();
+      searchState.abortController = null;
     }
-  });
+  }
+
+  async function loadStaticProducts() {
+    try {
+      const response = await fetch(`${SEARCH_ENDPOINT}?limit=${MAX_SEARCH_RESULTS}`);
+      const data = await response.json();
+      if (data.success && Array.isArray(data.products)) {
+        searchState.staticProducts = data.products.map(normalizeProduct);
+        searchState.staticProducts.forEach((product) => {
+          searchState.recentProducts = searchState.recentProducts.filter((item) => String(item.id) !== String(product.id));
+        });
+        renderStaticProducts();
+      }
+    } catch (error) {
+      console.error('Error loading default products:', error);
+    }
+  }
+
+  async function fetchLiveProducts(query) {
+    clearSearchRequest();
+    searchState.abortController = new AbortController();
+    showLoadingState();
+
+    try {
+      const response = await fetch(`${SEARCH_ENDPOINT}?q=${encodeURIComponent(query)}&limit=${MAX_SEARCH_RESULTS}`, {
+        signal: searchState.abortController.signal,
+      });
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Search failed');
+      }
+
+      searchState.liveProducts = Array.isArray(data.products) ? data.products.map(normalizeProduct) : [];
+      searchState.activeQuery = query;
+
+      if (searchState.liveProducts.length) {
+        renderLiveResults(searchState.liveProducts, query);
+      } else {
+        navSearchLoading.hidden = true;
+        navSearchEmpty.hidden = false;
+        navSearchStaticSection.hidden = true;
+        navSearchRecentSection.hidden = true;
+        navSearchLiveSection.hidden = true;
+        openPanel();
+      }
+    } catch (error) {
+      if (error.name === 'AbortError') return;
+      console.error('Error searching products:', error);
+      navSearchLoading.hidden = true;
+      navSearchEmpty.hidden = false;
+      navSearchStaticSection.hidden = true;
+      navSearchRecentSection.hidden = true;
+      navSearchLiveSection.hidden = true;
+      openPanel();
+    } finally {
+      if (searchState.abortController) {
+        searchState.abortController = null;
+      }
+    }
+  }
+
+  function queueSearch(query) {
+    const normalized = query.trim();
+    clearTimeout(searchState.debounceTimer);
+
+    if (!normalized) {
+      searchState.activeQuery = '';
+      searchState.liveProducts = [];
+      renderDefaultDropdown();
+      return;
+    }
+
+    openPanel();
+    navSearchLoading.hidden = false;
+    navSearchEmpty.hidden = true;
+    navSearchStaticSection.hidden = true;
+    navSearchRecentSection.hidden = true;
+    navSearchLiveSection.hidden = true;
+
+    searchState.debounceTimer = setTimeout(() => {
+      fetchLiveProducts(normalized);
+    }, 300);
+  }
+
+  function findProductFromCard(card) {
+    if (!card) return null;
+    const productUrl = card.dataset.productUrl;
+    if (!productUrl) return null;
+    return [...searchState.staticProducts, ...searchState.recentProducts, ...searchState.liveProducts]
+      .find((item) => getProductUrl(item) === productUrl) || null;
+  }
+
+  function openProduct(product) {
+    if (!product) return;
+    saveRecentProduct(product);
+    window.location.href = getProductUrl(product);
+  }
+
+  if (navSearchInput && navSearchWrapper && navSearchPanel) {
+    loadStaticProducts().then(() => {
+      renderRecentProducts();
+      navSearchLoading.hidden = true;
+      navSearchEmpty.hidden = true;
+      navSearchStaticSection.hidden = false;
+      navSearchRecentSection.hidden = !searchState.recentProducts.length;
+      navSearchLiveSection.hidden = true;
+      closePanel();
+    });
+
+    // Clear recent searches button
+    const clearRecentBtn = document.getElementById('clear-recent-searches');
+    if (clearRecentBtn) {
+      clearRecentBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        searchState.recentProducts = [];
+        localStorage.setItem(SEARCH_STORAGE_KEY, JSON.stringify([]));
+        renderRecentProducts();
+        navSearchRecentSection.hidden = true;
+        navSearchRecentList.innerHTML = '';
+      });
+    }
+
+    navSearchInput.addEventListener('focus', () => {
+      if (navSearchInput.value.trim().length === 0) {
+        renderDefaultDropdown();
+      } else {
+        queueSearch(navSearchInput.value);
+      }
+    });
+
+    navSearchInput.addEventListener('input', () => {
+      queueSearch(navSearchInput.value);
+    });
+
+    navSearchWrapper.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const query = navSearchInput.value.trim();
+      clearTimeout(searchState.debounceTimer);
+      if (!query) {
+        renderDefaultDropdown();
+        return;
+      }
+      fetchLiveProducts(query);
+    });
+
+    navSearchPanel.addEventListener('click', (event) => {
+      const openButton = event.target.closest('[data-search-open]');
+      if (openButton) {
+        event.preventDefault();
+        const product = findProductFromCard(openButton.closest('[data-product-url]'));
+        if (product) {
+          openProduct(product);
+        } else {
+          window.location.href = openButton.dataset.searchOpen;
+        }
+        return;
+      }
+
+      const card = event.target.closest('[data-product-url]');
+      if (!card || event.target.closest('button, a')) {
+        return;
+      }
+
+      const product = findProductFromCard(card);
+      if (product) {
+        openProduct(product);
+      } else {
+        window.location.href = card.dataset.productUrl;
+      }
+    });
+
+    navSearchPanel.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        const card = event.target.closest('[data-product-url]');
+        if (card) {
+          event.preventDefault();
+          const product = findProductFromCard(card);
+          if (product) {
+            openProduct(product);
+          }
+        }
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!navSearchWrapper.contains(event.target)) {
+        closePanel();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closePanel();
+      }
+    });
+  }
 
   document.getElementById('newsletter-form').addEventListener('submit', (e) => {
     e.preventDefault();

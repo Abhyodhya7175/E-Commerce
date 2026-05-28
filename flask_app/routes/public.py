@@ -1,9 +1,12 @@
 from datetime import datetime, timedelta
 import re
 
-from flask import Blueprint, render_template, abort, jsonify, request, make_response, current_app
+from flask import Blueprint, render_template, abort, jsonify, request, make_response, current_app, url_for
 from flask_login import current_user
-from ..models import Product, _slugify, Review, SearchHistory, PincodeServiceabilityCache
+from sqlalchemy import or_
+from sqlalchemy.orm import load_only, selectinload
+
+from ..models import Product, ProductImage, _slugify, Review, SearchHistory, PincodeServiceabilityCache
 from ..extensions import db
 from ..services.shiprocket import check_serviceability
 
@@ -161,6 +164,88 @@ def product_suggestions():
             'success': False,
             'error': str(e)
         }), 500
+
+
+def _search_product_payload(product: Product) -> dict:
+    image_url = product.image_url
+    if not image_url and product.images:
+        first_image = next((image for image in sorted(product.images, key=lambda item: (item.order_index or 0, item.id or 0)) if image.image_url), None)
+        image_url = first_image.image_url if first_image else None
+
+    mrp = float(product.mrp or 0)
+    discount_price = float(product.discount_price or 0)
+    discount_percent = 0
+    if mrp > 0 and 0 <= discount_price <= mrp:
+        discount_percent = round(((mrp - discount_price) / mrp) * 100)
+
+    reviews = product.reviews or []
+    rating = round(sum(review.rating for review in reviews) / len(reviews), 1) if reviews else 0
+
+    slug = product.slug or _slugify(product.name)
+    return {
+        'id': product.id,
+        'slug': slug,
+        'url': url_for('public.product_public', slug=slug),
+        'name': product.name,
+        'category': product.category,
+        'brand': product.brand or '',
+        'mrp': mrp,
+        'discountPrice': discount_price,
+        'discountPercent': discount_percent,
+        'rating': rating,
+        'reviewCount': len(reviews),
+        'imageUrl': image_url,
+        'stockQuantity': product.stock_quantity,
+        'active': product.active,
+    }
+
+
+@public_bp.route("/search-products")
+def search_products():
+    q = (request.args.get('q') or '').strip()
+    limit = min(max(int(request.args.get('limit', 5) or 5), 1), 5)
+
+    query = Product.query.filter_by(active=True)
+    if q:
+        term = f"%{q}%"
+        query = query.filter(
+            or_(
+                Product.name.ilike(term),
+                Product.category.ilike(term),
+                Product.brand.ilike(term),
+                Product.meta_keywords.ilike(term),
+                Product.description.ilike(term),
+                Product.short_description.ilike(term),
+            )
+        )
+
+    products = query.options(
+        load_only(
+            Product.id,
+            Product.name,
+            Product.slug,
+            Product.category,
+            Product.brand,
+            Product.mrp,
+            Product.discount_price,
+            Product.image_url,
+            Product.stock_quantity,
+            Product.meta_keywords,
+            Product.description,
+            Product.short_description,
+            Product.active,
+        ),
+        selectinload(Product.images).load_only(ProductImage.id, ProductImage.image_url, ProductImage.order_index),
+        selectinload(Product.reviews).load_only(Review.id, Review.rating),
+    ).order_by(Product.created_at.desc()).limit(limit).all()
+
+    products_payload = [_search_product_payload(product) for product in products]
+    return jsonify({
+        'success': True,
+        'query': q,
+        'count': len(products_payload),
+        'products': products_payload,
+    })
 
 
 @public_bp.route("/api/search/save", methods=["POST"])
