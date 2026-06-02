@@ -71,3 +71,34 @@ class Config:
     SHIPROCKET_CACHE_TTL_SECONDS = int(os.getenv("SHIPROCKET_CACHE_TTL_SECONDS", "21600"))
     DEFAULT_PRODUCT_WEIGHT_KG = float(os.getenv("DEFAULT_PRODUCT_WEIGHT_KG", "0.5"))
     FREE_SHIPPING_MIN = float(os.getenv("FREE_SHIPPING_MIN", "0"))
+
+    APP_NAME = os.getenv("APP_NAME", "UrbanCart")
+    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+    MAIL_PORT = int(os.getenv("MAIL_PORT", "587"))
+    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", "true").lower() in ("1", "true", "yes")
+    MAIL_USE_SSL = os.getenv("MAIL_USE_SSL", "false").lower() in ("1", "true", "yes")
+    MAIL_USERNAME = (os.getenv("MAIL_USERNAME") or "").strip() or None
+    # Gmail app passwords are often pasted with spaces; SMTP expects no spaces.
+    _mail_password = (os.getenv("MAIL_PASSWORD") or "").strip().strip('"').strip("'")
+    MAIL_PASSWORD = _mail_password.replace(" ", "") if _mail_password else None
+    MAIL_DEFAULT_SENDER = (
+        (os.getenv("MAIL_DEFAULT_SENDER") or "").strip()
+        or MAIL_USERNAME
+    )
+    OTP_EXPIRE_MINUTES = int(os.getenv("OTP_EXPIRE_MINUTES", "10"))
+    OTP_LENGTH = int(os.getenv("OTP_LENGTH", "6"))
+
+    _mail_suppress_env = (os.getenv("MAIL_SUPPRESS_SEND") or "").strip().lower()
+    if _mail_suppress_env in ("1", "true", "yes"):
+        MAIL_SUPPRESS_SEND = True
+    elif _mail_suppress_env in ("0", "false", "no"):
+        MAIL_SUPPRESS_SEND = False
+    else:
+        # Only send real email when SMTP username + password are both set.
+        MAIL_SUPPRESS_SEND = not (MAIL_USERNAME and MAIL_PASSWORD)
+
+    COIN_VALUE_INR = float(os.getenv("COIN_VALUE_INR", "1"))
+    MAX_COIN_REDEEM_PERCENT = float(os.getenv("MAX_COIN_REDEEM_PERCENT", "20"))
+    CHECKOUT_PLATFORM_FEE = float(os.getenv("CHECKOUT_PLATFORM_FEE", "0"))
+    CHECKOUT_LOCK_MINUTES = int(os.getenv("CHECKOUT_LOCK_MINUTES", "15"))
+    DEFAULT_SIGNUP_COINS = int(os.getenv("DEFAULT_SIGNUP_COINS", "250"))

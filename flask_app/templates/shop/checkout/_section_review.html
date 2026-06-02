@@ -1,0 +1,46 @@
+<div class="accordion-item co-section" data-section="review" id="sec-review">
+  <h2 class="accordion-header d-lg-none">
+    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReview">Review order</button>
+  </h2>
+  <div id="collapseReview" class="accordion-collapse collapse" data-bs-parent="#coMobileAccordion">
+    <div class="accordion-body co-card co-section-card">
+      <div class="co-section-head">
+        <div class="co-section-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+        <div>
+          <h2>Review order</h2>
+          <p>Confirm everything looks right before you pay</p>
+        </div>
+      </div>
+      <div class="co-review-grid">
+        <article class="co-review-card">
+          <header><i class="fa-regular fa-user"></i> Contact <button type="button" class="co-jump" data-jump="contact">Edit</button></header>
+          <p id="rev-contact" class="co-review-value co-review-muted">Not provided yet</p>
+        </article>
+        <article class="co-review-card">
+          <header><i class="fa-solid fa-location-dot"></i> Address <button type="button" class="co-jump" data-jump="address">Edit</button></header>
+          <p id="rev-address" class="co-review-value co-review-muted">Add a delivery address</p>
+        </article>
+        <article class="co-review-card">
+          <header><i class="fa-solid fa-truck"></i> Delivery <button type="button" class="co-jump" data-jump="delivery">Edit</button></header>
+          <p id="rev-delivery" class="co-review-value">Standard Delivery</p>
+        </article>
+        <article class="co-review-card">
+          <header><i class="fa-regular fa-credit-card"></i> Payment <button type="button" class="co-jump" data-jump="payment">Edit</button></header>
+          <p id="rev-payment" class="co-review-value">UPI</p>
+        </article>
+      </div>
+      <div class="co-review-items mt-3">
+        <h3 class="h6 mb-2">Items in your order</h3>
+        <div id="rev-items-list" class="co-review-items-list"></div>
+      </div>
+      <div class="co-review-discounts mt-3">
+        <span class="text-muted small">Promotions</span>
+        <p id="rev-discounts" class="mb-0 fw-semibold">No discounts applied</p>
+      </div>
+      <button type="button" class="btn btn-dark btn-lg w-100 co-pay-btn d-lg-none mt-4" id="co-place-order-mobile">
+        <span>Pay securely</span>
+        <strong id="co-pay-amt-mobile">₹0</strong>
+      </button>
+    </div>
+  </div>
+</div>

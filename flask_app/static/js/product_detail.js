@@ -1,16 +1,69 @@
 function $(id) { return document.getElementById(id); }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Thumbnail switching
-  document.querySelectorAll('.pd-thumb[data-img]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const img = btn.dataset.img;
-      const main = $('pd-main-img');
-      if (!main || !img) return;
-      main.src = img;
-      document.querySelectorAll('.pd-thumb').forEach(b => b.classList.toggle('active', b === btn));
+  // Image slider: read images from data attribute and wire navigation
+  const mainWrap = $('pd-main');
+  const mainImg = $('pd-main-img');
+  const images = (() => {
+    try {
+      const raw = mainWrap?.dataset.images;
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  })();
+  const thumbs = Array.from(document.querySelectorAll('.pd-thumb[data-img]'));
+  let currentIndex = 0;
+
+  function showImageAt(index){
+    if (!images || images.length === 0) return;
+    const idx = (index + images.length) % images.length;
+    const src = images[idx];
+    const main = mainImg || $('pd-main-img');
+    if (!main || !src) return;
+    main.src = src;
+    if (thumbs && thumbs.length) {
+      thumbs.forEach((b, i) => b.classList.toggle('active', i === idx));
+    }
+    currentIndex = idx;
+  }
+
+  if (thumbs && thumbs.length) {
+    thumbs.forEach((btn, i) => {
+      btn.addEventListener('click', () => showImageAt(i));
     });
+  }
+
+  // initialize to first image if present
+  if (images && images.length) showImageAt(0);
+
+  // Prev/Next buttons
+  const prevBtn = document.querySelector('.pd-nav-prev');
+  const nextBtn = document.querySelector('.pd-nav-next');
+  if (prevBtn) prevBtn.addEventListener('click', () => showImageAt(currentIndex - 1));
+  if (nextBtn) nextBtn.addEventListener('click', () => showImageAt(currentIndex + 1));
+
+  // keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') showImageAt(currentIndex - 1);
+    if (e.key === 'ArrowRight') showImageAt(currentIndex + 1);
   });
+
+  // touch swipe support for the main image
+  if (mainWrap) {
+    let touchStartX = 0;
+    let touchEndX = 0;
+    mainWrap.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].clientX;
+    }, {passive:true});
+    mainWrap.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].clientX;
+      const dx = touchEndX - touchStartX;
+      const threshold = 40; // px
+      if (dx > threshold) showImageAt(currentIndex - 1);
+      else if (dx < -threshold) showImageAt(currentIndex + 1);
+    }, {passive:true});
+  }
 
   // Pincode checker
   const pinCard = $('pd-pin-card');
@@ -132,20 +185,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Quantity
   const qtyInput = $('pd-qty');
+  const addBtn = $('pd-add');
+  const availableStock = Math.max(0, parseInt(addBtn?.dataset.stock || '0', 10) || 0);
   document.querySelectorAll('.pd-qtybtn[data-qty]').forEach((btn) => {
     btn.addEventListener('click', () => {
       if (!qtyInput) return;
       const delta = parseInt(btn.dataset.qty, 10) || 0;
       const current = Math.max(1, parseInt(qtyInput.value || '1', 10) || 1);
-      qtyInput.value = String(Math.max(1, current + delta));
+      let next = Math.max(1, current + delta);
+      if (availableStock > 0 && next > availableStock) {
+        next = availableStock;
+        // brief user feedback
+        alert(`Only ${availableStock} unit${availableStock === 1 ? '' : 's'} available in stock.`);
+      }
+      qtyInput.value = String(next);
     });
   });
+
+  if (qtyInput) {
+    // Clamp manual input to valid range on blur/change
+    qtyInput.addEventListener('change', () => {
+      let val = Math.max(1, parseInt(qtyInput.value || '1', 10) || 1);
+      if (availableStock > 0 && val > availableStock) {
+        val = availableStock;
+        alert(`Only ${availableStock} unit${availableStock === 1 ? '' : 's'} available in stock.`);
+      }
+      qtyInput.value = String(val);
+    });
+    qtyInput.addEventListener('input', () => {
+      // prevent non-numeric and leading zeros
+      qtyInput.value = qtyInput.value.replace(/[^0-9]/g, '').replace(/^0+/, '') || '1';
+    });
+  }
+
+  if (addBtn && qtyInput) {
+    addBtn.addEventListener('click', (e) => {
+      const qty = Math.max(1, parseInt(qtyInput.value || '1', 10) || 1);
+      if (availableStock > 0 && qty > availableStock) {
+        e.preventDefault();
+        alert(`Cannot add ${qty} items — only ${availableStock} in stock.`);
+        qtyInput.value = String(availableStock);
+        return;
+      }
+    });
+  }
 
   // Share buttons
   document.querySelectorAll('.pd-sharebtn[data-share]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const type = btn.dataset.share;
       const url = window.location.href;
+      if (type === 'native') {
+        // Try native share API first
+        try {
+          await navigator.share({
+            title: document.title || '',
+            text: (document.querySelector('#pd-short-desc')?.textContent || '').trim(),
+            url: url
+          });
+          return;
+        } catch (err) {
+          // fall through to copy fallback
+        }
+      }
+
       if (type === 'copy') {
         try {
           await navigator.clipboard.writeText(url);
@@ -250,5 +353,36 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Read more / Read less for short description
+  (function(){
+    const shortDesc = $('pd-short-desc');
+    const toggle = $('pd-desc-toggle');
+    const threshold = 240; // characters
+    if (!shortDesc || !toggle) return;
+    const text = shortDesc.textContent?.trim() || '';
+    if (text.length <= threshold) {
+      // nothing to toggle
+      toggle.hidden = true;
+      return;
+    }
+    // initialize collapsed
+    shortDesc.classList.add('pd-desc-collapsed');
+    toggle.hidden = false;
+    toggle.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      if (expanded) {
+        shortDesc.classList.remove('pd-desc-expanded');
+        shortDesc.classList.add('pd-desc-collapsed');
+        toggle.textContent = '...';
+        toggle.setAttribute('aria-expanded', 'false');
+      } else {
+        shortDesc.classList.remove('pd-desc-collapsed');
+        shortDesc.classList.add('pd-desc-expanded');
+        toggle.textContent = 'Read less';
+        toggle.setAttribute('aria-expanded', 'true');
+      }
+    });
+  })();
 });
 

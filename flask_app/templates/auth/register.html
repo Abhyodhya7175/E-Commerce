@@ -5,16 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UrbanCart — Register</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shop_commerce.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
 </head>
 <body>
+{% include 'components/navbar.html' %}
 <div class="card">
-  <div class="logo">Urban<span>Cart</span></div>
   <h2>Create account</h2>
-  <p class="subtitle">Join thousands of happy customers</p>
+  <p class="subtitle">Verify your email — password is optional</p>
 
-  <div class="success-msg" id="success-msg">Account created! Redirecting to login...</div>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert-error show">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
 
   <form id="register-form" method="POST" action="{{ url_for('auth.register') }}" novalidate>
     <div class="field">
@@ -27,14 +36,25 @@
       <input type="email" id="reg-email" name="email" placeholder="you@email.com" autocomplete="email" required />
       <div class="field-error" id="err-email">Enter a valid email.</div>
     </div>
+
+    <div class="field otp-row">
+      <label>Email verification code</label>
+      <div class="otp-input-row">
+        <input type="text" id="reg-otp" name="otp" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="6-digit code" autocomplete="one-time-code" required />
+        <button type="button" class="btn-secondary" id="btn-reg-send-otp">Send code</button>
+      </div>
+      <p class="field-hint">We will email you a code to confirm this address.</p>
+    </div>
+    <div id="reg-otp-message" class="alert-error"></div>
+
     <div class="field">
-      <label>Password</label>
-      <input type="password" id="reg-pass" name="password" placeholder="Min 6 characters" autocomplete="new-password" required />
+      <label>Password <span class="label-hint">(optional)</span></label>
+      <input type="password" id="reg-pass" name="password" placeholder="Min 6 characters if used" autocomplete="new-password" />
       <div class="field-error" id="err-pass">Password must be at least 6 characters.</div>
     </div>
     <div class="field">
-      <label>Confirm Password</label>
-      <input type="password" id="reg-pass2" placeholder="Repeat password" autocomplete="new-password" required />
+      <label>Confirm Password <span class="label-hint">(optional)</span></label>
+      <input type="password" id="reg-pass2" placeholder="Repeat password" autocomplete="new-password" />
       <div class="field-error" id="err-pass2">Passwords do not match.</div>
     </div>
 
@@ -44,7 +64,17 @@
   <div class="form-footer">Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></div>
 </div>
 
+<script src="{{ url_for('static', filename='js/auth_otp.js') }}"></script>
 <script>
+  initAuthOtp({
+    sendUrl: '{{ url_for("auth.send_otp") }}',
+    sendButtonId: 'btn-reg-send-otp',
+    emailInputId: 'reg-email',
+    otpInputId: 'reg-otp',
+    messageId: 'reg-otp-message',
+    purpose: 'register'
+  });
+
   function validateRegisterForm() {
     let valid = true;
     const clear = (id) => { document.getElementById(id).classList.remove('show'); };
@@ -55,33 +85,39 @@
     };
 
     ['err-name','err-email','err-pass','err-pass2'].forEach(clear);
-    ['reg-name','reg-email','reg-pass','reg-pass2'].forEach(id => document.getElementById(id).classList.remove('error'));
+    ['reg-name','reg-email','reg-pass','reg-pass2','reg-otp'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('error');
+    });
 
     const name  = document.getElementById('reg-name').value.trim();
     const email = document.getElementById('reg-email').value.trim();
+    const otp   = document.getElementById('reg-otp').value.trim();
     const pass  = document.getElementById('reg-pass').value;
     const pass2 = document.getElementById('reg-pass2').value;
 
     if (!name) show('err-name', 'reg-name');
     if (!email || !/\S+@\S+\.\S+/.test(email)) show('err-email', 'reg-email');
-    if (!pass || pass.length < 6) show('err-pass', 'reg-pass');
-    if (pass !== pass2) show('err-pass2', 'reg-pass2');
+    if (!otp) {
+      document.getElementById('reg-otp').classList.add('error');
+      const msg = document.getElementById('reg-otp-message');
+      msg.textContent = 'Request and enter the verification code from your email.';
+      msg.classList.add('show', 'alert-error');
+      valid = false;
+    }
+    if (pass && pass.length < 6) show('err-pass', 'reg-pass');
+    if (pass && pass !== pass2) show('err-pass2', 'reg-pass2');
+    if (!pass && pass2) show('err-pass2', 'reg-pass2');
 
-    if (!valid) return;
-
-    document.getElementById('success-msg').classList.add('show');
-    return true;
+    return valid;
   }
 
-  const form = document.getElementById('register-form');
-  form.addEventListener('submit', (e) => {
-    if (!validateRegisterForm()) {
-      e.preventDefault();
-      return;
-    }
-    // Allow the POST to the server (it will store the user in DB).
+  document.getElementById('register-form').addEventListener('submit', (e) => {
+    if (!validateRegisterForm()) e.preventDefault();
   });
 </script>
+
+<script src="{{ url_for('static', filename='js/shop_commerce.js') }}"></script>
 
 {% from 'components/footer.html' import footer %}
 {{ footer() }}

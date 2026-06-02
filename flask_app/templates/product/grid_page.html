@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>{{ title }} — UrbanCart</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/product_card_premium.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/shop_commerce.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
   <style>
-    body{ margin:0; background:#fbfaf7; }
+    body{ margin:0; background:#fbfaf7; padding-top:84px; }
     .wrap{ max-width:1200px; margin:0 auto; padding:24px 18px; }
     .top{
       display:flex; align-items:flex-end; justify-content:space-between;
@@ -22,6 +23,7 @@
   </style>
 </head>
 <body>
+  {% include 'components/navbar.html' %}
   {% from 'components/product_card_premium.html' import premium_product_card %}
   <div class="wrap">
     <div class="top">

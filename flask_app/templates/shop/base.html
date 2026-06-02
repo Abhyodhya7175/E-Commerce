@@ -20,39 +20,7 @@
     </script>
   </head>
   <body>
-    <nav class="uc-glass-nav navbar navbar-expand-lg navbar-light">
-      <div class="uc-nav-inner w-100">
-        <a class="uc-brand" href="{{ url_for('home') }}">Urban<span>Cart</span></a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#ucNavbar" aria-controls="ucNavbar" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="ucNavbar">
-          <div class="uc-nav-links me-auto ms-lg-3">
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('customer.shop_home') }}">Shop</a>
-            <a href="{{ url_for('commerce.wishlist_page') }}">Wishlist</a>
-            <a href="{{ url_for('commerce.cart_page') }}">Cart</a>
-          </div>
-          <div class="uc-nav-actions">
-            <a class="uc-icon-chip" href="{{ url_for('commerce.wishlist_page') }}" aria-label="Wishlist">
-              <i class="fa-solid fa-heart text-danger"></i>
-              <span>Wishlist</span>
-              <span class="badge" data-wishlist-count>{{ wishlist_count or 0 }}</span>
-            </a>
-            <a class="uc-icon-chip" href="{{ url_for('commerce.cart_page') }}" aria-label="Cart">
-              <i class="fa-solid fa-bag-shopping"></i>
-              <span>Cart</span>
-              <span class="badge" data-cart-count>{{ cart_count or 0 }}</span>
-            </a>
-            {% if current_user.is_authenticated %}
-              <a class="uc-icon-chip" href="{{ url_for('auth.logout') }}">Logout</a>
-            {% else %}
-              <a class="uc-icon-chip" href="{{ url_for('auth.login') }}">Login</a>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </nav>
+    {% include 'components/navbar.html' %}
 
     <main class="uc-page-shell">
       {% block content %}{% endblock %}

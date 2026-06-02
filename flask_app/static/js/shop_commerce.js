@@ -179,9 +179,6 @@
             <button type="button" class="uc-action-link subtle" data-cart-remove="${item.id}">Remove</button>
             <button type="button" class="uc-action-link ghost" data-save-later="${item.id}">Save for later</button>
           </div>
-          <div class="uc-product-meta">
-            <strong>Line total:</strong> <span>${fmt(item.lineTotal)}</span>
-          </div>
         </div>
       </article>
     `;
@@ -192,6 +189,12 @@
     if (!root) return;
     const cart = findCartState();
     const items = cart.items || [];
+    const hasServerRenderedItems = root.querySelectorAll('.uc-cart-line').length > 0;
+
+    if (!items.length && hasServerRenderedItems) {
+      return;
+    }
+
     if (!items.length) {
       root.innerHTML = `
         <div class="uc-empty-state">
@@ -212,12 +215,6 @@
     document.querySelectorAll('[data-summary-value="shipping"]').forEach((node) => (node.textContent = fmt(summary.shippingTotal)));
     document.querySelectorAll('[data-summary-value="total"]').forEach((node) => (node.textContent = fmt(summary.total)));
     document.querySelectorAll('[data-cart-line-count]').forEach((node) => (node.textContent = String(summary.count || 0)));
-
-    const pinCard = document.getElementById('uc-pin-card');
-    if (pinCard) {
-      pinCard.dataset.orderTotal = String(summary.total || 0);
-      pinCard.style.display = items.length ? '' : 'none';
-    }
 
     const progressTrack = document.querySelector('.uc-progress-track[data-progress]');
     if (progressTrack) {
@@ -510,6 +507,27 @@
   window.ucToast = showToast;
 
   document.addEventListener('DOMContentLoaded', () => {
+    const html = document.documentElement;
+    const savedTheme = localStorage.getItem('uc_theme');
+    if (savedTheme) {
+      html.dataset.theme = savedTheme;
+    }
+
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('uc_theme', html.dataset.theme);
+      });
+    }
+
+    const nav = document.getElementById('navbar');
+    if (nav) {
+      window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 10);
+      }, { passive: true });
+    }
+
     const embeddedCartState = document.getElementById('uc-cart-state')?.dataset?.cartState;
     if (embeddedCartState) {
       try {
@@ -547,116 +565,5 @@
       }
     }
 
-    const pinCard = document.getElementById('uc-pin-card');
-    const pinInput = document.getElementById('uc-pincode');
-    const pinBtn = document.getElementById('uc-pincheck');
-    const pinMsg = document.getElementById('uc-pinmsg');
-    const pinLoader = document.getElementById('uc-pinloader');
-    const codBadge = document.getElementById('uc-cod-badge');
-    const etaBadge = document.getElementById('uc-eta-badge');
-    const dateBadge = document.getElementById('uc-date-badge');
-    const freeShipBadge = document.getElementById('uc-free-ship');
-
-    function resetPinBadges() {
-      [codBadge, etaBadge, dateBadge, freeShipBadge].forEach((badge) => {
-        if (badge) badge.hidden = true;
-      });
-      if (codBadge) {
-        codBadge.classList.remove('neutral');
-        codBadge.classList.add('success');
-      }
-    }
-
-    function setPinMessage(message, status) {
-      if (!pinMsg) return;
-      pinMsg.textContent = message || '';
-      pinMsg.classList.remove('success', 'error');
-      if (status === 'success') pinMsg.classList.add('success');
-      if (status === 'error') pinMsg.classList.add('error');
-    }
-
-    function setPinLoading(active) {
-      if (pinLoader) pinLoader.hidden = !active;
-      if (pinBtn) pinBtn.disabled = active;
-    }
-
-    if (pinBtn && pinInput) {
-      pinBtn.addEventListener('click', async () => {
-        const val = String(pinInput.value || '').trim();
-        if (!/^[1-9]\d{5}$/.test(val)) {
-          resetPinBadges();
-          setPinMessage('Enter a valid 6-digit Indian pincode.', 'error');
-          return;
-        }
-
-        resetPinBadges();
-        setPinMessage('', null);
-        setPinLoading(true);
-
-        try {
-          const params = new URLSearchParams();
-          if (pinCard?.dataset.orderTotal) {
-            params.set('order_value', pinCard.dataset.orderTotal);
-          }
-          const response = await fetch(`/check-pincode/${encodeURIComponent(val)}?${params.toString()}`);
-          let data = {};
-          try {
-            data = await response.json();
-          } catch {
-            data = {};
-          }
-
-          if (!response.ok) {
-            resetPinBadges();
-            setPinMessage(data.error || 'Unable to check delivery at the moment.', 'error');
-            return;
-          }
-
-          if (!data.available) {
-            setPinMessage('Delivery is not available for this pincode.', 'error');
-            if (codBadge) {
-              codBadge.textContent = 'COD Unavailable';
-              codBadge.classList.remove('success');
-              codBadge.classList.add('neutral');
-              codBadge.hidden = false;
-            }
-            return;
-          }
-
-          const courier = data.courier ? ` via ${data.courier}` : '';
-          const etaText = data.eta ? ` · ETA ${data.eta}` : '';
-          setPinMessage(`Delivery available${courier}${etaText}.`, 'success');
-
-          if (data.cod && codBadge) {
-            codBadge.textContent = 'COD Available';
-            codBadge.hidden = false;
-          } else if (codBadge) {
-            codBadge.textContent = 'COD Unavailable';
-            codBadge.classList.remove('success');
-            codBadge.classList.add('neutral');
-            codBadge.hidden = false;
-          }
-
-          if (data.eta && etaBadge) {
-            etaBadge.textContent = `ETA: ${data.eta}`;
-            etaBadge.hidden = false;
-          }
-
-          if (data.estimated_date && dateBadge) {
-            dateBadge.textContent = `Delivers by ${data.estimated_date}`;
-            dateBadge.hidden = false;
-          }
-
-          if (data.free_shipping && freeShipBadge) {
-            freeShipBadge.hidden = false;
-          }
-        } catch (error) {
-          resetPinBadges();
-          setPinMessage('Delivery check failed. Please try again.', 'error');
-        } finally {
-          setPinLoading(false);
-        }
-      });
-    }
   });
 })();

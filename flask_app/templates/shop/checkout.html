@@ -1,22 +1,180 @@
 {% extends 'shop/base.html' %}
-
-{% block title %}Checkout - My Shop{% endblock %}
+{% block title %}Checkout — UrbanCart{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}">
+{% endblock %}
 
 {% block content %}
-<h2>Checkout</h2>
-<form>
-  <div class="mb-3">
-    <label class="form-label">Full name</label>
-    <input class="form-control" />
+<div class="co-page" id="checkout-app">
+  <header class="co-page-head">
+    <h1 class="co-page-title">Complete your order</h1>
+    <nav class="co-stepper" aria-label="Checkout progress">
+    <ol class="co-stepper-list">
+      <li class="co-step is-done" data-step="cart">
+        <span class="co-step-icon"><i class="fa-solid fa-check"></i></span>
+        <span class="co-step-text">Cart</span>
+      </li>
+      <li class="co-step-connector" aria-hidden="true"></li>
+      <li class="co-step is-active" data-step="address">
+        <span class="co-step-icon">2</span>
+        <span class="co-step-text">Address</span>
+      </li>
+      <li class="co-step-connector" aria-hidden="true"></li>
+      <li class="co-step" data-step="delivery">
+        <span class="co-step-icon">3</span>
+        <span class="co-step-text">Delivery</span>
+      </li>
+      <li class="co-step-connector" aria-hidden="true"></li>
+      <li class="co-step" data-step="payment">
+        <span class="co-step-icon">4</span>
+        <span class="co-step-text">Payment</span>
+      </li>
+    </ol>
+    </nav>
+  </header>
+
+  <div class="co-shell">
+    <div class="co-main-col">
+      <div class="co-panels" id="coMobilePanels">
+        {% include 'shop/checkout/_section_contact.html' %}
+        {% include 'shop/checkout/_section_address.html' %}
+        {% include 'shop/checkout/_section_delivery.html' %}
+        {% include 'shop/checkout/_section_payment.html' %}
+      </div>
+    </div>
+
+    <aside class="co-summary-col">
+      <div class="co-summary-card">
+        <header class="co-summary-head">
+          <h2 class="co-card-title">Order summary</h2>
+          <p class="co-card-desc"><span id="co-item-count">{{ cart_payload.summary.count }}</span> items in your bag</p>
+        </header>
+
+        <div id="co-savings-strip" class="co-savings d-none">
+          <i class="fa-solid fa-tag"></i>
+          You save <strong id="co-savings-amt">₹0</strong>
+        </div>
+
+        <div id="co-cart-lines" class="co-summary-items">
+          {% for item in cart_payload['items'] %}
+          <article class="co-summary-item" data-product-id="{{ item.id }}">
+            <div class="co-summary-item-img">
+              {% if item.imageUrl %}<img src="{{ item.imageUrl }}" alt="{{ item.name }}">{% else %}{{ item.icon or '📦' }}{% endif %}
+            </div>
+            <div class="co-summary-item-body">
+              <h3>{{ item.name }}</h3>
+              <div class="co-summary-item-qty">
+                <button type="button" class="co-qty-btn" data-qty-delta="-1" data-id="{{ item.id }}" aria-label="Decrease">−</button>
+                <input type="number" min="1" max="{{ item.stockQuantity or 99 }}" value="{{ item.quantity }}" data-qty-input="{{ item.id }}" aria-label="Quantity">
+                <button type="button" class="co-qty-btn" data-qty-delta="1" data-id="{{ item.id }}" aria-label="Increase">+</button>
+                <button type="button" class="co-remove" data-remove="{{ item.id }}">Remove</button>
+              </div>
+            </div>
+            <strong class="co-summary-item-price" data-line-total="{{ item.id }}">₹{{ '%.0f'|format(item.lineTotal or 0) }}</strong>
+          </article>
+          {% endfor %}
+        </div>
+
+        <div class="co-summary-block">
+          <label class="co-label" for="co-coupon-input">Coupon code</label>
+          <div class="co-inline-field">
+            <input type="text" class="co-input" id="co-coupon-input" placeholder="e.g. WELCOME10" autocomplete="off">
+            <button type="button" class="co-btn co-btn-outline co-btn-sm" id="co-coupon-apply">Apply</button>
+          </div>
+          <div id="co-coupon-msg" class="co-msg d-none"></div>
+          <div id="co-coupon-applied" class="co-coupon-applied d-none">
+            <span id="co-coupon-label"></span>
+            <button type="button" class="co-link-btn" id="co-coupon-remove">Remove</button>
+          </div>
+        </div>
+
+        {% if is_logged_in %}
+        <div class="co-summary-block co-coins-block">
+          <div class="co-coins-head">
+            <span class="co-label">Reward coins</span>
+            <span class="co-muted">Available: <strong id="co-coins-available">{{ wallet.balanceCoins }}</strong></span>
+          </div>
+          <p class="co-muted co-coins-hint">1 coin = ₹<span id="co-coin-value">{{ wallet.coinValueInr }}</span> · up to 20% of order</p>
+          <input type="range" class="co-range" id="co-coins-slider" min="0" max="0" value="0">
+          <div class="co-coin-presets">
+            <button type="button" class="co-chip co-coin-preset" data-coins="0">None</button>
+            <button type="button" class="co-chip co-coin-preset" data-coins="50">50</button>
+            <button type="button" class="co-chip co-coin-preset" data-coins="100">100</button>
+            <button type="button" class="co-chip" id="co-coins-max">Max</button>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="co-breakdown">
+          <div class="co-breakdown-row"><span>Subtotal</span><strong id="bd-subtotal">₹0</strong></div>
+          <div class="co-breakdown-row is-discount"><span>Product discounts</span><strong id="bd-product-disc">−₹0</strong></div>
+          <div class="co-breakdown-row is-discount d-none" id="row-coupon"><span>Coupon</span><strong id="bd-coupon">−₹0</strong></div>
+          <div class="co-breakdown-row is-discount d-none" id="row-coins"><span>Reward coins</span><strong id="bd-coins">−₹0</strong></div>
+          <div class="co-breakdown-row"><span>Shipping</span><strong id="bd-shipping">₹0</strong></div>
+          <div class="co-breakdown-row"><span>Tax / GST</span><strong id="bd-gst">₹0</strong></div>
+          <div class="co-breakdown-row d-none" id="row-platform"><span>Platform fee</span><strong id="bd-platform">₹0</strong></div>
+          <div class="co-breakdown-row co-breakdown-total"><span>Total</span><strong id="bd-grand">₹0</strong></div>
+        </div>
+
+        <button type="button" class="co-btn co-btn-primary co-btn-place d-none d-lg-flex" id="co-place-order-desktop">
+          <span class="co-btn-ripple"></span>
+          <span>Place order</span>
+          <strong id="co-pay-amt-desktop">₹0</strong>
+        </button>
+
+        <ul class="co-summary-trust">
+          <li><i class="fa-solid fa-lock"></i> Secure checkout</li>
+          <li><i class="fa-solid fa-truck"></i> Fast delivery</li>
+        </ul>
+      </div>
+    </aside>
   </div>
-  <div class="mb-3">
-    <label class="form-label">Address</label>
-    <input class="form-control" />
+</div>
+
+<div class="co-mobile-bar d-lg-none">
+  <div class="co-mobile-bar-total">
+    <span class="co-muted">Total</span>
+    <strong id="co-mobile-total">₹0</strong>
   </div>
-  <div class="mb-3">
-    <label class="form-label">Phone</label>
-    <input class="form-control" />
+  <button type="button" class="co-btn co-btn-primary" id="co-place-order-mobile">
+    <span class="co-btn-ripple"></span>
+    Place order · <strong id="co-pay-amt-mobile">₹0</strong>
+  </button>
+</div>
+
+<div class="co-overlay d-none" id="co-processing">
+  <div class="co-loader">
+    <div class="co-loader-ring"></div>
+    <p>Processing your order…</p>
   </div>
-  <button class="btn btn-primary">Place order</button>
-</form>
+</div>
+
+{% include 'shop/checkout/_address_modal.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.ucCheckout = {
+    cart: {{ cart_payload | tojson }},
+    addresses: {{ addresses | tojson }},
+    contact: {{ contact | tojson }},
+    wallet: {{ wallet | tojson }},
+    shippingMethods: {{ shipping_methods | tojson }},
+    isLoggedIn: {{ is_logged_in | tojson }},
+    urls: {
+      preview: "{{ url_for('checkout.checkout_preview') }}",
+      applyCoupon: "{{ url_for('checkout.apply_coupon') }}",
+      placeOrder: "{{ url_for('checkout.checkout_place_order') }}",
+      track: "{{ url_for('checkout.checkout_track') }}",
+      addresses: "{{ url_for('checkout.list_addresses') }}",
+      createAddress: "{{ url_for('checkout.create_address') }}",
+      updateAddress: "{{ url_for('checkout.update_address', address_id=0) }}".replace('/0', ''),
+      cartUpdate: "{{ url_for('commerce.api_cart_update', product_id=0) }}".replace('/0', ''),
+      cartRemove: "{{ url_for('commerce.api_cart_remove', product_id=0) }}".replace('/0', ''),
+      cartAdd: "{{ url_for('commerce.api_cart_add', product_id=0) }}".replace('/0', ''),
+      pincode: "/check-pincode/"
+    }
+  };
+</script>
+<script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
 {% endblock %}

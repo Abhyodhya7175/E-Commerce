@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UrbanCart &mdash; Shop</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/product_card_premium.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/shop_commerce.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
@@ -33,103 +34,8 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    padding-top: 84px;
   }
-
-  /* NAV */
-  nav {
-    background: var(--ink);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 62px;
-    position: sticky; top: 0; z-index: 100;
-  }
-
-  .nav-left {
-    display: flex;
-    align-items: center;
-    gap: 1.3rem;
-    min-width: 0;
-  }
-
-  .nav-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: #fff;
-  }
-  .nav-logo span { color: var(--gold); }
-
-  .nav-center {
-    display: flex;
-    gap: 0.2rem;
-  }
-
-  .nav-link {
-    font-size: 0.82rem;
-    font-weight: 400;
-    color: rgba(255,255,255,0.65);
-    padding: 0.4rem 0.9rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-  .nav-link:hover, .nav-link.active { color: #fff; background: rgba(255,255,255,0.08); }
-
-  .nav-right {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-left: auto;
-  }
-
-  .cart-btn {
-    position: relative;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 10px;
-    padding: 0.4rem 0.9rem;
-    color: #fff;
-    font-size: 0.82rem;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    transition: background 0.15s;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .cart-btn:hover { background: rgba(255,255,255,0.18); }
-
-  .cart-badge {
-    background: var(--gold);
-    color: var(--ink);
-    border-radius: 50%;
-    width: 18px; height: 18px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.65rem;
-    font-weight: 600;
-  }
-
-  .user-info {
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.6);
-    white-space: nowrap;
-  }
-  .user-info strong { color: rgba(255,255,255,0.9); }
-
-  .logout-btn {
-    font-size: 0.78rem;
-    color: rgba(255,255,255,0.5);
-    cursor: pointer;
-    padding: 0.35rem 0.7rem;
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 7px;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-  .logout-btn:hover { color: #fff; border-color: rgba(255,255,255,0.35); }
 
   /* HERO BANNER */
   .hero {
@@ -427,7 +333,69 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
     gap: 1.2rem;
-    margin-bottom: 3rem;
+    margin-bottom: 1.4rem;
+  }
+
+  .shop-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 0.4rem 0 3rem;
+    padding: 0.9rem 1rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .pagination-summary {
+    font-size: 0.82rem;
+    color: var(--ink-light);
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+  }
+
+  .pagination-btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.12s;
+  }
+
+  .pagination-btn:hover:not(:disabled),
+  .pagination-btn.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+
+  .pagination-btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  .pagination-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  .pagination-ellipsis {
+    color: var(--ink-light);
+    font-size: 0.82rem;
+    padding: 0 0.2rem;
   }
 
   .product-card {
@@ -900,39 +868,26 @@
     }
     .filter-row { grid-template-columns: 1fr; }
     .filter-actions { grid-template-columns: 1fr; }
+    .shop-pagination {
+      align-items: stretch;
+      flex-direction: column;
+    }
+    .pagination-controls {
+      justify-content: center;
+    }
+    .pagination-btn {
+      min-width: 34px;
+      height: 34px;
+      padding: 0 0.65rem;
+    }
   }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <div class="nav-left">
-    <div class="nav-logo">Urban<span>Cart</span></div>
-    <div class="nav-center">
-      <span class="nav-link active" onclick="showSection('shop', this)">Shop</span>
-      <span class="nav-link" onclick="showSection('orders', this)">My Orders</span>
-      <span class="nav-link" onclick="showSection('account', this)">Account</span>
-    </div>
-  </div>
-  <div class="nav-right">
-    <button class="cart-btn" onclick="openCart()">
-      &#128722; Cart <span class="cart-badge" id="cart-count">0</span>
-    </button>
-    <span class="user-info">Hi, <strong id="user-name">{{ user.name.split(' ')[0] if user else 'Customer' }}</strong></span>
-    {% if user %}
-      <a href="{{ url_for('auth.logout') }}" class="logout-btn" style="text-decoration:none;display:block;">Sign out</a>
-    {% else %}
-      <a href="{{ url_for('auth.login') }}" class="logout-btn" style="text-decoration:none;display:block;">Login</a>
-    {% endif %}
-  </div>
-</nav>
+{% include 'components/navbar.html' %}
 
-<!-- HERO (shop only) -->
-<div class="hero" id="hero-banner">
-  <h1>Discover <span>Premium</span> Products</h1>
-  <p>Thousands of curated items, delivered straight to your door.</p>
-</div>
+<!-- Hero/banner removed here (homepage only) -->
 
 <!-- MAIN -->
 <div class="main">
@@ -1018,6 +973,10 @@
           <span class="results-count results-count-inline" id="results-count">12 products</span>
         </div>
         <div class="product-grid" id="product-grid"></div>
+        <div class="shop-pagination" id="shop-pagination" hidden>
+          <div class="pagination-summary" id="pagination-summary"></div>
+          <div class="pagination-controls" id="pagination-controls" aria-label="Product pagination"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1069,8 +1028,11 @@
 <div class="toast" id="toast"></div>
 
 <script src="{{ url_for('static', filename='js/product_card_premium.js') }}"></script>
+<script src="{{ url_for('static', filename='js/shop_commerce.js') }}"></script>
 
 <script>
+  // Server-provided initial products (if any) to avoid blank UI when API fetch fails
+  window.__INITIAL_PRODUCTS = {{ initial_products|default([]) | tojson | safe }};
   // User data from Flask context
   const userData = {
     name: '{{ user.name }}',
@@ -1078,13 +1040,17 @@
     role: '{{ user.role }}'
   };
 
-  // Populate account info
-  document.getElementById('user-name').textContent = userData.name.split(' ')[0] || '';
-  document.getElementById('acc-name').textContent = userData.name || '';
-  document.getElementById('acc-email').textContent = userData.email || '';
+  // Populate account info (guard elements to avoid runtime errors)
+  const elUserName = document.getElementById('user-name');
+  if (elUserName) elUserName.textContent = (userData.name || '').split(' ')[0] || '';
+  const elAccName = document.getElementById('acc-name');
+  if (elAccName) elAccName.textContent = userData.name || '';
+  const elAccEmail = document.getElementById('acc-email');
+  if (elAccEmail) elAccEmail.textContent = userData.email || '';
   if (userData.name) {
     const parts = userData.name.split(' ');
-    document.getElementById('acc-initials').textContent = parts.map(p => p[0]).join('').toUpperCase();
+    const elAccInitials = document.getElementById('acc-initials');
+    if (elAccInitials) elAccInitials.textContent = parts.map(p => p[0]).join('').toUpperCase();
   }
 
   const PRODUCTS_API_URL = '{{ url_for("customer.api_products") }}';
@@ -1096,9 +1062,23 @@
     { label: 'Assembly Required', type: 'boolean' },
     { label: 'Assembly Time (Min)', type: 'numeric' }
   ];
-  let PRODUCTS = [];
+  let PRODUCTS = Array.isArray(window.__INITIAL_PRODUCTS) && window.__INITIAL_PRODUCTS.length ? window.__INITIAL_PRODUCTS : [];
   let cart = [];
   let filteredProducts = [];
+  const PRODUCTS_PER_PAGE = 12;
+  let currentPage = getInitialPage();
+
+  function getInitialPage() {
+    const page = Number(new URLSearchParams(window.location.search).get('page') || 1);
+    return Number.isInteger(page) && page > 0 ? page : 1;
+  }
+
+  function updatePageInUrl(page) {
+    const url = new URL(window.location.href);
+    if (page > 1) url.searchParams.set('page', String(page));
+    else url.searchParams.delete('page');
+    window.history.replaceState({}, '', url);
+  }
 
   function calculateOfferPercent(mrp, discountPrice) {
     if (!mrp || mrp <= 0 || discountPrice < 0 || discountPrice > mrp) return 0;
@@ -1115,6 +1095,43 @@
 
   function normalizeFilterValue(value) {
     return String(value ?? '').trim().toLowerCase();
+  }
+
+  function getCategoryFromQuery() {
+    const params = new URLSearchParams(window.location.search);
+    return normalizeFilterValue(params.get('category'));
+  }
+
+  function updateResultsHeading(categoryValue) {
+    const heading = document.querySelector('.results-bar .section-title');
+    if (!heading) return;
+    const normalized = normalizeFilterValue(categoryValue);
+    if (!normalized) {
+      heading.textContent = 'All Products';
+      return;
+    }
+
+    const categorySelect = document.getElementById('cat-filter');
+    const matchedOption = categorySelect
+      ? Array.from(categorySelect.options).find(option => normalizeFilterValue(option.value) === normalized)
+      : null;
+    heading.textContent = matchedOption ? `${matchedOption.textContent} Products` : 'All Products';
+  }
+
+  function applySelectedCategoryFromQuery() {
+    const categorySelect = document.getElementById('cat-filter');
+    if (!categorySelect) return;
+
+    const selectedCategory = getCategoryFromQuery();
+    if (!selectedCategory) {
+      categorySelect.value = '';
+      updateResultsHeading('');
+      return;
+    }
+
+    const matchingOption = Array.from(categorySelect.options).find(option => normalizeFilterValue(option.value) === selectedCategory);
+    categorySelect.value = matchingOption ? matchingOption.value : '';
+    updateResultsHeading(matchingOption ? matchingOption.value : '');
   }
 
   function getCheckedValues(name) {
@@ -1246,7 +1263,7 @@
       if (input.value === 'any') input.checked = true;
     });
 
-    filterProducts();
+    filterProducts({ resetPage: true });
   }
 
   function isOutOfStock(product) {
@@ -1276,17 +1293,109 @@
   }
 
   async function loadProducts() {
-    const response = await fetch(PRODUCTS_API_URL);
-    const data = await response.json();
-    PRODUCTS = data.products || [];
+    try {
+      const response = await fetch(PRODUCTS_API_URL);
+      if (!response.ok) throw new Error('Network response not ok: ' + response.status);
+      const data = await response.json();
+      PRODUCTS = Array.isArray(data.products) ? data.products : [];
+      if (!PRODUCTS.length && Array.isArray(window.__INITIAL_PRODUCTS) && window.__INITIAL_PRODUCTS.length) {
+        console.warn('API returned no products; falling back to server-provided initial products.');
+        PRODUCTS = window.__INITIAL_PRODUCTS;
+      }
+    } catch (err) {
+      console.warn('Failed to fetch products API, using initial server payload if available:', err);
+      PRODUCTS = Array.isArray(window.__INITIAL_PRODUCTS) ? window.__INITIAL_PRODUCTS : [];
+    }
+
+    console.info('Loaded products count:', PRODUCTS.length, '(API:', PRODUCTS_API_URL, ')');
     buildFilterSidebar();
     filteredProducts = [...PRODUCTS];
-    filterProducts();
+    applySelectedCategoryFromQuery();
+    filterProducts({ resetPage: false });
   }
 
-  function renderProducts() {
+  function getPaginationItems(current, total) {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, index) => index + 1);
+    }
+
+    const items = [1];
+    const start = Math.max(2, current - 1);
+    const end = Math.min(total - 1, current + 1);
+
+    if (start > 2) items.push('start-ellipsis');
+    for (let page = start; page <= end; page++) items.push(page);
+    if (end < total - 1) items.push('end-ellipsis');
+    items.push(total);
+
+    return items;
+  }
+
+  function goToPage(page) {
+    const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE));
+    currentPage = Math.min(Math.max(Number(page) || 1, 1), totalPages);
+    updatePageInUrl(currentPage);
+    renderProducts({ scrollToResults: true });
+  }
+
+  function renderPagination(totalItems, startIndex, endIndex, totalPages) {
+    const pagination = document.getElementById('shop-pagination');
+    const summary = document.getElementById('pagination-summary');
+    const controls = document.getElementById('pagination-controls');
+    if (!pagination || !summary || !controls) return;
+
+    if (totalItems === 0) {
+      pagination.hidden = true;
+      summary.textContent = '';
+      controls.innerHTML = '';
+      return;
+    }
+
+    pagination.hidden = false;
+    summary.textContent = `Showing ${startIndex + 1}-${endIndex} of ${totalItems} products`;
+
+    if (totalPages <= 1) {
+      controls.innerHTML = '';
+      return;
+    }
+
+    const pageItems = getPaginationItems(currentPage, totalPages).map(item => {
+      if (typeof item === 'string') {
+        return '<span class="pagination-ellipsis" aria-hidden="true">...</span>';
+      }
+      return `
+        <button
+          type="button"
+          class="pagination-btn ${item === currentPage ? 'active' : ''}"
+          onclick="goToPage(${item})"
+          aria-label="Go to page ${item}"
+          ${item === currentPage ? 'aria-current="page"' : ''}
+        >${item}</button>
+      `;
+    }).join('');
+
+    controls.innerHTML = `
+      <button type="button" class="pagination-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} aria-label="Previous page">Prev</button>
+      ${pageItems}
+      <button type="button" class="pagination-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} aria-label="Next page">Next</button>
+    `;
+  }
+
+  function renderProducts(options = {}) {
     const grid = document.getElementById('product-grid');
-    grid.innerHTML = filteredProducts.map(p => {
+    const totalItems = filteredProducts.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / PRODUCTS_PER_PAGE));
+    const requestedPage = currentPage;
+    currentPage = Math.min(Math.max(currentPage, 1), totalPages);
+    if (currentPage !== requestedPage) {
+      updatePageInUrl(currentPage);
+    }
+
+    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    const pageProducts = filteredProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
+    const endIndex = startIndex + pageProducts.length;
+
+    grid.innerHTML = pageProducts.map(p => {
       const outOfStock = isOutOfStock(p);
 
       const rawImageUrls = Array.isArray(p.imageUrls) ? p.imageUrls : (p.imageUrl ? [p.imageUrl] : []);
@@ -1378,17 +1487,25 @@
       `;
     }).join('');
 
-    document.getElementById('results-count').textContent = `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''}`;
+    const resultText = totalItems === 0
+      ? 'No products'
+      : `Showing ${startIndex + 1}-${endIndex} of ${totalItems} product${totalItems !== 1 ? 's' : ''}`;
+    document.getElementById('results-count').textContent = resultText;
+    renderPagination(totalItems, startIndex, endIndex, totalPages);
 
     // Re-bind premium card click handlers for newly created cards
     if (typeof ucInitProductCards === 'function') {
       ucInitProductCards(document);
     }
+
+    if (options.scrollToResults) {
+      document.querySelector('.shop-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
-  function filterProducts() {
+  function filterProducts(options = {}) {
     const q = normalizeFilterValue(document.getElementById('search-input').value);
-    const cat = document.getElementById('cat-filter').value;
+    const cat = normalizeFilterValue(document.getElementById('cat-filter').value);
     const sort = document.getElementById('sort-filter').value;
     const minPrice = Number(document.getElementById('min-price').value || 0);
     const maxPriceValue = document.getElementById('max-price').value;
@@ -1420,7 +1537,7 @@
       ].filter(Boolean).join(' ').toLowerCase();
 
       const withinSearch = searchable.includes(q);
-      const withinCategory = !cat || p.category === cat;
+      const withinCategory = !cat || normalizeFilterValue(p.category) === cat;
       const withinPrice = Number(p.discountPrice || 0) >= minPrice && (maxPrice === null || Number(p.discountPrice || 0) <= maxPrice);
       const withinBrands = !selectedBrands.length || selectedBrands.includes(normalizeFilterValue(p.brand));
       const withinRatings = !selectedRatings.length || selectedRatings.some(threshold => rating >= threshold);
@@ -1455,6 +1572,10 @@
     if (sort === 'price-desc') filteredProducts.sort((a,b) => b.discountPrice - a.discountPrice);
     if (sort === 'name')       filteredProducts.sort((a,b) => a.name.localeCompare(b.name));
     if (sort === 'rating-desc') filteredProducts.sort((a,b) => Number(b.rating || 0) - Number(a.rating || 0));
+
+    updateResultsHeading(cat);
+    currentPage = options.resetPage === false ? currentPage : 1;
+    updatePageInUrl(currentPage);
 
     renderProducts();
   }
@@ -1577,7 +1698,7 @@
     document.getElementById('section-' + name).classList.add('active');
     el.classList.add('active');
     const hero = document.getElementById('hero-banner');
-    hero.style.display    = name === 'shop' ? '' : 'none';
+    if (hero) hero.style.display = name === 'shop' ? '' : 'none';
     if (name === 'orders') renderOrders();
   }
 

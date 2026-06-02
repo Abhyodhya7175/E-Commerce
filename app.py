@@ -2,7 +2,7 @@ from flask import redirect, url_for, jsonify, render_template
 from flask_login import current_user
 from flask_app.models import Product, OfferBanner
 from flask_app.extensions import db
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask_app import create_app
 
@@ -18,8 +18,9 @@ def home():
         # (Shop pages remain available via their own routes.)'''
 
     # Fetch data for various sections (always fresh from DB)
-    # Latest "Just Landed" products - keep the default homepage shelf compact
-    just_landed = [p.to_dict() for p in Product.query.filter_by(active=True).order_by(Product.created_at.desc()).limit(5).all()]
+    # Latest "Just Landed" products - only include items created in the last 14 days
+    cutoff = datetime.utcnow() - timedelta(days=14)
+    just_landed = [p.to_dict() for p in Product.query.filter(Product.active == True, Product.created_at >= cutoff).order_by(Product.created_at.desc()).limit(6).all()]
 
     # New arrivals - newest 4 products
     new_arrivals = [p.to_dict() for p in Product.query.filter_by(active=True).order_by(Product.created_at.desc()).limit(4).all()]
@@ -88,7 +89,23 @@ def health():
     return jsonify(status='ok')
 
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+
 
 if __name__ == '__main__':
+    from flask_app.services.otp import mail_is_configured
+
     print("Starting Flask app...")
+    with app.app_context():
+        if mail_is_configured():
+            print(f"Email OTP: enabled ({app.config.get('MAIL_USERNAME')})")
+        else:
+            print(
+                "Email OTP: DISABLED — add MAIL_USERNAME and MAIL_PASSWORD to "
+                "flask_app/.env, then restart. Use the project venv: "
+                ".\\env\\Scripts\\python.exe app.py"
+            )
     app.run(debug=True)

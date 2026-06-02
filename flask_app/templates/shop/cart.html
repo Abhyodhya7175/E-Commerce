@@ -4,24 +4,16 @@
 
 {% block content %}
 {% set summary = cart_payload.summary %}
-<section class="uc-cart-hero">
-  <div class="uc-toolbar">
-    <div class="uc-heading">
-     
-      <h1>Your cart</h1>
-      
-    </div>
-    <div class="uc-pill"><i class="fa-solid fa-bag-shopping"></i> <span data-cart-line-count>{{ summary.count }}</span> items</div>
+<!-- Banner removed on non-home pages -->
+<div class="uc-toolbar" style="margin-bottom:12px;padding-top:8px;">
+  <div class="uc-heading">
+    <h1>Your cart</h1>
   </div>
-</section>
+  <div class="uc-pill"><i class="fa-solid fa-bag-shopping"></i> <span data-cart-line-count>{{ summary.count }}</span> items</div>
+</div>
 
 <div class="uc-grid-2">
   <section class="uc-cart-list-wrap">
-    <div class="uc-cart-trustbar">
-      <span><i class="fa-solid fa-shield-halved"></i> Secure payments</span>
-      <span><i class="fa-solid fa-truck-fast"></i> Fast delivery</span>
-      <span><i class="fa-solid fa-rotate-left"></i> Easy returns</span>
-    </div>
     <div id="uc-cart-list" class="uc-cart-list">
       {% if cart_payload['items'] %}
         {% for item in cart_payload['items'] %}
@@ -51,7 +43,6 @@
                     <span class="uc-stock {{ 'out' if 'out' in stock_label else 'low' if 'low' in stock_label else '' }}">{{ item.stockStatus }}</span>
                   </div>
                 </div>
-                <div class="uc-delivery-chip"><i class="fa-solid fa-truck-fast"></i> Delivery by Tomorrow</div>
               </div>
 
               <div class="uc-detail-grid">
@@ -68,16 +59,11 @@
                     {% if item.freeShipping %}
                       <span>Free shipping applied</span>
                     {% else %}
-                      <span>Shipping ₹{{ '%.0f'|format(item.shippingCharges or 0) }}</span>
                     {% endif %}
-                    <span>GST included</span>
+                    
                   </div>
                 </div>
 
-                <div class="uc-delivery-stack">
-                  <span><i class="fa-solid fa-shield-halved"></i> Secure checkout</span>
-                  <span><i class="fa-solid fa-rotate-left"></i> Easy returns</span>
-                </div>
               </div>
 
               <div class="uc-line-actions">
@@ -90,21 +76,10 @@
                     <i class="fa-solid fa-plus"></i>
                   </button>
                 </div>
-                <button type="button" class="uc-action-link subtle" data-cart-remove="{{ item.id }}">
-                  <i class="fa-regular fa-trash-can"></i> Remove
-                </button>
-                <button type="button" class="uc-action-link ghost" data-save-later="{{ item.id }}">
-                  <i class="fa-regular fa-bookmark"></i> Save for later
-                </button>
+                <button type="button" class="uc-action-link subtle" data-cart-remove="{{ item.id }}">Remove</button>
+                <button type="button" class="uc-action-link ghost" data-save-later="{{ item.id }}">Save for later</button>
               </div>
 
-              <div class="uc-line-footer">
-                <div class="uc-line-delivery"><i class="fa-solid fa-truck-fast"></i> Estimated delivery in 2-4 days</div>
-                <div class="uc-line-total">
-                  <span>Line total</span>
-                  <strong>₹{{ '%.0f'|format(item.lineTotal or 0) }}</strong>
-                </div>
-              </div>
             </div>
           </article>
         {% endfor %}
@@ -128,48 +103,6 @@
       <span class="uc-pill"><i class="fa-solid fa-lock"></i> Secure</span>
     </div>
 
-    {% if cart_payload['items'] %}
-      <div class="uc-progress-card">
-        {% set free_shipping_target = 500 %}
-        {% set remaining_for_free = free_shipping_target - (summary.subtotal or 0) %}
-        {% set progress = 100 if remaining_for_free <= 0 else ((summary.subtotal or 0) / free_shipping_target * 100) %}
-        {% set progress_pct = progress if progress <= 100 else 100 %}
-        <div class="uc-progress-head">
-          <strong>Free shipping progress</strong>
-          <span>₹{{ free_shipping_target | int }} target</span>
-        </div>
-        <div class="uc-progress-track" data-progress="{{ progress_pct }}">
-          <span class="uc-progress-fill"></span>
-        </div>
-        <div class="uc-progress-note">
-          {% if remaining_for_free > 0 %}
-            You are ₹{{ remaining_for_free | int }} away from FREE delivery.
-          {% else %}
-            You unlocked FREE delivery.
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="uc-pin-card" id="uc-pin-card" data-order-total="{{ summary.total or 0 }}">
-        <div class="uc-pin-label">Check delivery</div>
-        <div class="uc-pin-row">
-          <input id="uc-pincode" inputmode="numeric" maxlength="6" placeholder="Enter pincode" />
-          <button type="button" class="uc-btn uc-btn-soft" id="uc-pincheck">Check</button>
-        </div>
-        <div class="uc-pinloader" id="uc-pinloader" hidden>
-          <span class="uc-spinner" aria-hidden="true"></span>
-          <span>Checking availability...</span>
-        </div>
-        <div class="uc-pinmsg" id="uc-pinmsg" aria-live="polite"></div>
-        <div class="uc-pinmeta" id="uc-pinmeta">
-          <span class="uc-pin-badge success" id="uc-cod-badge" hidden>COD Available</span>
-          <span class="uc-pin-badge info" id="uc-eta-badge" hidden></span>
-          <span class="uc-pin-badge info" id="uc-date-badge" hidden></span>
-          <span class="uc-pin-badge neutral" id="uc-free-ship" hidden>Free Shipping</span>
-        </div>
-      </div>
-    {% endif %}
-
     <div class="uc-summary-grid">
       <div class="uc-summary-row"><span>Subtotal</span><strong data-summary-value="subtotal">₹{{ '%.0f'|format(summary.subtotal or 0) }}</strong></div>
       <div class="uc-summary-row"><span>Discount</span><strong data-summary-value="discount">-₹{{ '%.0f'|format(summary.discountTotal or 0) }}</strong></div>
@@ -183,29 +116,13 @@
         <strong>Total savings</strong>
         <p>₹{{ '%.0f'|format(summary.discountTotal or 0) }} on this order</p>
       </div>
-      <span class="uc-mini-pill success">GST Included</span>
     </div>
-
-    <div class="uc-coupon">
-      <input type="text" class="uc-input" placeholder="Apply coupon code" aria-label="Coupon code">
-      <button type="button" class="uc-btn uc-btn-soft">Apply</button>
-    </div>
-
     <div class="mt-3 d-grid gap-2">
-      <a href="{{ url_for('customer.checkout') }}" class="uc-btn uc-btn-cta">Proceed to Checkout <i class="fa-solid fa-arrow-right"></i></a>
+      <a href="{{ url_for('checkout.checkout_page') }}" class="uc-btn uc-btn-cta">Proceed to Checkout <i class="fa-solid fa-arrow-right"></i></a>
       <a href="{{ url_for('customer.shop_home') }}" class="uc-btn uc-btn-outline">Continue shopping</a>
     </div>
 
-    <div class="uc-summary-trust">
-      <div><i class="fa-solid fa-shield-halved"></i> Secure payments</div>
-      <div><i class="fa-solid fa-truck-fast"></i> Fast delivery</div>
-      <div><i class="fa-solid fa-credit-card"></i> All major cards</div>
-      <div><i class="fa-solid fa-rotate-left"></i> Easy returns</div>
-    </div>
-
-    <div class="mt-3 small text-muted lh-sm">
-      Prices are refreshed instantly when quantities change. Shipping and GST values are recalculated live.
-    </div>
+    
   </aside>
 </div>
 

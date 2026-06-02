@@ -1,0 +1,73 @@
+<section class="co-panel" id="sec-address" data-panel="address">
+  <button class="co-panel-toggle d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#panel-address" aria-expanded="true">
+    <span><i class="fa-solid fa-location-dot"></i> Shipping address</span>
+    <i class="fa-solid fa-chevron-down"></i>
+  </button>
+  <div id="panel-address" class="collapse show co-panel-body">
+    <header class="co-panel-head d-none d-lg-flex">
+      <span class="co-panel-icon"><i class="fa-solid fa-location-dot"></i></span>
+      <div>
+        <h2 class="co-card-title">Shipping address</h2>
+        <p class="co-card-desc">Select or add a delivery address</p>
+      </div>
+      <button type="button" class="co-btn co-btn-outline co-btn-sm" id="co-add-address-btn">+ Add new address</button>
+    </header>
+
+    <div class="d-lg-none co-panel-actions-mobile">
+      <button type="button" class="co-btn co-btn-outline co-btn-sm w-100" id="co-add-address-btn-mobile">+ Add new address</button>
+    </div>
+
+    <div id="co-saved-addresses" class="co-address-list" role="listbox" aria-label="Saved addresses"></div>
+
+    <div id="co-use-new-address-wrap" class="d-none">
+      <button type="button" class="co-link-btn" id="co-toggle-new-address">Use a different address</button>
+    </div>
+
+    <div id="co-guest-address" class="{% if is_logged_in and addresses %}d-none{% endif %}">
+      <p class="co-subheading">New delivery address</p>
+      <form id="co-guest-address-form" class="co-address-form">
+        <div class="co-form-row">
+          <div class="co-field">
+            <label class="co-label">Full name</label>
+            <input class="co-input" name="fullName" required>
+          </div>
+          <div class="co-field">
+            <label class="co-label">Mobile</label>
+            <input class="co-input" name="mobile" inputmode="tel" required>
+          </div>
+        </div>
+        <div class="co-field">
+          <label class="co-label">House / flat / building</label>
+          <input class="co-input" name="house" placeholder="Flat 4B, Green Residency" required>
+        </div>
+        <div class="co-field">
+          <label class="co-label">Street / area</label>
+          <input class="co-input" name="street" required>
+        </div>
+        <div class="co-field">
+          <label class="co-label">Landmark <span class="co-muted">(optional)</span></label>
+          <input class="co-input" name="landmark">
+        </div>
+        <div class="co-form-row co-form-row-3">
+          <div class="co-field">
+            <label class="co-label">City</label>
+            <input class="co-input" name="city" required>
+          </div>
+          <div class="co-field">
+            <label class="co-label">State</label>
+            <select class="co-input co-select" name="state" required>
+              <option value="">Select</option>
+              {% for st in ['Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Delhi','Goa','Gujarat','Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab','Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh','Uttarakhand','West Bengal'] %}
+              <option value="{{ st }}">{{ st }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="co-field">
+            <label class="co-label">PIN code</label>
+            <input class="co-input" name="pincode" maxlength="6" inputmode="numeric" required>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,66 @@
+<!-- Shared navbar component -->
+{% if request.endpoint == 'home' %}
+  <div class="announcement-bar">🎉 Summer Sale: Get up to 40% off on selected items + Free Shipping on orders above ₹500</div>
+{% endif %}
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="{{ url_for('home') }}" class="logo">Urban<span>Cart</span></a>
+
+    <ul class="nav-cats">
+      <li><a href="/">Home</a></li>
+      <li><a href="#new-arrivals">New Arrivals</a></li>
+      <li><a href="{{ url_for('customer.shop_home') }}" class="shop-now">Shop Now</a></li>
+      <li><a href="{{ url_for('blog.blog_list') }}">Blog</a></li>
+      <li><a href="{{ url_for('about') }}">About</a></li>
+    </ul>
+
+    <form class="nav-search-wrapper" id="nav-search-wrapper" autocomplete="off">
+      <div class="nav-search-shell">
+        <div class="nav-search-input-wrap">
+          <i class="fas fa-search nav-search-icon" aria-hidden="true"></i>
+          <input type="text" name="q" id="nav-search-input" class="nav-search-input" placeholder="Search products, brands, categories..." autocomplete="off">
+          <button type="submit" class="nav-search-btn">Search</button>
+        </div>
+
+        <div class="nav-search-panel" id="nav-search-panel" aria-label="Product search dropdown" aria-hidden="true">
+          <div class="nav-search-state" id="nav-search-loading" hidden>
+            <span class="nav-search-spinner" aria-hidden="true"></span>
+            Searching products...
+          </div>
+
+          <div class="nav-search-empty" id="nav-search-empty" hidden>No products found</div>
+
+          <section class="nav-search-section" id="nav-search-static-section"></section>
+        </div>
+      </div>
+    </form>
+
+    <div class="nav-icons">
+      <a href="{{ url_for('commerce.wishlist_page') }}" class="icon-btn" title="Wishlist">
+        <i class="fas fa-heart"></i>
+        <span class="dot" data-wishlist-count>{{ wishlist_count or 0 }}</span>
+      </a>
+      <a href="{{ url_for('commerce.cart_page') }}" class="icon-btn" title="Cart">
+        <i class="fas fa-shopping-bag"></i>
+        <span class="dot" data-cart-count>{{ cart_count or 0 }}</span>
+      </a>
+      {% if current_user.is_authenticated %}
+      <a href="{{ url_for('customer.shop_home') }}" class="icon-btn" title="My Account">
+        <i class="fas fa-user"></i>
+      </a>
+      {% endif %}
+    </div>
+
+    <div class="nav-auth">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost">Logout</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn btn-ghost">Login</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-solid">Register</a>
+      {% endif %}
+    </div>
+
+    <button class="theme-pill" id="themeToggle" aria-label="Toggle dark mode"></button>
+
+  </div>
+</nav>

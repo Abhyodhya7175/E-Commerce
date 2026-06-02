@@ -1,0 +1,40 @@
+<section class="co-panel" id="sec-delivery" data-panel="delivery">
+  <button class="co-panel-toggle d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#panel-delivery" aria-expanded="true">
+    <span><i class="fa-solid fa-truck"></i> Delivery method</span>
+    <i class="fa-solid fa-chevron-down"></i>
+  </button>
+  <div id="panel-delivery" class="collapse show co-panel-body">
+    <header class="co-panel-head d-none d-lg-flex">
+      <span class="co-panel-icon"><i class="fa-solid fa-truck"></i></span>
+      <div>
+        <h2 class="co-card-title">Delivery method</h2>
+        <p class="co-card-desc">Choose speed and confirm PIN serviceability</p>
+      </div>
+    </header>
+
+    <div class="co-field co-pin-field">
+      <label class="co-label" for="co-pincode">Delivery PIN code</label>
+      <div class="co-inline-field">
+        <input type="text" class="co-input" id="co-pincode" maxlength="6" inputmode="numeric" placeholder="6-digit PIN">
+        <button type="button" class="co-btn co-btn-outline co-btn-sm" id="co-pincode-btn">Check</button>
+      </div>
+      <p id="co-pincode-msg" class="co-pin-msg"></p>
+    </div>
+
+    <div id="co-shipping-options" class="co-delivery-options">
+      {% for method in shipping_methods %}
+      <label class="co-delivery-option">
+        <input type="radio" name="shippingMethod" value="{{ method.id }}" {% if method.id == 'standard' %}checked{% endif %}>
+        <span class="co-delivery-option-inner">
+          <span class="co-delivery-top">
+            <strong>{{ method.label }}</strong>
+            <span class="co-delivery-fee">{% if method.fee %}₹{{ '%.0f'|format(method.fee) }}{% else %}Free{% endif %}</span>
+          </span>
+          <span class="co-eta co-muted" data-eta-days="{{ method.etaDays }}">Est. delivery — calculating…</span>
+          {% if method.badge %}<span class="co-pill">{{ method.badge }}</span>{% endif %}
+        </span>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+</section>

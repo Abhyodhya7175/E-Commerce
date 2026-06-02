@@ -1,0 +1,35 @@
+{# Shared admin sidebar — Font Awesome icons, pill active state #}
+{% set ep = request.endpoint %}
+<aside class="sidebar" aria-label="Admin navigation">
+  <div class="sidebar-logo">Urban<span>Cart</span></div>
+  <nav class="sidebar-nav">
+    <a href="{{ url_for('home') }}" class="nav-item">
+      <i class="fa-solid fa-house" aria-hidden="true"></i>
+      <span class="nav-label">Store</span>
+    </a>
+    <a href="{{ url_for('admin.dashboard') }}" class="nav-item{% if ep == 'admin.dashboard' %} active{% endif %}">
+      <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+      <span class="nav-label">Dashboard</span>
+    </a>
+    <a href="{{ url_for('admin.products') }}" class="nav-item{% if ep in ['admin.products', 'admin.new_product', 'admin.edit_product', 'admin.products_grid'] %} active{% endif %}">
+      <i class="fa-solid fa-box" aria-hidden="true"></i>
+      <span class="nav-label">Products</span>
+    </a>
+    <a href="{{ url_for('admin.coupons_page') }}" class="nav-item{% if ep == 'admin.coupons_page' %} active{% endif %}">
+      <i class="fa-solid fa-ticket" aria-hidden="true"></i>
+      <span class="nav-label">Coupons</span>
+    </a>
+    <a href="{{ url_for('admin.orders') }}" class="nav-item{% if ep == 'admin.orders' %} active{% endif %}">
+      <i class="fa-solid fa-receipt" aria-hidden="true"></i>
+      <span class="nav-label">Orders</span>
+    </a>
+    <a href="{{ url_for('admin.users') }}" class="nav-item{% if ep == 'admin.users' %} active{% endif %}">
+      <i class="fa-solid fa-users" aria-hidden="true"></i>
+      <span class="nav-label">Users</span>
+    </a>
+    <a href="{{ url_for('admin.banners') }}" class="nav-item{% if ep in ['admin.banners', 'admin.create_banner', 'admin.edit_banner', 'admin.delete_banner', 'admin.toggle_banner'] %} active{% endif %}">
+      <i class="fa-solid fa-image" aria-hidden="true"></i>
+      <span class="nav-label">Banners</span>
+    </a>
+  </nav>
+</aside>

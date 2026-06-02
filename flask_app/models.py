@@ -80,14 +80,39 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=True)
     role = db.Column(db.String(20), nullable=False, default='customer')
+    is_verified=db.Column(db.Boolean, default=False)
+    last_login=db.Column(db.DateTime, nullable=True)
+    created_at=db.Column(db.DateTime, default=datetime.utcnow)
+
 
     def set_password(self, password):
+        if not password:
+            self.password_hash = None
+            return
         self.password_hash = generate_password_hash(password)
 
+    @property
+    def has_password(self):
+        return bool(self.password_hash)
+
     def check_password(self, password):
+        if not self.password_hash or not password:
+            return False
         return check_password_hash(self.password_hash, password)
+    
+
+
+class EmailOTP(db.Model):
+    __tablename__ = 'email_otps'
+    id=db.Column(db.Integer, primary_key=True)
+    email=db.Column(db.String(100), nullable=False)
+    otp=db.Column(db.String(255), nullable=False)
+    expires_at=db.Column(db.DateTime, nullable=False)
+    is_used=db.Column(db.Boolean, default=False)
+    created_at=db.Column(db.DateTime, default=datetime.utcnow)
+
 
 
 class ProductCategory(db.Model):
@@ -441,3 +466,298 @@ class OfferBanner(db.Model):
             'endDate': self.end_date.strftime('%Y-%m-%dT%H:%M') if self.end_date else '',
             'createdAt': self.created_at.isoformat() if self.created_at else '',
         }
+
+
+class UserAddress(db.Model):
+    __tablename__ = 'user_addresses'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False, index=True)
+    full_name = db.Column(db.String(120), nullable=False)
+    mobile = db.Column(db.String(20), nullable=False)
+    email = db.Column(db.String(120), nullable=True)
+    house = db.Column(db.String(200), nullable=False)
+    street = db.Column(db.String(255), nullable=False)
+    landmark = db.Column(db.String(255), nullable=True)
+    city = db.Column(db.String(100), nullable=False)
+    state = db.Column(db.String(100), nullable=False)
+    pincode = db.Column(db.String(6), nullable=False)
+    country = db.Column(db.String(80), nullable=False, default='India')
+    is_default = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    user = db.relationship('User', backref=db.backref('addresses', lazy=True, cascade='all, delete-orphan'))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'fullName': self.full_name,
+            'mobile': self.mobile,
+            'email': self.email or '',
+            'house': self.house,
+            'street': self.street,
+            'landmark': self.landmark or '',
+            'city': self.city,
+            'state': self.state,
+            'pincode': self.pincode,
+            'country': self.country,
+            'isDefault': bool(self.is_default),
+            'label': f'{self.house}, {self.city} — {self.pincode}',
+        }
+
+
+def _json_load(text, default=None):
+    if default is None:
+        default = []
+    if not text:
+        return default
+    try:
+        return json.loads(text)
+    except (TypeError, ValueError):
+        return default
+
+
+def _json_dump(value):
+    return json.dumps(value or [])
+
+
+class Coupon(db.Model):
+    __tablename__ = 'coupons'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=True)
+    code = db.Column(db.String(40), unique=True, nullable=False, index=True)
+    description = db.Column(db.String(255), nullable=True)
+    kind = db.Column(db.String(20), nullable=False, default='coupon')  # coupon | promotion
+    discount_type = db.Column(db.String(20), nullable=False, default='percent')
+    discount_value = db.Column(db.Float, nullable=False, default=0.0)
+    min_order_amount = db.Column(db.Float, default=0.0, nullable=False)
+    max_discount = db.Column(db.Float, nullable=True)
+    buy_x = db.Column(db.Integer, nullable=True)
+    buy_y = db.Column(db.Integer, nullable=True)
+    usage_limit = db.Column(db.Integer, nullable=True)
+    per_customer_limit = db.Column(db.Integer, nullable=True)
+    used_count = db.Column(db.Integer, default=0, nullable=False)
+    first_purchase_only = db.Column(db.Boolean, default=False, nullable=False)
+    new_customer_only = db.Column(db.Boolean, default=False, nullable=False)
+    active = db.Column(db.Boolean, default=True, nullable=False)
+    is_draft = db.Column(db.Boolean, default=False, nullable=False)
+    starts_at = db.Column(db.DateTime, nullable=True)
+    expires_at = db.Column(db.DateTime, nullable=True)
+    rules_json = db.Column(db.Text, nullable=True)
+    product_ids_json = db.Column(db.Text, nullable=True)
+    category_ids_json = db.Column(db.Text, nullable=True)
+    brand_ids_json = db.Column(db.Text, nullable=True)
+    exclude_product_ids_json = db.Column(db.Text, nullable=True)
+    exclude_category_ids_json = db.Column(db.Text, nullable=True)
+    flash_sale_json = db.Column(db.Text, nullable=True)
+    parent_id = db.Column(db.Integer, db.ForeignKey('coupons.id'), nullable=True, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    children = db.relationship('Coupon', backref=db.backref('parent', remote_side=[id]), lazy='dynamic')
+
+    def compute_status(self) -> str:
+        now = datetime.utcnow()
+        if self.is_draft:
+            return 'draft'
+        if self.starts_at and self.starts_at > now:
+            return 'scheduled'
+        if self.expires_at and self.expires_at < now:
+            return 'expired'
+        if not self.active:
+            return 'expired'
+        return 'active'
+
+    def to_dict(self, admin: bool = False):
+        base = {
+            'code': self.code,
+            'description': self.description or '',
+            'discountType': self.discount_type,
+            'discountValue': float(self.discount_value or 0),
+            'minOrderAmount': float(self.min_order_amount or 0),
+            'maxDiscount': float(self.max_discount) if self.max_discount is not None else None,
+        }
+        if not admin:
+            return base
+        return {
+            **base,
+            'id': self.id,
+            'name': self.name or self.code,
+            'kind': self.kind or 'coupon',
+            'status': self.compute_status(),
+            'buyX': self.buy_x,
+            'buyY': self.buy_y,
+            'usageLimit': self.usage_limit,
+            'perCustomerLimit': self.per_customer_limit,
+            'usedCount': int(self.used_count or 0),
+            'firstPurchaseOnly': bool(self.first_purchase_only),
+            'newCustomerOnly': bool(self.new_customer_only),
+            'active': bool(self.active),
+            'isDraft': bool(self.is_draft),
+            'startsAt': self.starts_at.isoformat() if self.starts_at else None,
+            'expiresAt': self.expires_at.isoformat() if self.expires_at else None,
+            'rules': _json_load(self.rules_json, []),
+            'productIds': _json_load(self.product_ids_json, []),
+            'categoryIds': _json_load(self.category_ids_json, []),
+            'brandIds': _json_load(self.brand_ids_json, []),
+            'excludeProductIds': _json_load(self.exclude_product_ids_json, []),
+            'excludeCategoryIds': _json_load(self.exclude_category_ids_json, []),
+            'flashSale': _json_load(self.flash_sale_json, {}),
+            'parentId': self.parent_id,
+            'createdAt': self.created_at.isoformat() if self.created_at else None,
+            'updatedAt': self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class LoyaltyReward(db.Model):
+    __tablename__ = 'loyalty_rewards'
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(120), nullable=False)
+    coins_required = db.Column(db.Integer, nullable=False, default=0)
+    reward_type = db.Column(db.String(30), nullable=False, default='coupon')
+    reward_value = db.Column(db.Float, nullable=True)
+    expiry_days = db.Column(db.Integer, nullable=True)
+    coupon_id = db.Column(db.Integer, db.ForeignKey('coupons.id', ondelete='SET NULL'), nullable=True)
+    config_json = db.Column(db.Text, nullable=True)
+    active = db.Column(db.Boolean, default=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    coupon = db.relationship('Coupon', backref=db.backref('loyalty_rewards', lazy=True))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'coinsRequired': int(self.coins_required or 0),
+            'rewardType': self.reward_type,
+            'rewardValue': float(self.reward_value) if self.reward_value is not None else None,
+            'expiryDays': self.expiry_days,
+            'couponId': self.coupon_id,
+            'config': _json_load(self.config_json, {}),
+            'active': bool(self.active),
+            'createdAt': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class LoyaltyWallet(db.Model):
+    __tablename__ = 'loyalty_wallets'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), unique=True, nullable=False)
+    balance_coins = db.Column(db.Integer, default=0, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    user = db.relationship('User', backref=db.backref('loyalty_wallet', uselist=False, cascade='all, delete-orphan'))
+
+
+class Order(db.Model):
+    __tablename__ = 'orders'
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_number = db.Column(db.String(32), unique=True, nullable=False, index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='SET NULL'), nullable=True, index=True)
+    guest_token = db.Column(db.String(64), nullable=True, index=True)
+
+    contact_name = db.Column(db.String(120), nullable=False)
+    contact_email = db.Column(db.String(120), nullable=False)
+    contact_phone = db.Column(db.String(20), nullable=False)
+
+    shipping_full_name = db.Column(db.String(120), nullable=False)
+    shipping_mobile = db.Column(db.String(20), nullable=False)
+    shipping_house = db.Column(db.String(200), nullable=False)
+    shipping_street = db.Column(db.String(255), nullable=False)
+    shipping_landmark = db.Column(db.String(255), nullable=True)
+    shipping_city = db.Column(db.String(100), nullable=False)
+    shipping_state = db.Column(db.String(100), nullable=False)
+    shipping_pincode = db.Column(db.String(6), nullable=False)
+    shipping_country = db.Column(db.String(80), nullable=False, default='India')
+
+    shipping_method = db.Column(db.String(30), nullable=False, default='standard')
+    shipping_charge = db.Column(db.Float, default=0.0, nullable=False)
+    estimated_delivery = db.Column(db.String(80), nullable=True)
+
+    subtotal = db.Column(db.Float, default=0.0, nullable=False)
+    product_discount = db.Column(db.Float, default=0.0, nullable=False)
+    coupon_code = db.Column(db.String(40), nullable=True)
+    coupon_discount = db.Column(db.Float, default=0.0, nullable=False)
+    coins_redeemed = db.Column(db.Integer, default=0, nullable=False)
+    coin_discount = db.Column(db.Float, default=0.0, nullable=False)
+    gst_total = db.Column(db.Float, default=0.0, nullable=False)
+    platform_fee = db.Column(db.Float, default=0.0, nullable=False)
+    grand_total = db.Column(db.Float, default=0.0, nullable=False)
+
+    status = db.Column(db.String(30), default='pending', nullable=False)
+    payment_method = db.Column(db.String(30), nullable=False)
+    payment_status = db.Column(db.String(30), default='pending', nullable=False)
+
+    checkout_step = db.Column(db.String(30), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    items = db.relationship('OrderItem', backref='order', lazy=True, cascade='all, delete-orphan')
+    payments = db.relationship('Payment', backref='order', lazy=True, cascade='all, delete-orphan')
+
+    def to_dict(self):
+        return {
+            'orderNumber': self.order_number,
+            'status': self.status,
+            'grandTotal': float(self.grand_total or 0),
+            'paymentMethod': self.payment_method,
+            'paymentStatus': self.payment_status,
+            'createdAt': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class OrderItem(db.Model):
+    __tablename__ = 'order_items'
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id', ondelete='CASCADE'), nullable=False, index=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id', ondelete='SET NULL'), nullable=True)
+    product_name = db.Column(db.String(200), nullable=False)
+    product_sku = db.Column(db.String(80), nullable=True)
+    variant = db.Column(db.String(120), nullable=True)
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+    unit_price = db.Column(db.Float, nullable=False, default=0.0)
+    line_total = db.Column(db.Float, nullable=False, default=0.0)
+    image_url = db.Column(db.String(255), nullable=True)
+
+
+class Payment(db.Model):
+    __tablename__ = 'payments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id', ondelete='CASCADE'), nullable=False, index=True)
+    method = db.Column(db.String(30), nullable=False)
+    status = db.Column(db.String(30), default='pending', nullable=False)
+    amount = db.Column(db.Float, nullable=False, default=0.0)
+    transaction_id = db.Column(db.String(120), nullable=True)
+    metadata_json = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+
+class CheckoutInventoryLock(db.Model):
+    __tablename__ = 'checkout_inventory_locks'
+
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id', ondelete='CASCADE'), nullable=False, index=True)
+    quantity = db.Column(db.Integer, nullable=False)
+    lock_token = db.Column(db.String(64), nullable=False, index=True)
+    expires_at = db.Column(db.DateTime, nullable=False, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+
+class CheckoutAbandonment(db.Model):
+    __tablename__ = 'checkout_abandonments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='SET NULL'), nullable=True, index=True)
+    guest_token = db.Column(db.String(64), nullable=True, index=True)
+    cart_snapshot = db.Column(db.Text, nullable=True)
+    last_step = db.Column(db.String(30), nullable=True)
+    email = db.Column(db.String(120), nullable=True)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)

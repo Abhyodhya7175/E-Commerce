@@ -7,7 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from uuid import uuid4
 from datetime import datetime
 import os
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, func, case
 
 admin_bp = Blueprint('admin', __name__, template_folder='../templates')
 
@@ -602,7 +602,7 @@ def api_product_list():
         product_status = request.args.get('product_status', '').strip()
         price_min = request.args.get('price_min', type=float)
         price_max = request.args.get('price_max', type=float)
-        sort_by = request.args.get('sort', 'latest').strip()
+        sort_by = request.args.get('sort', 'sku_asc').strip()
     except (ValueError, TypeError):
         return jsonify(error='Invalid filter parameters'), 400
 
@@ -638,7 +638,16 @@ def api_product_list():
 
     total = query.count()
 
-    if sort_by == 'price_asc':
+    if sort_by == 'sku_asc':
+        query = query.order_by(
+            case(
+                ((Product.sku.is_(None)) | (Product.sku == ''), 1),
+                else_=0,
+            ),
+            func.lower(Product.sku),
+            Product.id.asc(),
+        )
+    elif sort_by == 'price_asc':
         query = query.order_by(Product.selling_price.asc())
     elif sort_by == 'price_desc':
         query = query.order_by(Product.selling_price.desc())
@@ -963,3 +972,7 @@ def api_save_product_advanced():
         db.session.rollback()
         current_app.logger.exception('Could not save product')
         return jsonify(error=f'Database error: {error.__class__.__name__}'), 500
+
+
+# Register coupon admin routes on admin_bp before the blueprint is mounted on the app.
+from . import admin_coupons  # noqa: E402, F401

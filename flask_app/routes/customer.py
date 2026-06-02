@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, url_for, jsonify, abort, request, make_response
+import json
 from flask_login import current_user, login_required
 from ..models import Product,Review
 from ..extensions import db
@@ -11,11 +12,23 @@ customer_bp = Blueprint('customer', __name__)
 def shop_home():
     """Customer dashboard with products, cart, and orders"""
     user = current_user if current_user.is_authenticated else None
-    return render_template('customer/dashboard.html', user=user)
+    # Provide an initial products payload to the template so the page
+    # can render products server-side if the client fetch fails.
+    products = Product.query.filter_by(active=True).order_by(Product.created_at.desc()).limit(24).all()
+    products_payload = [p.to_dict() for p in products]
+    return render_template('customer/dashboard.html', user=user, initial_products=products_payload)
 
 @customer_bp.route('/products')
 def products_page():
-    products = Product.query.filter_by(active=True).order_by(Product.id.desc()).limit(24).all()
+    # Support optional filtering via query param `filter`
+    # - filter=new_arrivals : show products with new_arrival=True
+    f = request.args.get('filter', '').strip().lower()
+    query = Product.query.filter_by(active=True)
+    if f in ('new_arrivals', 'new-arrivals', 'new'):
+        query = query.filter_by(new_arrival=True).order_by(Product.created_at.desc())
+    else:
+        query = query.order_by(Product.id.desc())
+    products = query.limit(24).all()
     enriched = [p.to_dict() for p in products]
     for idx, d in enumerate(enriched):
         d["freeGift"] = idx % 4 == 0
@@ -67,12 +80,6 @@ def cart():
 def wishlist():
     payload = get_wishlist_payload()
     return render_template('shop/wishlist.html', wishlist_payload=payload)
-
-
-@customer_bp.route('/checkout')
-def checkout():
-    return render_template('shop/checkout.html')
-
 
 
 @customer_bp.route('/api/reviews/add', methods=['POST'])

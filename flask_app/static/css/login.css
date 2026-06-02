@@ -19,6 +19,7 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    padding-top: 84px;
   }
 
   /* --- Decorative Split Layout --- */
@@ -282,6 +283,94 @@
     display: none;
   }
   .alert-error.show { display: block; }
+
+  .alert-success {
+    background: #eef8f0;
+    border: 1px solid #b8dfc4;
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    font-size: 0.82rem;
+    color: #1e6b3a;
+    margin-bottom: 1rem;
+    display: none;
+  }
+  .alert-success.show { display: block; }
+
+  .auth-method-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 1.4rem;
+  }
+
+  .auth-method-tab {
+    padding: 0.55rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ink-light);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .auth-method-tab.active {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: #fff;
+  }
+
+  .hidden-panel { display: none; }
+
+  .label-hint {
+    font-weight: 300;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink-light);
+    font-size: 0.72rem;
+  }
+
+  .field-hint {
+    font-size: 0.75rem;
+    color: var(--ink-light);
+    margin-top: 0.35rem;
+    font-weight: 300;
+  }
+
+  .otp-input-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+
+  .otp-input-row input { flex: 1; min-width: 0; }
+
+  .btn-secondary {
+    flex-shrink: 0;
+    padding: 0 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    border-color: var(--gold);
+    background: var(--gold-light);
+  }
+
+  .btn-secondary:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
 
   /* --- Responsive --- */
   @media (max-width: 768px) {

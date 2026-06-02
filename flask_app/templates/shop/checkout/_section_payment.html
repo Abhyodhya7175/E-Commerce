@@ -1,0 +1,58 @@
+<section class="co-panel" id="sec-payment" data-panel="payment">
+  <button class="co-panel-toggle d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#panel-payment" aria-expanded="true">
+    <span><i class="fa-regular fa-credit-card"></i> Payment method</span>
+    <i class="fa-solid fa-chevron-down"></i>
+  </button>
+  <div id="panel-payment" class="collapse show co-panel-body">
+    <header class="co-panel-head d-none d-lg-flex">
+      <span class="co-panel-icon"><i class="fa-regular fa-credit-card"></i></span>
+      <div>
+        <h2 class="co-card-title">Payment method</h2>
+        <p class="co-card-desc">All transactions are secure and encrypted</p>
+      </div>
+    </header>
+
+    <div class="co-pay-grid">
+      {% for pm, label, icon in [('upi','UPI','fa-mobile-screen'),('card','Card','fa-credit-card'),('netbanking','Net Banking','fa-building-columns'),('wallet','Wallet','fa-wallet'),('cod','Cash on Delivery','fa-money-bill-wave')] %}
+      <label class="co-pay-option">
+        <input type="radio" name="paymentMethod" value="{{ pm }}" {% if pm == 'upi' %}checked{% endif %}>
+        <span><i class="fa-solid {{ icon }}"></i> {{ label }}</span>
+      </label>
+      {% endfor %}
+    </div>
+
+    <div id="co-pay-panel-upi" class="co-pay-detail">
+      <div class="co-pay-detail-grid">
+        <div class="co-qr">
+          <i class="fa-solid fa-qrcode"></i>
+          <span>Scan to pay</span>
+        </div>
+        <div class="co-field">
+          <label class="co-label" for="pay-upi-id">UPI ID</label>
+          <input type="text" class="co-input" id="pay-upi-id" placeholder="yourname@upi">
+        </div>
+      </div>
+    </div>
+    <div id="co-pay-panel-card" class="co-pay-detail d-none">
+      <div class="co-field">
+        <label class="co-label" for="pay-card-num">Card number</label>
+        <input class="co-input" id="pay-card-num" inputmode="numeric" maxlength="19" placeholder="4111 1111 1111 1111" autocomplete="cc-number">
+      </div>
+      <div class="co-form-row co-form-row-3">
+        <div class="co-field">
+          <label class="co-label" for="pay-card-exp">Expiry</label>
+          <input class="co-input" id="pay-card-exp" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp">
+        </div>
+        <div class="co-field">
+          <label class="co-label" for="pay-card-cvv">CVV</label>
+          <input class="co-input" id="pay-card-cvv" type="password" maxlength="4" autocomplete="cc-csc">
+        </div>
+        <div class="co-field">
+          <label class="co-label" for="pay-card-name">Name on card</label>
+          <input class="co-input" id="pay-card-name" autocomplete="cc-name">
+        </div>
+      </div>
+    </div>
+    <p class="co-note co-note-secure"><i class="fa-solid fa-shield-halved"></i> We never store your card or UPI credentials.</p>
+  </div>
+</section>

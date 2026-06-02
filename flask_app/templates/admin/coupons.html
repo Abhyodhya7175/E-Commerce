@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coupons &amp; Promotions — UrbanCart Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_sidebar.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_coupons.css') }}">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: #faf8f3; color: #1a1a2e; display: flex; min-height: 100vh; }
+  .main { flex: 1; min-height: 100vh; }
+  .content { padding: 1.8rem 2rem 3rem; }
+</style>
+</head>
+<body>
+
+{% include 'admin/_sidebar.html' %}
+
+<main class="main">
+  <div class="content cp-page">
+
+    <header class="cp-header">
+      <div>
+        <h1 class="cp-title">Coupons &amp; Promotions</h1>
+        <p class="cp-subtitle">Create, schedule, and analyze discount campaigns</p>
+      </div>
+      <div class="cp-header-actions">
+        <input type="search" class="cp-search" id="cpTableSearch" placeholder="Search coupons…">
+        <select class="cp-select" id="cpStatusFilter">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="expired">Expired</option>
+          <option value="draft">Draft</option>
+        </select>
+        <button type="button" class="cp-btn cp-btn-primary" id="cpBtnCreateCoupon"><i class="fa-solid fa-plus"></i> Create coupon</button>
+        <button type="button" class="cp-btn cp-btn-gold" id="cpBtnCreatePromotion"><i class="fa-solid fa-bullhorn"></i> Create promotion</button>
+      </div>
+    </header>
+
+    <section class="cp-stats" id="cpStats" aria-label="KPI statistics">
+      <div class="cp-stat"><label>Active coupons</label><strong id="statActive">—</strong></div>
+      <div class="cp-stat"><label>Scheduled promotions</label><strong id="statScheduled">—</strong></div>
+      <div class="cp-stat"><label>Revenue generated</label><strong id="statRevenue">—</strong></div>
+      <div class="cp-stat"><label>Total discounts</label><strong id="statDiscounts">—</strong></div>
+      <div class="cp-stat"><label>Redemption rate</label><strong id="statRedemption">—</strong></div>
+      <div class="cp-stat"><label>AOV impact</label><strong id="statAov">—</strong></div>
+    </section>
+
+    <div class="cp-grid-2">
+      <div>
+        <div class="cp-card" id="cpEditorCard">
+          <div class="cp-card-head">
+            <h3 id="cpEditorTitle">Coupon editor</h3>
+            <div>
+              <button type="button" class="cp-btn cp-btn-outline cp-btn-sm" id="cpBtnNew">New</button>
+              <button type="button" class="cp-btn cp-btn-primary cp-btn-sm" id="cpBtnSave">Save</button>
+            </div>
+          </div>
+
+          <div class="cp-section-tabs" id="cpFormTabs">
+            <button type="button" class="cp-tab active" data-tab="basic">Basic</button>
+            <button type="button" class="cp-tab" data-tab="discount">Discount</button>
+            <button type="button" class="cp-tab" data-tab="rules">Rules</button>
+            <button type="button" class="cp-tab" data-tab="assign">Products</button>
+            <button type="button" class="cp-tab" data-tab="flash">Flash sale</button>
+          </div>
+
+          <input type="hidden" id="cpId" value="">
+          <input type="hidden" id="cpKind" value="coupon">
+
+          <div class="cp-panel active" data-panel="basic">
+            <div class="cp-form-grid">
+              <div class="cp-field"><label>Coupon name</label><input type="text" id="cpName" placeholder="Summer Sale 20%"></div>
+              <div class="cp-field"><label>Coupon code</label><input type="text" id="cpCode" placeholder="SUMMER20"></div>
+              <div class="cp-field cp-full"><label>Description</label><textarea id="cpDescription" placeholder="Internal notes and customer-facing text"></textarea></div>
+            </div>
+            <div class="cp-form-grid cp-form-grid-3" style="margin-top:1rem">
+              <div class="cp-field"><label>Start date</label><input type="date" id="cpStartDate"></div>
+              <div class="cp-field"><label>Start time</label><input type="time" id="cpStartTime" value="00:00"></div>
+              <div class="cp-field"><label>End date</label><input type="date" id="cpEndDate"></div>
+              <div class="cp-field"><label>End time</label><input type="time" id="cpEndTime" value="23:59"></div>
+            </div>
+            <div class="cp-toggle-row" style="margin-top:1rem">
+              <label class="cp-toggle"><input type="checkbox" id="cpActive" checked> Active</label>
+              <label class="cp-toggle"><input type="checkbox" id="cpDraft"> Save as draft</label>
+            </div>
+          </div>
+
+          <div class="cp-panel" data-panel="discount">
+            <div class="cp-form-grid">
+              <div class="cp-field">
+                <label>Discount type</label>
+                <select id="cpDiscountType">
+                  <option value="percent">Percentage discount</option>
+                  <option value="fixed">Fixed amount</option>
+                  <option value="free_shipping">Free shipping</option>
+                  <option value="buy_x_get_y">Buy X Get Y</option>
+                </select>
+              </div>
+              <div class="cp-field"><label>Discount value</label><input type="number" id="cpDiscountValue" min="0" step="0.01" value="10"></div>
+              <div class="cp-field"><label>Max discount cap (₹)</label><input type="number" id="cpMaxDiscount" min="0" step="1" placeholder="Optional"></div>
+              <div class="cp-field"><label>Minimum order (₹)</label><input type="number" id="cpMinOrder" min="0" value="0"></div>
+              <div class="cp-field" id="cpBuyXWrap"><label>Buy X (qty)</label><input type="number" id="cpBuyX" min="1"></div>
+              <div class="cp-field" id="cpBuyYWrap"><label>Get Y (qty)</label><input type="number" id="cpBuyY" min="1"></div>
+            </div>
+            <h4 style="margin:1.25rem 0 0.75rem;font-size:0.9rem">Usage restrictions</h4>
+            <div class="cp-form-grid">
+              <div class="cp-field"><label>Total usage limit</label><input type="number" id="cpUsageLimit" min="1" placeholder="Unlimited"></div>
+              <div class="cp-field"><label>Usage per customer</label><input type="number" id="cpPerCustomer" min="1" placeholder="Unlimited"></div>
+            </div>
+            <div class="cp-toggle-row" style="margin-top:0.75rem">
+              <label class="cp-toggle"><input type="checkbox" id="cpFirstPurchase"> First purchase only</label>
+              <label class="cp-toggle"><input type="checkbox" id="cpNewCustomer"> New customer only</label>
+            </div>
+          </div>
+
+          <div class="cp-panel" data-panel="rules">
+            <p class="cp-subtitle" style="margin-bottom:0.75rem">Build IF → THEN promotion rules</p>
+            <div id="cpRulesList"></div>
+            <button type="button" class="cp-btn cp-btn-outline cp-btn-sm" id="cpAddRule"><i class="fa-solid fa-plus"></i> Add rule</button>
+          </div>
+
+          <div class="cp-panel" data-panel="assign">
+            <div class="cp-form-grid">
+              <div class="cp-field">
+                <label>Select products</label>
+                <select id="cpSelectProduct" multiple size="4"></select>
+                <div class="cp-chips" id="cpChipsProducts"></div>
+              </div>
+              <div class="cp-field">
+                <label>Select categories</label>
+                <select id="cpSelectCategory" multiple size="4"></select>
+                <div class="cp-chips" id="cpChipsCategories"></div>
+              </div>
+              <div class="cp-field">
+                <label>Select brands</label>
+                <select id="cpSelectBrand" multiple size="4"></select>
+                <div class="cp-chips" id="cpChipsBrands"></div>
+              </div>
+              <div class="cp-field">
+                <label>Exclude products</label>
+                <select id="cpSelectExProduct" multiple size="3"></select>
+                <div class="cp-chips" id="cpChipsExProducts"></div>
+              </div>
+              <div class="cp-field">
+                <label>Exclude categories</label>
+                <select id="cpSelectExCategory" multiple size="3"></select>
+                <div class="cp-chips" id="cpChipsExCategories"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cp-panel" data-panel="flash">
+            <div class="cp-form-grid">
+              <div class="cp-field"><label>Flash sale name</label><input type="text" id="cpFlashName"></div>
+              <div class="cp-field"><label>Banner image URL</label><input type="text" id="cpFlashBanner" placeholder="/static/uploads/banners/..."></div>
+              <div class="cp-field"><label>Sale start</label><input type="datetime-local" id="cpFlashStart"></div>
+              <div class="cp-field"><label>Sale end</label><input type="datetime-local" id="cpFlashEnd"></div>
+              <div class="cp-field"><label>Qty limit per user</label><input type="number" id="cpFlashQtyLimit" min="1"></div>
+            </div>
+            <div class="cp-field" style="margin-top:0.75rem">
+              <label>Flash sale products</label>
+              <div class="cp-flash-products" id="cpFlashProducts"></div>
+            </div>
+            <div class="cp-countdown" id="cpFlashCountdown">Set sale dates to preview countdown</div>
+          </div>
+        </div>
+
+        <div class="cp-card">
+          <div class="cp-card-head"><h3>Loyalty &amp; rewards</h3><button type="button" class="cp-btn cp-btn-outline cp-btn-sm" id="cpAddReward">Add reward</button></div>
+          <div id="cpRewardsList"></div>
+          <div id="cpRewardForm" class="cp-editor-hidden" style="margin-top:1rem;padding-top:1rem;border-top:1px solid #e8e3d8">
+            <input type="hidden" id="cpRewardId">
+            <div class="cp-form-grid">
+              <div class="cp-field"><label>Title</label><input type="text" id="cpRewardTitle"></div>
+              <div class="cp-field"><label>Coins required</label><input type="number" id="cpRewardCoins" min="0"></div>
+              <div class="cp-field">
+                <label>Reward type</label>
+                <select id="cpRewardType">
+                  <option value="coupon">Coupon</option>
+                  <option value="free_gift">Free gift</option>
+                  <option value="free_shipping">Free shipping</option>
+                  <option value="cashback">Cashback</option>
+                </select>
+              </div>
+              <div class="cp-field"><label>Reward value</label><input type="number" id="cpRewardValue" step="0.01"></div>
+              <div class="cp-field"><label>Expiry (days)</label><input type="number" id="cpRewardExpiry" min="1"></div>
+            </div>
+            <button type="button" class="cp-btn cp-btn-primary cp-btn-sm" id="cpSaveReward" style="margin-top:0.75rem">Save reward</button>
+          </div>
+        </div>
+
+        <div class="cp-card">
+          <div class="cp-card-head"><h3>Bulk coupon generator</h3></div>
+          <div class="cp-form-grid">
+            <div class="cp-field"><label>Prefix</label><input type="text" id="cpBulkPrefix" value="UC"></div>
+            <div class="cp-field"><label>Number of coupons</label><input type="number" id="cpBulkCount" min="1" max="500" value="10"></div>
+            <div class="cp-field">
+              <label>Discount type</label>
+              <select id="cpBulkType"><option value="percent">Percent</option><option value="fixed">Fixed</option></select>
+            </div>
+            <div class="cp-field"><label>Discount value</label><input type="number" id="cpBulkValue" value="10"></div>
+            <div class="cp-field"><label>Expiry date</label><input type="date" id="cpBulkExpiry"></div>
+          </div>
+          <button type="button" class="cp-btn cp-btn-gold" id="cpBulkGenerate" style="margin-top:0.75rem">Generate coupons</button>
+          <div class="cp-table-wrap" style="margin-top:1rem">
+            <table class="cp-table" id="cpBulkTable"><thead><tr><th>Code</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="cp-card">
+          <div class="cp-card-head">
+            <h3>Coupon analytics</h3>
+            <div>
+              <input type="date" id="cpAnalyticsFrom" class="cp-select">
+              <input type="date" id="cpAnalyticsTo" class="cp-select">
+              <button type="button" class="cp-btn cp-btn-outline cp-btn-sm" id="cpRefreshAnalytics">Apply</button>
+            </div>
+          </div>
+          <div class="cp-analytics-grid">
+            <div class="cp-chart-box"><canvas id="cpChartUsage"></canvas></div>
+            <div class="cp-chart-box"><canvas id="cpChartRevenue"></canvas></div>
+          </div>
+          <div class="cp-table-wrap" style="margin-top:1rem">
+            <table class="cp-table" id="cpTopCouponsTable">
+              <thead><tr><th>Coupon</th><th>Uses</th><th>Revenue</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="cp-subtitle" style="margin-top:0.75rem">Conversion: <strong id="cpConvRate">—</strong> · Orders with coupon: <strong id="cpAcq">—</strong></p>
+        </div>
+
+        <div class="cp-card">
+          <div class="cp-card-head">
+            <h3>Coupon management</h3>
+            <select class="cp-select" id="cpTableSort">
+              <option value="created_desc">Newest</option>
+              <option value="usage_desc">Most used</option>
+              <option value="name_asc">Name A–Z</option>
+            </select>
+          </div>
+          <div style="margin-bottom:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap">
+            <select class="cp-select" id="cpBulkAction">
+              <option value="">Bulk action</option>
+              <option value="activate">Activate</option>
+              <option value="draft">Move to draft</option>
+              <option value="delete">Delete</option>
+            </select>
+            <button type="button" class="cp-btn cp-btn-outline cp-btn-sm" id="cpApplyBulk">Apply</button>
+          </div>
+          <div class="cp-table-wrap">
+            <table class="cp-table" id="cpCouponsTable">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="cpSelectAll"></th>
+                  <th>Name</th>
+                  <th>Code</th>
+                  <th>Type</th>
+                  <th>Used</th>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="cpCouponsBody"></tbody>
+            </table>
+          </div>
+          <div class="cp-pagination">
+            <span id="cpPageInfo">Page 1</span>
+            <div>
+              <button type="button" class="cp-btn cp-btn-outline cp-btn-sm" id="cpPrevPage">Prev</button>
+              <button type="button" class="cp-btn cp-btn-outline cp-btn-sm" id="cpNextPage">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="cp-toast" id="cpToast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  window.ucCouponAdmin = {
+    urls: {
+      stats: "{{ url_for('admin.api_coupon_stats') }}",
+      list: "{{ url_for('admin.api_coupon_list') }}",
+      save: "{{ url_for('admin.api_coupon_save') }}",
+      get: "{{ url_for('admin.api_coupon_get', coupon_id=0) }}".replace('/0', ''),
+      duplicate: "{{ url_for('admin.api_coupon_duplicate', coupon_id=0) }}".replace('/0', ''),
+      delete: "{{ url_for('admin.api_coupon_delete', coupon_id=0) }}".replace('/0', ''),
+      bulkAction: "{{ url_for('admin.api_coupon_bulk_action') }}",
+      bulkGenerate: "{{ url_for('admin.api_coupon_bulk_generate') }}",
+      analytics: "{{ url_for('admin.api_coupon_analytics') }}",
+      lookup: "{{ url_for('admin.api_coupon_lookup') }}",
+      loyalty: "{{ url_for('admin.api_loyalty_list') }}",
+      loyaltySave: "{{ url_for('admin.api_loyalty_save') }}",
+      loyaltyDelete: "{{ url_for('admin.api_loyalty_delete', reward_id=0) }}".replace('/0', ''),
+    }
+  };
+</script>
+<script src="{{ url_for('static', filename='js/admin_coupons.js') }}"></script>
+</body>
+</html>

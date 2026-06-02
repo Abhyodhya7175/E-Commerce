@@ -1588,10 +1588,7 @@
 </head>
 <body>
 
-<!-- ANNOUNCEMENT BAR -->
-<div class="announcement-bar">
-  🎉 Summer Sale: Get up to 40% off on selected items + Free Shipping on orders above ₹500
-</div>
+<!-- Announcement moved to shared navbar (renders on homepage only) -->
 
 <!-- NAVBAR -->
 <nav class="navbar" id="navbar">
@@ -1759,19 +1756,19 @@
     </div>
 
     <div class="categories-grid">
-      <a href="{{ url_for('customer.shop_home') }}?category=electronics" class="category-card">
+      <a href="{{ url_for('customer.shop_home') }}?category=Electronics" class="category-card">
         <div class="category-icon">💻</div>
         <div class="category-name">Electronics</div>
       </a>
-      <a href="{{ url_for('customer.shop_home') }}?category=fashion" class="category-card">
+      <a href="{{ url_for('customer.shop_home') }}?category=Fashion" class="category-card">
         <div class="category-icon">👗</div>
         <div class="category-name">Fashion</div>
       </a>
-      <a href="{{ url_for('customer.shop_home') }}?category=beauty" class="category-card">
-        <div class="category-icon">💄</div>
-        <div class="category-name">Beauty</div>
+      <a href="{{ url_for('customer.shop_home') }}?category=Sports" class="category-card">
+        <div class="category-icon">🏀</div>
+        <div class="category-name">Sports</div>
       </a>
-      <a href="{{ url_for('customer.shop_home') }}?category=books" class="category-card">
+      <a href="{{ url_for('customer.shop_home') }}?category=Books" class="category-card">
         <div class="category-icon">📚</div>
         <div class="category-name">Books</div>
       </a>
@@ -1878,9 +1875,9 @@
     <div class="sec-header">
       <div>
         
-        <h2 class="sec-title">Best Rated</h2>
+        <h2 class="sec-title">New Arrivals</h2>
       </div>
-      <a href="{{ url_for('customer.shop_home') }}" class="see-all">Explore All →</a>
+      <a href="{{ url_for('customer.products_page') }}?filter=new_arrivals" class="see-all">Explore All →</a>
     </div>
 
     <div class="grid">

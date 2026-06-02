@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 from werkzeug.exceptions import RequestEntityTooLarge
 from .config import Config
-from .extensions import db
+from .extensions import db,mail
 from .shop_state import get_commerce_state, get_csrf_token
 from sqlalchemy import text
 import os
@@ -106,6 +106,56 @@ def _ensure_pincode_cache_schema():
     for column, definition in missing_columns.items():
         if column not in columns:
             db.session.execute(text(f'ALTER TABLE pincode_serviceability_cache ADD COLUMN {column} {definition}'))
+
+    db.session.commit()
+
+
+def _ensure_user_schema():
+    inspector = db.inspect(db.engine)
+    if 'user' not in inspector.get_table_names():
+        return
+
+    columns = {column['name'] for column in inspector.get_columns('user')}
+    missing_columns = {
+        'is_verified': 'BOOLEAN DEFAULT 0',
+        'last_login': 'DATETIME NULL',
+    }
+    for column, definition in missing_columns.items():
+        if column not in columns:
+            db.session.execute(text(f'ALTER TABLE user ADD COLUMN {column} {definition}'))
+
+    db.session.commit()
+
+
+def _ensure_coupon_schema():
+    inspector = db.inspect(db.engine)
+    if 'coupons' not in inspector.get_table_names():
+        return
+
+    columns = {column['name'] for column in inspector.get_columns('coupons')}
+    missing_columns = {
+        'name': 'VARCHAR(120) NULL',
+        'kind': "VARCHAR(20) DEFAULT 'coupon'",
+        'buy_x': 'INTEGER NULL',
+        'buy_y': 'INTEGER NULL',
+        'per_customer_limit': 'INTEGER NULL',
+        'first_purchase_only': 'BOOLEAN DEFAULT 0',
+        'new_customer_only': 'BOOLEAN DEFAULT 0',
+        'is_draft': 'BOOLEAN DEFAULT 0',
+        'starts_at': 'DATETIME NULL',
+        'rules_json': 'TEXT NULL',
+        'product_ids_json': 'TEXT NULL',
+        'category_ids_json': 'TEXT NULL',
+        'brand_ids_json': 'TEXT NULL',
+        'exclude_product_ids_json': 'TEXT NULL',
+        'exclude_category_ids_json': 'TEXT NULL',
+        'flash_sale_json': 'TEXT NULL',
+        'parent_id': 'INTEGER NULL',
+        'updated_at': 'DATETIME NULL',
+    }
+    for column, definition in missing_columns.items():
+        if column not in columns:
+            db.session.execute(text(f'ALTER TABLE coupons ADD COLUMN {column} {definition}'))
 
     db.session.commit()
 
@@ -245,6 +295,19 @@ def create_app():
     app = Flask(__name__, static_folder=static_folder, static_url_path='/static', template_folder=template_folder)
     app.config.from_object(Config)
     db.init_app(app)
+    mail.init_app(app)
+
+    if app.config.get("MAIL_SUPPRESS_SEND"):
+        app.logger.warning(
+            "Email OTP is OFF — set MAIL_USERNAME and MAIL_PASSWORD in flask_app/.env, then restart."
+        )
+    else:
+        app.logger.info(
+            "Email OTP is ON (SMTP %s:%s as %s)",
+            app.config.get("MAIL_SERVER"),
+            app.config.get("MAIL_PORT"),
+            app.config.get("MAIL_USERNAME"),
+        )
 
     for upload_subdir in (
         app.config.get('PRODUCT_UPLOAD_SUBDIR', 'uploads/products'),
@@ -259,6 +322,8 @@ def create_app():
         _ensure_offer_banner_schema()
         _ensure_product_schema()
         _ensure_pincode_cache_schema()
+        _ensure_user_schema()
+        _ensure_coupon_schema()
 
         from .models import Product, ProductCategory, ProductBrand
         from .product_store import DEFAULT_PRODUCTS
@@ -333,6 +398,10 @@ def create_app():
         _deduplicate_products()
         _ensure_demo_users()
 
+        from .services.checkout_service import seed_default_coupons
+
+        seed_default_coupons()
+
         from .extensions import login_manager
         # initialize login manager
         login_manager.init_app(app)
@@ -358,6 +427,7 @@ def create_app():
         from .routes.admin import admin_bp
         from .routes.customer import customer_bp
         from .routes.commerce import commerce_bp
+        from .routes.checkout import checkout_bp
         from .routes.public import public_bp
         from .routes.blog import blog_bp
 
@@ -368,6 +438,7 @@ def create_app():
         app.register_blueprint(auth_bp)
         app.register_blueprint(admin_bp, url_prefix='/admin')
         app.register_blueprint(customer_bp, url_prefix='/shop')
+        app.register_blueprint(checkout_bp, url_prefix='/shop')
         app.register_blueprint(commerce_bp)
         app.register_blueprint(public_bp)
         app.register_blueprint(blog_bp)

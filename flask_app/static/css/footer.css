@@ -27,6 +27,7 @@
 }
 
 .footer {
+  width: 100%;
   background: var(--footer-bg);
   color: var(--footer-text);
   padding: 4rem 2rem 2rem;
@@ -140,6 +141,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
 }

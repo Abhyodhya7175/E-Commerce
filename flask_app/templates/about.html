@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About — UrbanCart</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,800;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/shop_commerce.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+  <style>
+    .about-hero { padding: 64px 2rem; display:flex; gap:2rem; align-items:center; background: linear-gradient(180deg,#faf8f3, #f4efe6); }
+    .about-hero .hero-copy { max-width:720px; }
+    .about-hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 4vw, 44px); margin-bottom: 0.6rem; }
+    .about-hero p.lead { color:var(--uc-muted); font-size:1.05rem; margin-bottom:1rem; }
+    .values { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:1rem; padding:2.2rem; }
+    .value-card { background:var(--uc-card); border:1px solid var(--uc-border); border-radius:12px; padding:1.25rem; box-shadow:var(--uc-shadow); }
+    .value-card h3 { margin:0 0 .4rem 0; font-size:1.05rem; }
+    .team { padding:2.2rem; background:transparent; }
+    .team-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:1rem; }
+    .team-member { text-align:center; padding:1rem; background:var(--uc-card); border-radius:12px; border:1px solid var(--uc-border); }
+    .team-member img { width:86px; height:86px; border-radius:999px; object-fit:cover; margin-bottom:.6rem; }
+    .cta { padding:2.2rem; text-align:center; }
+  </style>
+</head>
+<body>
+  {% include 'components/navbar.html' %}
+
+  <main class="uc-page-shell">
+    <section class="about-hero">
+      <div class="hero-copy">
+        <h1>Built for thoughtful commerce</h1>
+        <p class="lead">UrbanCart blends premium curation, trusted checkout, and delightful product discovery to help shoppers find what they love — quickly and confidently.</p>
+        <p>We design every shopping touchpoint with care: curated assortments, clear product storytelling, and a focus on fast, secure delivery. Our team combines retail expertise, engineering, and design to build a modern shopping experience.</p>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <img src="{{ url_for('static', filename='img/about-illustration.png') }}" alt="About illustration" style="max-width:420px; width:100%; border-radius:12px; box-shadow:var(--uc-shadow);">
+      </div>
+    </section>
+
+    <section class="values">
+      <div class="value-card">
+        <h3>Customer-first</h3>
+        <p>We prioritize clarity, trust, and helpful product information so customers make confident decisions.</p>
+      </div>
+      <div class="value-card">
+        <h3>Curated selection</h3>
+        <p>Our catalog is carefully chosen for quality and relevance, not just breadth.</p>
+      </div>
+      <div class="value-card">
+        <h3>Operational excellence</h3>
+        <p>Fast fulfillment and clear policies make shopping reliable and predictable.</p>
+      </div>
+      <div class="value-card">
+        <h3>Sustainable choices</h3>
+        <p>We work with partners who share our values toward responsible sourcing.</p>
+      </div>
+    </section>
+
+    <section class="team">
+      <h2 style="font-family: 'Playfair Display', serif; margin-bottom:1rem;">Meet the team</h2>
+      <div class="team-grid">
+        <div class="team-member">
+          <img src="{{ url_for('static', filename='img/team-alex.jpg') }}" alt="Alex, Founder">
+          <strong>Alex Rao</strong>
+          <div class="muted">Founder & CEO</div>
+        </div>
+        <div class="team-member">
+          <img src="{{ url_for('static', filename='img/team-rita.jpg') }}" alt="Rita, Product">
+          <strong>Rita Singh</strong>
+          <div class="muted">Head of Product</div>
+        </div>
+        <div class="team-member">
+          <img src="{{ url_for('static', filename='img/team-jon.jpg') }}" alt="Jon, Engineering">
+          <strong>Jon Park</strong>
+          <div class="muted">Engineering Lead</div>
+        </div>
+        <div class="team-member">
+          <img src="{{ url_for('static', filename='img/team-maya.jpg') }}" alt="Maya, Design">
+          <strong>Maya Iyer</strong>
+          <div class="muted">Design Lead</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <h3>Want to work with us?</h3>
+      <p class="lead">We're hiring talented people who care about building delightful shopping experiences.</p>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-solid" style="margin-top:12px;">Join our team</a>
+    </section>
+  </main>
+
+  {% from 'components/footer.html' import footer %}
+  {{ footer() }}
+
+  <script src="{{ url_for('static', filename='js/shop_commerce.js') }}"></script>
+</body>
+</html>

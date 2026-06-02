@@ -1,0 +1,36 @@
+<section class="co-panel" id="sec-contact" data-panel="contact">
+  <button class="co-panel-toggle d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#panel-contact" aria-expanded="true">
+    <span><i class="fa-regular fa-user"></i> Contact information</span>
+    <i class="fa-solid fa-chevron-down"></i>
+  </button>
+  <div id="panel-contact" class="collapse show co-panel-body">
+    <header class="co-panel-head d-none d-lg-flex">
+      <span class="co-panel-icon"><i class="fa-regular fa-user"></i></span>
+      <div>
+        <h2 class="co-card-title">Contact information</h2>
+        <p class="co-card-desc">Manage your order updates</p>
+      </div>
+      <button type="button" class="co-btn co-btn-ghost co-btn-sm" id="co-edit-contact">Edit</button>
+    </header>
+
+    <form id="co-contact-form" class="co-contact-readonly" novalidate>
+      <div class="co-form-row">
+        <div class="co-field">
+          <label class="co-label" for="contact-fullName">Full name</label>
+          <input type="text" class="co-input" id="contact-fullName" name="fullName" value="{{ contact.fullName }}" autocomplete="name" required readonly>
+        </div>
+        <div class="co-field">
+          <label class="co-label" for="contact-email">Email</label>
+          <input type="email" class="co-input" id="contact-email" name="email" value="{{ contact.email }}" autocomplete="email" required readonly>
+        </div>
+      </div>
+      <div class="co-field">
+        <label class="co-label" for="contact-mobile">Mobile number</label>
+        <input type="tel" class="co-input" id="contact-mobile" name="mobile" value="{{ contact.mobile }}" placeholder="10-digit mobile number" inputmode="tel" autocomplete="tel" required readonly>
+      </div>
+    </form>
+    {% if not is_logged_in %}
+    <p class="co-note">Guest checkout — <a href="{{ url_for('auth.login') }}">Sign in</a> to save your details.</p>
+    {% endif %}
+  </div>
+</section>

@@ -1,0 +1,17 @@
+{% extends 'shop/base.html' %}
+{% block title %}Order Confirmed — UrbanCart{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}">
+{% endblock %}
+{% block content %}
+<div class="co-success text-center py-5">
+  <div class="co-success-icon">✓</div>
+  <h1 class="h3">Thank you for your order!</h1>
+  <p class="text-muted">Order <strong>{{ order.order_number }}</strong> · ₹{{ '%.2f'|format(order.grand_total) }}</p>
+  <p>We've received your order and will send updates to <strong>{{ order.contact_email }}</strong>.</p>
+  <div class="d-flex gap-2 justify-content-center mt-4">
+    <a href="{{ url_for('customer.shop_home') }}" class="btn btn-dark">Continue shopping</a>
+    <a href="{{ url_for('commerce.cart_page') }}" class="btn btn-outline-secondary">View cart</a>
+  </div>
+</div>
+{% endblock %}

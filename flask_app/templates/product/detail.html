@@ -16,29 +16,13 @@
 <body>
   <div class="pd-bg"></div>
 
-  <header class="pd-top">
-    <div class="pd-top-inner">
-      <a class="pd-logo" href="{{ url_for('home') }}">Urban<span>Cart</span></a>
-      <nav class="pd-nav">
-        <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('customer.shop_home') }}">Shop</a>
-        <a class="uc-icon-chip" href="{{ url_for('commerce.wishlist_page') }}" style="margin-left: 8px;">
-          <i class="fa-solid fa-heart text-danger"></i>
-          <span data-wishlist-count>{{ wishlist_count or 0 }}</span>
-        </a>
-        <a class="uc-icon-chip" href="{{ url_for('commerce.cart_page') }}">
-          <i class="fa-solid fa-bag-shopping"></i>
-          <span data-cart-count>{{ cart_count or 0 }}</span>
-        </a>
-      </nav>
-    </div>
-  </header>
+  {% include 'components/navbar.html' %}
 
   <main class="pd-container">
     <section class="pd-grid">
       <!-- LEFT: GALLERY -->
       <div class="pd-gallery">
-        <div class="pd-main-image" id="pd-main">
+        <div class="pd-main-image" id="pd-main" data-images='{{ images|tojson }}'>
           {% if product.discountPercent %}
             <span class="pd-badge pd-badge-discount">{{ product.discountPercent }}% OFF</span>
           {% endif %}
@@ -47,23 +31,14 @@
 
           {% if images and images[0] %}
             <img id="pd-main-img" src="{{ images[0] }}" alt="{{ product.name }}">
+            <button type="button" class="pd-nav pd-nav-prev" aria-label="Previous image">‹</button>
+            <button type="button" class="pd-nav pd-nav-next" aria-label="Next image">›</button>
           {% else %}
             <div class="pd-fallback" aria-hidden="true">{{ product.icon or '📦' }}</div>
           {% endif %}
         </div>
 
-        {% if images|length > 1 %}
-        <div class="pd-thumbs" role="list">
-          {% for img in images %}
-            <button type="button"
-                    class="pd-thumb {{ 'active' if loop.index0 == 0 else '' }}"
-                    data-img="{{ img }}"
-                    aria-label="View image {{ loop.index }}">
-              <img src="{{ img }}" alt="{{ product.name }} thumbnail {{ loop.index }}">
-            </button>
-          {% endfor %}
-        </div>
-        {% endif %}
+        {# thumbnails removed to save vertical space #}
       </div>
 
       <!-- RIGHT: DETAILS -->
@@ -97,21 +72,48 @@
           </span>
         </div>
 
+        {% if product.freeShipping %}
+        <div class="pd-free-shipping-prominent" aria-hidden="true">
+          <strong>FREE SHIPPING</strong>
+          <span class="pd-free-ship-note">Delivered to you with no shipping charges</span>
+        </div>
+        {% endif %}
+
         <div class="pd-summary">
           {% if product.shortDesc %}
-            <p>{{ product.shortDesc }}</p>
+            <p id="pd-short-desc">{{ product.shortDesc }}</p>
+            <button type="button" id="pd-desc-toggle" class="pd-desc-toggle" aria-expanded="false" hidden>...</button>
           {% endif %}
-          <div class="pd-summary-grid">
-            {% if product.freeShipping %}
-              <div><span>Shipping</span><strong>Free</strong></div>
-            {% elif product.shippingCharges %}
-              <div><span>Shipping</span><strong>₹{{ product.shippingCharges | int }}</strong></div>
-            {% endif %}
-            {% if product.gstPercentage %}
-              <div><span>GST</span><strong>{{ product.gstPercentage }}% {{ product.gstType }}</strong></div>
-            {% endif %}
+          {# Shipping info intentionally removed from this summary area to reduce repetition #}
+        </div>
+
+        
+
+        <div class="pd-qty">
+          <div class="pd-qty-left">
+            <div class="pd-label">Quantity</div>
+            <div class="pd-qtyrow">
+              <button class="pd-qtybtn" type="button" data-qty="-1">−</button>
+              <input id="pd-qty" value="1" inputmode="numeric" />
+              <button class="pd-qtybtn" type="button" data-qty="1">+</button>
+            </div>
+          </div>
+
+          <div class="pd-share pd-share-inline" role="group" aria-label="Share product">
+              <button class="pd-sharebtn pd-share-icon" type="button" data-share="whatsapp" title="Share on WhatsApp" aria-label="Share on WhatsApp"><i class="fa-brands fa-whatsapp"></i></button>
+              <button class="pd-sharebtn pd-share-icon" type="button" data-share="facebook" title="Share on Facebook" aria-label="Share on Facebook"><i class="fa-brands fa-facebook-f"></i></button>
+              <button class="pd-sharebtn pd-share-icon" type="button" data-share="copy" title="Copy product link" aria-label="Copy link"><i class="fa-regular fa-copy"></i></button>
+              <button class="pd-sharebtn pd-share-icon" type="button" data-share="native" title="Share" aria-label="Share"><i class="fa-solid fa-share-nodes"></i></button>
           </div>
         </div>
+
+        <div class="pd-actions">
+          <button class="pd-btn pd-btn-primary" type="button" id="pd-add" data-cart-id="{{ product.id }}" data-stock="{{ product.stockQuantity or 0 }}" {% if (product.stockStatus or '')|lower == 'out of stock' %}disabled{% endif %}>Add to Cart</button>
+          <button class="pd-btn pd-btn-dark" type="button" id="pd-buy" {% if (product.stockStatus or '')|lower == 'out of stock' %}disabled{% endif %}>Buy Now</button>
+          <button class="pd-btn pd-btn-ghost" type="button" id="pd-wish" data-wishlist-id="{{ product.id }}">Wishlist</button>
+        </div>
+
+        {# share moved next to quantity for compact layout #}
 
         <div class="pd-card" id="pd-pin-card"
              data-product-id="{{ product.id }}"
@@ -136,28 +138,6 @@
               <span class="pd-badge-pill pd-badge-neutral" id="pd-free-ship" hidden>Free Shipping</span>
             </div>
           </div>
-        </div>
-
-        <div class="pd-qty">
-          <div class="pd-label">Quantity</div>
-          <div class="pd-qtyrow">
-            <button class="pd-qtybtn" type="button" data-qty="-1">−</button>
-            <input id="pd-qty" value="1" inputmode="numeric" />
-            <button class="pd-qtybtn" type="button" data-qty="1">+</button>
-          </div>
-        </div>
-
-        <div class="pd-actions">
-          <button class="pd-btn pd-btn-primary" type="button" id="pd-add" data-cart-id="{{ product.id }}" data-stock="{{ product.stockQuantity or 0 }}" {% if (product.stockStatus or '')|lower == 'out of stock' %}disabled{% endif %}>Add to Cart</button>
-          <button class="pd-btn pd-btn-dark" type="button" id="pd-buy" {% if (product.stockStatus or '')|lower == 'out of stock' %}disabled{% endif %}>Buy Now</button>
-          <button class="pd-btn pd-btn-ghost" type="button" id="pd-wish" data-wishlist-id="{{ product.id }}">Wishlist</button>
-        </div>
-
-        <div class="pd-share">
-          <span class="pd-label">Share</span>
-          <button class="pd-sharebtn" type="button" data-share="whatsapp">WhatsApp</button>
-          <button class="pd-sharebtn" type="button" data-share="facebook">Facebook</button>
-          <button class="pd-sharebtn" type="button" data-share="copy">Copy Link</button>
         </div>
       </div>
     </section>
@@ -198,7 +178,7 @@
             <div class="pd-spec"><span>SKU</span><strong>{{ product.sku }}</strong></div>
             <div class="pd-spec"><span>Status</span><strong>{{ product.stockStatus }}</strong></div>
             
-            {% if product.discountPercent %}<div class="pd-spec"><span>Discount</span><strong>{{ product.discountPercent }}%</strong></div>{% endif %}
+              {% if product.discountPercent %}<div class="pd-spec"><span>Discount</span><strong>{{ product.discountPercent }}%</strong></div>{% endif %}
             {% if product.weight %}<div class="pd-spec"><span>Weight</span><strong>{{ product.weight }} kg</strong></div>{% endif %}
             {% if product.length and product.width and product.height %}
               <div class="pd-spec"><span>Dimensions</span><strong>{{ product.length }} × {{ product.width }} × {{ product.height }} cm</strong></div>
@@ -209,8 +189,9 @@
               <div class="pd-spec"><span>Shipping</span><strong>₹{{ product.shippingCharges | int }}</strong></div>
             {% endif %}
             {% for spec in product.specificationItems %}
-              {% if spec.label|lower not in ['brand'] %}
-              <div class="pd-spec"><span>{{ spec.label }}</span><strong>{{ spec.value }}</strong></div>
+              {% set label_l = (spec.label or '')|lower %}
+              {% if label_l not in ['brand'] and 'weight' not in label_l and 'dimension' not in label_l and 'dimensions' not in label_l %}
+                <div class="pd-spec"><span>{{ spec.label }}</span><strong>{{ spec.value }}</strong></div>
               {% endif %}
             {% endfor %}
           </div>
